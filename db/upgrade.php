@@ -24,39 +24,46 @@
 
 /**
  * Take actions on upgrading mergeusers tool.
- * @package tool_mergeusers
- * @global moodle_database $DB
- * @param int $oldversion old plugin version.
+ *
+ * @param int              $oldversion old plugin version.
+ *
  * @return boolean true when success, false on error.
+ * @throws ddl_exception
+ * @throws downgrade_exception
+ * @throws upgrade_exception
+ * @package      tool_mergeusers
+ * @global moodle_database $DB
+ * @noinspection PhpUnused
  */
-function xmldb_tool_mergeusers_upgrade ($oldversion) {
-    global $DB;
+function xmldb_tool_mergeusers_upgrade(int $oldversion): bool
+{
+	global $DB;
 
-    $dbman = $DB->get_manager();
+	$dbman = $DB->get_manager();
 
-    if ($oldversion < 2013112912) {
+	if($oldversion < 2013112912) {
 
-        // Define table tool_mergeusers to be created
-        $table = new xmldb_table('tool_mergeusers');
+		// Define table tool_mergeusers to be created
+		$table = new xmldb_table('tool_mergeusers');
 
-        // Adding fields to table tool_mergeusers
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('touserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('fromuserid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('success', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
-        $table->add_field('log', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+		// Adding fields to table tool_mergeusers
+		$table->add_field('id', XMLDB_TYPE_INTEGER, '10', NULL, XMLDB_NOTNULL, XMLDB_SEQUENCE);
+		$table->add_field('touserid', XMLDB_TYPE_INTEGER, '10', NULL, XMLDB_NOTNULL);
+		$table->add_field('fromuserid', XMLDB_TYPE_INTEGER, '10', NULL, XMLDB_NOTNULL);
+		$table->add_field('success', XMLDB_TYPE_INTEGER, '4', NULL, XMLDB_NOTNULL);
+		$table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', NULL, XMLDB_NOTNULL);
+		$table->add_field('log', XMLDB_TYPE_TEXT, NULL, NULL, XMLDB_NOTNULL);
 
-        // Adding keys to table tool_mergeusers
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		// Adding keys to table tool_mergeusers
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
 
-        // Adding indexes to table tool_mergeusers
-        $table->add_index('mdl_toolmerg_tou_ix', XMLDB_INDEX_NOTUNIQUE, array('touserid'));
-        $table->add_index('mdl_toolmerg_fru_ix', XMLDB_INDEX_NOTUNIQUE, array('fromuserid'));
-        $table->add_index('mdl_toolmerg_suc_ix', XMLDB_INDEX_NOTUNIQUE, array('success'));
-        $table->add_index('mdl_toolmerg_tfs_ix', XMLDB_INDEX_NOTUNIQUE, array('touserid', 'fromuserid', 'success'));
+		// Adding indexes to table tool_mergeusers
+		$table->add_index('mdl_toolmerg_tou_ix', XMLDB_INDEX_NOTUNIQUE, array('touserid'));
+		$table->add_index('mdl_toolmerg_fru_ix', XMLDB_INDEX_NOTUNIQUE, array('fromuserid'));
+		$table->add_index('mdl_toolmerg_suc_ix', XMLDB_INDEX_NOTUNIQUE, array('success'));
+		$table->add_index('mdl_toolmerg_tfs_ix', XMLDB_INDEX_NOTUNIQUE, array('touserid', 'fromuserid', 'success'));
 
-        // Conditionally launch create table for tool_mergeusersr
+		// Conditionally launch create table for tool_mergeusers
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }

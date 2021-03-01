@@ -36,6 +36,7 @@ require_once dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php';
 
 global $CFG;
 
+/** @noinspection PhpIncludeInspection */
 require_once $CFG->dirroot . '/lib/clilib.php';
 require_once __DIR__ . '/autoload.php';
 
@@ -44,26 +45,31 @@ require_once __DIR__ . '/autoload.php';
  *
  * @author John Hoopes <hoopes@wisc.edu>
  */
-class MergeUserSearch{
+class MergeUserSearch
+{
 
 
-    /**
-     * Searches the user table based on the input.
-     *
-     * @param mixed $input input
-     * @param string $searchfield The field to search on.  empty string means all fields
-     * @return array $results the results of the search
-     */
-    public function search_users($input, $searchfield){
-        global $DB;
+	/**
+	 * Searches the user table based on the input.
+	 *
+	 * @param mixed  $input       input
+	 * @param string $searchfield The field to search on.  empty string means all fields
+	 *
+	 * @return array $results the results of the search
+	 * @throws dml_exception
+	 * @noinspection SqlDialectInspection
+	 */
+	public function search_users($input, string $searchfield): array
+	{
+		global $DB;
 
-        switch($searchfield){
-            case 'id': // search on id field
+		switch($searchfield) {
+			case 'id': // search on id field
 
-                $params = array(
-                    'userid' => $input,
-                );
-                $sql = 'SELECT * FROM {user} WHERE id = :userid';
+				$params = array(
+					'userid' => $input,
+				);
+				$sql = 'SELECT * FROM {user} WHERE id = :userid';
 
                 break;
             case 'username': // search on username
@@ -128,39 +134,40 @@ class MergeUserSearch{
                         email LIKE :email OR
                         idnumber LIKE :idnumber';
 
-                break;
-        }
+				break;
+		}
 
-        $ordering = ' ORDER BY lastname, firstname';
+		$ordering = ' ORDER BY lastname, firstname';
 
-        $results = $DB->get_records_sql($sql . $ordering, $params);
-        return $results;
-    }
+		return $DB->get_records_sql($sql . $ordering, $params);
+	}
 
-    /**
-     * Verifies whether or not a user exists based upon the user information
-     * to verify and the column that matches that information
-     *
-     * @param mixed $uinfo The identifying information about the user
-     * @param string $column The column name to verify against.  (should not be direct user input)
-     *
-     * @return array
-     *      (
-     *          0 => Either NULL or the user object.  Will be NULL if not valid user,
-     *          1 => Message for invalid user to display/log
-     *      )
-     */
-    public function verify_user($uinfo, $column){
-        global $DB;
-        $message = '';
-        try {
-            $user = $DB->get_record('user', array($column => $uinfo), '*', MUST_EXIST);
-        } catch (Exception $e) {
-            $message = get_string('invaliduser', 'tool_mergeusers'). '('.$column . '=>' . $uinfo .'): ' . $e->getMessage();
-            $user = null;
-        }
+	/**
+	 * Verifies whether or not a user exists based upon the user information
+	 * to verify and the column that matches that information
+	 *
+	 * @param mixed  $userinfo The identifying information about the user
+	 * @param string $column   The column name to verify against.  (should not be direct user input)
+	 *
+	 * @return array
+	 *      (
+	 *          0 => Either NULL or the user object.  Will be NULL if not valid user,
+	 *          1 => Message for invalid user to display/log
+	 *      )
+	 * @throws coding_exception
+	 */
+	public function verify_user($userinfo, string $column): array
+	{
+		global $DB;
+		$message = '';
+		try {
+			$user = $DB->get_record('user', array($column => $userinfo), '*', MUST_EXIST);
+		} catch(Exception $e) {
+			$message = get_string('invaliduser', 'tool_mergeusers') . '(' . $column . '=>' . $userinfo . '): ' . $e->getMessage();
+			$user = NULL;
+		}
 
-        return array($user, $message);
+		return array($user, $message);
     }
 
 

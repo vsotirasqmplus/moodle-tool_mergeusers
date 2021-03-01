@@ -36,8 +36,10 @@ require_once(dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php');
 global $CFG;
 
 // require needed library files
+/** @noinspection PhpIncludeInspection */
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
+/** @noinspection PhpIncludeInspection */
 require_once($CFG->dirroot . '/lib/outputcomponents.php');
 
 /**
@@ -49,74 +51,76 @@ require_once($CFG->dirroot . '/lib/outputcomponents.php');
  */
 class UserReviewTable extends html_table implements renderable
 {
-    /** @var stdClass $olduser The olduser db object */
-    protected $olduser;
+	/** @var stdClass $olduser The olduser db object */
+	protected $olduser;
 
-    /** @var stdClass $newuser The newuser db object */
-    protected $newuser;
+	/** @var stdClass $newuser The newuser db object */
+	protected $newuser;
 
-    /** @var bool $showmergebutton Whether or not to show the merge button on rendering */
-    protected $showmergebutton = false;
+	/** @var tool_mergeusers_renderer Render to help showing user info. */
+	protected $renderer;
 
-    /** @var tool_mergeusers_renderer Render to help showing user info. */
-    protected $renderer;
+	/**
+	 * Call parent construct and then build table
+	 *
+	 * @param tool_mergeusers_renderer $renderer
+	 *
+	 * @throws coding_exception
+	 */
+	public function __construct(tool_mergeusers_renderer $renderer)
+	{
+		global $SESSION;
 
-    /**
-     * Call parent construct and then build table
-     * @param tool_mergeusers_renderer $renderer
-     */
-    public function __construct($renderer)
-    {
-        global $SESSION;
+		$this->renderer = $renderer;
 
-        $this->renderer = $renderer;
+		// Call parent constructor
+		parent::__construct();
 
-        // Call parent constructor
-        parent::__construct();
+		if(!empty($SESSION->mut)) {
+			if(!empty($SESSION->mut->olduser)) {
+				$this->olduser = $SESSION->mut->olduser;
+			}
+			if(!empty($SESSION->mut->newuser)) {
+				$this->newuser = $SESSION->mut->newuser;
+			}
+		}
+		$this->buildtable();
+	}
 
-        if (!empty($SESSION->mut)) {
-            if (!empty($SESSION->mut->olduser)) {
-                $this->olduser = $SESSION->mut->olduser;
-            }
-            if (!empty($SESSION->mut->newuser)) {
-                $this->newuser = $SESSION->mut->newuser;
-            }
-        }
-        $this->buildtable();
-    }
+	/**
+	 * Build the user select table using the extension of html_table
+	 *
+	 * @throws coding_exception
+	 */
+	protected function buildtable()
+	{
+		// Reset any existing data
+		$this->data = array();
 
-    /**
-     * Build the user select table using the extension of html_table
-     */
-    protected function buildtable()
-    {
-        // Reset any existing data
-        $this->data = array();
+		if(!empty($this->olduser) || !empty($this->newuser)) { // if there is a user add table rows and columns
+			$this->id = 'merge_users_tool_user_review_table';
+			$this->attributes['class'] = 'generaltable boxaligncenter';
 
-        if (!empty($this->olduser) || !empty($this->newuser)) { // if there is a user add table rows and columns
-            $this->id = 'merge_users_tool_user_review_table';
-            $this->attributes['class'] = 'generaltable boxaligncenter';
-
-            if ((isset($this->olduser->idnumber) && !empty($this->olduser->idnumber))
+			if((isset($this->olduser->idnumber) && !empty($this->olduser->idnumber))
                 || (isset($this->newuser->idnumber) && !empty($this->newuser->idnumber))) {
                 $extrafield = 'idnumber';
             } else {
                 $extrafield = 'description';
             }
-            $columns = array(
-                'col_label' => '',
-                'col_userid' => 'Id',
-                'col_username' => get_string('user'),
-                'col_email' => get_string('email'),
-                'col_extra' => get_string($extrafield)
-            );
-            $this->head = array_values($columns);
+			$columns = [
+				'col_label' => '',
+				'col_userid' => 'Id',
+				'col_username' => get_string('user'),
+				'col_email' => get_string('email'),
+				'col_extra' => get_string($extrafield)
+			];
+			$this->head = array_values($columns);
             $this->colclasses = array_keys($columns);
 
             // Always display both rows so that the end user can see what is selected/not selected
             // Add old user row
-            $olduserrow = array();
-            $olduserrow[] = get_string('olduser', 'tool_mergeusers');
+			$olduserrow = [];
+			$olduserrow[] = get_string('olduser', 'tool_mergeusers');
             if (!empty($this->olduser)) { // if there is an old user display it
                 $olduserrow[] = $this->olduser->id;
                 $olduserrow[] = $this->renderer->show_user($this->olduser->id, $this->olduser);
@@ -131,8 +135,8 @@ class UserReviewTable extends html_table implements renderable
             $this->data[] = $olduserrow;
 
             // Add new user row
-            $newuserrow = array();
-            $newuserrow[] = get_string('newuser', 'tool_mergeusers');
+			$newuserrow = [];
+			$newuserrow[] = get_string('newuser', 'tool_mergeusers');
             if (!empty($this->newuser)) { // if there is an new user display it
                 $newuserrow[] = $this->newuser->id;
                 $newuserrow[] = $this->renderer->show_user($this->newuser->id, $this->newuser);

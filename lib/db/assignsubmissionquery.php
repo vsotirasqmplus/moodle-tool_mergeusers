@@ -23,7 +23,19 @@ defined('MOODLE_INTERNAL') || die();
 
 interface assign_submission_query
 {
-    public function latest_from_assign_and_user($assignid, $userid);
+	/**
+	 * @param $assignid
+	 * @param $userid
+	 *
+	 * @return mixed
+	 */
+	public function latest_from_assign_and_user($assignid, $userid);
 
-    public function all_from_assign_and_user($assignid, $userid);
+	/**
+	 * @param $assignid
+	 * @param $userid
+	 *
+	 * @return mixed
+	 */
+	public function all_from_assign_and_user($assignid, $userid);
 }

@@ -23,40 +23,42 @@
  * @author     John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-require_once($CFG->libdir.'/formslib.php'); /// forms library
+global $CFG;
+/** @noinspection PhpIncludeInspection */
+require_once($CFG->libdir . '/formslib.php'); /// forms library
 
 /**
  * Define form snippet for getting the userids of the two users to merge
  */
-class selectuserform extends moodleform {
+class selectuserform extends moodleform
+{
 
-    /** @var UserSelectTable Table to select users. */
-    protected $ust;
+	/** @var UserSelectTable Table to select users. */
+	protected $ust;
 
-    public function __construct(UserSelectTable $ust = null)
-    {
-        //just before parent's construct
-        $this->ust = $ust;
-        parent::__construct();
+	public function __construct(UserSelectTable $ust = NULL)
+	{
+		//just before parent's construct
+		$this->ust = $ust;
+		parent::__construct();
+	}
 
+	/**
+	 * Form definition
+	 *
+	 * @throws coding_exception
+	 * @uses $CFG
+	 */
+	public function definition()
+	{
 
-    }
+		$mform =& $this->_form;
 
-    /**
-     * Form definition
-     *
-     * @uses $CFG
-     */
-    public function definition() {
+		// header
+		$mform->addElement('header', 'selectusers', get_string('userselecttable_legend', 'tool_mergeusers'));
 
-        $mform =& $this->_form;
-
-        // header
-        $mform->addElement('header', 'selectusers', get_string('userselecttable_legend', 'tool_mergeusers'));
-
-        // table content
-        $mform->addElement('static', 'selectuserslist', '', html_writer::table($this->ust));
+		// table content
+		$mform->addElement('static', 'selectuserslist', '', html_writer::table($this->ust));
 
         // hidden elements
         $mform->addElement('hidden', 'option', 'saveselection');

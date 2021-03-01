@@ -26,6 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
+/** @noinspection PhpIncludeInspection */
 require_once($CFG->dirroot . '/mod/assign/tests/base_test.php');
 
 /**
@@ -87,8 +88,8 @@ class tool_mergeusers_assign_testcase extends mod_assign_base_testcase {
      * @return testable_assign
      */
     private function get_user_assign_grade($user, $assign, $course) {
-        $gradebookgrades = \grade_get_grades($course->id, 'mod', 'assign', $assign->get_instance()->id, $user->id);
-        $gradebookitem   = array_shift($gradebookgrades->items);
+		$gradebookgrades = grade_get_grades($course->id, 'mod', 'assign', $assign->get_instance()->id, $user->id);
+		$gradebookitem = array_shift($gradebookgrades->items);
         $grade     = $gradebookitem->grades[$user->id];
         return $grade->str_grade;
     }

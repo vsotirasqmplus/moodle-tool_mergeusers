@@ -23,5 +23,11 @@ defined('MOODLE_INTERNAL') || die();
 
 interface DuplicatedDataMerger
 {
-    public function merge($olddata, $newdata): DuplicatedData;
+	/**
+	 * @param $olddata
+	 * @param $newdata
+	 *
+	 * @return DuplicatedData
+	 */
+	public function merge($olddata, $newdata): DuplicatedData;
 }

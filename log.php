@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpPossiblePolymorphicInvocationInspection */
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -31,35 +31,50 @@ global $CFG, $DB, $PAGE;
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
-require_once($CFG->dirroot . '/lib/adminlib.php');
+/** @noinspection PhpIncludeInspection */
+require_once("{$CFG->dirroot}/lib/adminlib.php");
+/** @noinspection PhpIncludeInspection */
 require_once('lib/autoload.php');
+try {
+	require_login();
+	require_capability('tool/mergeusers:mergeusers', context_system::instance());
+	admin_externalpage_setup('tool_mergeusers_viewlog');
+	$id = required_param('id', PARAM_INT);
+	$renderer = $PAGE->get_renderer('tool_mergeusers');
+	$logger = new tool_mergeusers_logger();
 
-require_login();
-require_capability('tool/mergeusers:mergeusers', context_system::instance());
-admin_externalpage_setup('tool_mergeusers_viewlog');
-$id = required_param('id', PARAM_INT);
+	$log = $logger->getDetail($id);
 
-$renderer = $PAGE->get_renderer('tool_mergeusers');
-$logger = new tool_mergeusers_logger();
-
-$log = $logger->getDetail($id);
-
-if (empty($log)) {
-    print_error('wronglogid', 'tool_mergeusers', new moodle_url('/admin/tool/mergeusers/index.php')); //aborts execution
+} catch(Exception $e) {
+	$id = 0;
+	$log = NULL;
+	$renderer = NULL;
+	$logger = NULL;
 }
 
-$from = $DB->get_record('user', array('id' => $log->fromuserid), 'id, username');
-if (!$from) {
-    $from = new stdClass();
-    $from->id = $log->fromuserid;
-    $from->username = get_string('deleted');
+if(empty($log)) {
+	/** @noinspection PhpUnhandledExceptionInspection */
+	print_error('wronglogid', 'tool_mergeusers',
+				new moodle_url('/admin/tool/mergeusers/index.php'));
+	//aborts execution
 }
+try {
+	$from = $DB->get_record('user', array('id' => $log->fromuserid), 'id, username');
+	if(!$from) {
+		$from = new stdClass();
+		$from->id = $log->fromuserid;
+		$from->username = get_string('deleted');
+	}
 
-$to = $DB->get_record('user', array('id' => $log->touserid), 'id, username');
-if (!$to) {
-    $to = new stdClass();
-    $to->id = $log->touserid;
-    $to->username = get_string('deleted');
+	$to = $DB->get_record('user', array('id' => $log->touserid), 'id, username');
+	if(!$to) {
+		$to = new stdClass();
+		$to->id = $log->touserid;
+		$to->username = get_string('deleted');
+	}
+
+	echo $renderer->results_page($to, $from, $log->success, $log->log, $log->id);
+
+} catch(Exception $e) {
+	mtrace($e->getMessage());
 }
-
-echo $renderer->results_page($to, $from, $log->success, $log->log, $log->id);

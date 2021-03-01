@@ -24,6 +24,8 @@
  * @author     John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+global $CFG;
+/** @noinspection PhpIncludeInspection */
 require_once($CFG->libdir . '/formslib.php'); /// forms library
 
 /**
@@ -32,8 +34,8 @@ require_once($CFG->libdir . '/formslib.php'); /// forms library
 class reviewuserform extends moodleform
 {
 
-    /** @var UserSelectTable Table to select users. */
-    protected $urt;
+	/** @var UserSelectTable Table to select users. */
+	protected $urt;
 
     /** @var renderer_base renderer */
     protected $output;

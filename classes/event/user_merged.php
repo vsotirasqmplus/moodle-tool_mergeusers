@@ -27,6 +27,9 @@
  */
 
 namespace tool_mergeusers\event;
+use core\event\base;
+use stdClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -46,26 +49,33 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2016 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class user_merged extends \core\event\base {
-    protected function init() {
-        $this->data['crud'] = 'u';      // Usually we perform update db queries so 'u' its ok!
-        $this->data['level'] = self::LEVEL_OTHER; // fixing backwards compatibility
-        $this->data['edulevel'] = self::LEVEL_OTHER;
-    }
+abstract class user_merged extends base
+{
 
-    /**
-     * It will allow legacy plugins to continue to listen user_merged events
-     * without upgrading their listeners.
-     *
-     * @return \stdClass legacy object
-     */
-    protected function get_legacy_eventdata() {
-        $data = new \stdClass();
-        $userinvolded = $this->other['usersinvolved'];
-        $data->newid = $userinvolded['toid'];
-        $data->oldid = $userinvolded['fromid'];
-        $data->log = $this->other['log'];
-        $data->timemodified = $this->timecreated;
-        return $data;
-    }
+	/**
+	 *
+	 */
+	protected function init()
+	{
+		$this->data['crud'] = 'u';      // Usually we perform update db queries so 'u' its ok!
+		$this->data['level'] = self::LEVEL_OTHER; // fixing backwards compatibility
+		$this->data['edulevel'] = self::LEVEL_OTHER;
+	}
+
+	/**
+	 * It will allow legacy plugins to continue to listen user_merged events
+	 * without upgrading their listeners.
+	 *
+	 * @return stdClass legacy object
+	 */
+	protected function get_legacy_eventdata(): stdClass
+	{
+		$data = new stdClass();
+		$userinvolded = $this->other['usersinvolved'];
+		$data->newid = $userinvolded['toid'];
+		$data->oldid = $userinvolded['fromid'];
+		$data->log = $this->other['log'];
+		$data->timemodified = $this->timecreated;
+		return $data;
+	}
 }

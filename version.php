@@ -29,9 +29,9 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-
-$plugin->version   = 2019082000;
-$plugin->requires  = 2017111300; // Moodle 3.4, 13 November 2017, https://docs.moodle.org/dev/Releases#Moodle_3.4
+$plugin = new stdClass();
+$plugin->version = 2019082000;
+$plugin->requires = 2017111300; // Moodle 3.4, 13 November 2017, https://docs.moodle.org/dev/Releases#Moodle_3.4
 $plugin->component = 'tool_mergeusers';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->release = '1.21 for Moodle 3.4 and upwards (Build: 2019082000)';

@@ -23,11 +23,11 @@
  */
 
 /**
- * Abstraction layer to use to get the list of mergin actions to perform.
+ * Abstraction layer to use to get the list of merging actions to perform.
  *
  * For simplicity, we force to implement the Iterator interface.
  *
- * For complex gathering implementations, like obtaning the list from external databases,
+ * For complex gathering implementations, like obtaining the list from external databases,
  * loading CSV files, or command line scripts, you can initialize all the necessary stuff
  * in its constructor (__construct()). It is highly recommended to check all things are ok
  * in method rewind() to start the iteration.

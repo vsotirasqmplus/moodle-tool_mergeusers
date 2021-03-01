@@ -36,8 +36,10 @@ require_once(dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php');
 global $CFG;
 
 // require needed library files
+/** @noinspection PhpIncludeInspection */
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
+/** @noinspection PhpIncludeInspection */
 require_once($CFG->dirroot . '/lib/outputcomponents.php');
 
 /**
@@ -50,40 +52,42 @@ require_once($CFG->dirroot . '/lib/outputcomponents.php');
 class UserSelectTable extends html_table implements renderable
 {
 
-    /** @var tool_mergeusers_renderer Renderer to show user info. */
-    protected $renderer;
+	/** @var tool_mergeusers_renderer Renderer to show user info. */
+	protected $renderer;
 
-    /**
-     * Call parent construct
-     *
-     * @param array $users
-     * @param tool_mergeusers_renderer $renderer
-     *
-     */
-    public function __construct($users, $renderer)
-    {
-        parent::__construct();
-        $this->renderer = $renderer;
-        $this->buildtable($users);
-    }
+	/**
+	 * Call parent construct
+	 *
+	 * @param array                    $users
+	 * @param tool_mergeusers_renderer $renderer
+	 *
+	 * @throws coding_exception
+	 */
+	public function __construct(array $users, tool_mergeusers_renderer $renderer)
+	{
+		parent::__construct();
+		$this->renderer = $renderer;
+		$this->buildtable($users);
+	}
 
-    /**
-     * Build the user select table using the extension of html_table
-     *
-     * @param array $users array of user results
-     *
-     */
-    protected function buildtable($users)
-    {
-        // Reset any existing data
-        $this->data = array();
+	/**
+	 * Build the user select table using the extension of html_table
+	 *
+	 * @param array $users array of user results
+	 *
+	 * @throws coding_exception
+	 */
+	protected function buildtable(array $users)
+	{
+		// Reset any existing data
+		$this->data = array();
 
-        $this->id = 'merge_users_tool_user_select_table';
-        $this->attributes['class'] = 'generaltable boxaligncenter';
+		$this->id = 'merge_users_tool_user_select_table';
+		$this->attributes['class'] = 'generaltable boxaligncenter';
 
-        $columns = array(
-            'col_select_olduser' => get_string('olduser', 'tool_mergeusers'),
-            'col_master_newuser' => get_string('newuser', 'tool_mergeusers'),
+		$columns = array(
+			'col_select_olduser' => get_string('olduser', 'tool_mergeusers'),
+			'col_master_newuser' => get_string('newuser', 'tool_mergeusers'),
             'col_userid' => 'Id',
             'col_username' => get_string('user'),
             'col_email' => get_string('email'),

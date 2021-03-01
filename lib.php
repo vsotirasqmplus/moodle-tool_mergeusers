@@ -25,49 +25,63 @@ defined('MOODLE_INTERNAL') || die;
 
 /**
  * Gets whether database transactions are allowed.
- * @global moodle_database $DB
+ *
  * @return bool true if transactions are allowed. false otherwise.
+ * @throws ReflectionException
+ * @global moodle_database $DB
  */
-function tool_mergeusers_transactionssupported() {
-    global $DB;
+function tool_mergeusers_transactionssupported(): bool
+{
+	global $DB;
 
-    // Tricky way of getting real transactions support, without re-programming it.
-    // May be in the future, as phpdoc shows, this method will be publicly accessible.
-    $method = new ReflectionMethod($DB, 'transactions_supported');
-    $method->setAccessible(true); //method is protected; make it accessible.
-    return $method->invoke($DB);
+	// Tricky way of getting real transactions support, without re-programming it.
+	// May be in the future, as phpdoc shows, this method will be publicly accessible.
+	$method = new ReflectionMethod($DB, 'transactions_supported');
+	$method->setAccessible(TRUE); //method is protected; make it accessible.
+	return $method->invoke($DB);
 }
 
-function tool_mergeusers_build_exceptions_options() {
-    require_once(__DIR__ . '/classes/tool_mergeusers_config.php');
+/**
+ * @return stdClass
+ * @throws coding_exception
+ */
+function tool_mergeusers_build_exceptions_options(): stdClass
+{
+	require_once(__DIR__ . '/classes/tool_mergeusers_config.php');
 
-    $config = tool_mergeusers_config::instance();
-    $none = get_string('none');
-    $options = array('none' => $none);
-    foreach ($config->exceptions as $exception) {
-        $options[$exception] = $exception;
-    }
-    unset($options['my_pages']); //duplicated records make MyMoodle does not work.
+	$config = tool_mergeusers_config::instance();
+	$none = get_string('none');
+	$options = array('none' => $none);
+	/** @noinspection PhpUndefinedFieldInspection */
+	foreach($config->exceptions as $exception){
+		$options[$exception] = $exception;
+	}
+	unset($options['my_pages']); //duplicated records make MyMoodle does not work.
 
-    $result = new stdClass();
-    $result->defaultkey = 'none';
-    $result->defaultvalue = $none;
-    $result->options = $options;
+	$result = new stdClass();
+	$result->defaultkey = 'none';
+	$result->defaultvalue = $none;
+	$result->options = $options;
 
-    return $result;
+	return $result;
 }
 
-function tool_mergeusers_build_quiz_options() {
-    require_once(__DIR__ . '/lib/table/quizattemptsmerger.php');
+/**
+ * @return stdClass
+ * @throws coding_exception
+ */
+function tool_mergeusers_build_quiz_options(): stdClass
+{
+	require_once(__DIR__ . '/lib/table/quizattemptsmerger.php');
 
-    // quiz attempts
-    $quizStrings = new stdClass();
-    $quizStrings->{QuizAttemptsMerger::ACTION_RENUMBER} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
-    $quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE, 'tool_mergeusers');
-    $quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET, 'tool_mergeusers');
-    $quizStrings->{QuizAttemptsMerger::ACTION_REMAIN} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_REMAIN, 'tool_mergeusers');
+	// quiz attempts
+	$quizStrings = new stdClass();
+	$quizStrings->{QuizAttemptsMerger::ACTION_RENUMBER} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
+	$quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE, 'tool_mergeusers');
+	$quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET, 'tool_mergeusers');
+	$quizStrings->{QuizAttemptsMerger::ACTION_REMAIN} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_REMAIN, 'tool_mergeusers');
 
-    $quizOptions = array(
+	$quizOptions = array(
         QuizAttemptsMerger::ACTION_RENUMBER => $quizStrings->{QuizAttemptsMerger::ACTION_RENUMBER},
         QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE => $quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE},
         QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET => $quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET},

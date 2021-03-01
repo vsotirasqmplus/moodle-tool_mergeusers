@@ -23,21 +23,42 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/assignsubmissionquery.php');
 
-class db_assign_submission implements assign_submission_query {
-    private $db;
+class db_assign_submission implements assign_submission_query
+{
+	private $db;
 
-    public function __construct() {
-        global $DB;
-        $this->db = $DB;
-    }
+	/**
+	 * db_assign_submission constructor.
+	 */
+	public function __construct()
+	{
+		global $DB;
+		$this->db = $DB;
+	}
 
-    public function latest_from_assign_and_user($assignid, $userid) {
-        return $this->db->get_record('assign_submission',
-                ['assignment' => $assignid, 'latest' => 1, 'userid' => $userid]);
-    }
+	/**
+	 * @param $assignid
+	 * @param $userid
+	 *
+	 * @return false|mixed|stdClass
+	 * @throws dml_exception
+	 */
+	public function latest_from_assign_and_user($assignid, $userid)
+	{
+		return $this->db->get_record('assign_submission',
+									 ['assignment' => $assignid, 'latest' => 1, 'userid' => $userid]);
+	}
 
-    public function all_from_assign_and_user($assignid, $userid) {
-        return $this->db->get_records('assign_submission',
-                ['assignment' => $assignid, 'userid' => $userid]);
-    }
+	/**
+	 * @param $assignid
+	 * @param $userid
+	 *
+	 * @return array
+	 * @throws dml_exception
+	 */
+	public function all_from_assign_and_user($assignid, $userid): array
+	{
+		return $this->db->get_records('assign_submission',
+									  ['assignment' => $assignid, 'userid' => $userid]);
+	}
 }

@@ -36,9 +36,11 @@ require_once dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php';
 
 global $CFG;
 
+/** @noinspection PhpIncludeInspection */
 require_once $CFG->dirroot . '/lib/clilib.php';
 require_once __DIR__ . '/autoload.php';
-require_once($CFG->dirroot . '/'.$CFG->admin.'/tool/mergeusers/lib.php');
+/** @noinspection PhpIncludeInspection */
+require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/mergeusers/lib.php');
 
 /**
  *
@@ -55,420 +57,463 @@ require_once($CFG->dirroot . '/'.$CFG->admin.'/tool/mergeusers/lib.php');
  */
 class MergeUserTool
 {
-    /**
-     * @var array associative array showing the user-related fields per database table,
-     * without the $CFG->prefix on each.
-     */
-    protected $userFieldsPerTable;
+	/**
+	 * @var array associative array showing the user-related fields per database table,
+	 * without the $CFG->prefix on each.
+	 */
+	protected $userFieldsPerTable;
 
-    /**
-     * @var array string array with all known database table names to skip in analysis,
-     * without the $CFG->prefix on each.
-     */
-    protected $tablesToSkip;
+	/**
+	 * @var array string array with all known database table names to skip in analysis,
+	 * without the $CFG->prefix on each.
+	 */
+	protected $tablesToSkip;
 
-    /**
-     * @var array string array with the current skipped tables with the $CFG->prefix on each.
-     */
-    protected $tablesSkipped;
+	/**
+	 * @var array string array with the current skipped tables with the $CFG->prefix on each.
+	 */
+	protected $tablesSkipped;
 
-    /**
-     * @var array associative array with special cases for tables with compound indexes,
-     * without the $CFG->prefix on each.
-     */
-    protected $tablesWithCompoundIndex;
+	/**
+	 * @var array associative array with special cases for tables with compound indexes,
+	 * without the $CFG->prefix on each.
+	 */
+	protected $tablesWithCompoundIndex;
 
-    /**
-     * @var string Database-specific SQL to get the list of database tables.
-     */
-    protected $sqlListTables;
+	/**
+	 * @var array array with table names (without $CFG->prefix) and the list of field names
+	 * that are related to user.id. The key 'default' is the default for any non matching table name.
+	 */
+	protected $userFieldNames;
 
-    /**
-     * @var array array with table names (without $CFG->prefix) and the list of field names
-     * that are related to user.id. The key 'default' is the default for any non matching table name.
-     */
-    protected $userFieldNames;
+	/**
+	 * @var tool_mergeusers_logger logger for merging users.
+	 */
+	protected $logger;
 
-    /**
-     * @var tool_mergeusers_logger logger for merging users.
-     */
-    protected $logger;
+	/**
+	 * @var array associative array (tablename => classname) with the
+	 * TableMerger tools to process all database tables.
+	 */
+	protected $tableMergers;
 
-    /**
-     * @var array associative array (tablename => classname) with the
-     * TableMerger tools to process all database tables.
-     */
-    protected $tableMergers;
+	/**
+	 * @var array list of table names processed by TableMerger's.
+	 */
+	protected $tablesProcessedByTableMergers;
 
-    /**
-     * @var array list of table names processed by TableMerger's.
-     */
-    protected $tablesProcessedByTableMergers;
+	/**
+	 * @var bool if true then never commit the transaction, used for testing.
+	 */
+	protected $alwaysRollback;
 
-    /**
-     * @var bool if true then never commit the transaction, used for testing.
-     */
-    protected $alwaysRollback;
+	/**
+	 * @var bool if true then write out all sql, used for testing.
+	 */
+	protected $debugdb;
 
-    /**
-     * @var bool if true then write out all sql, used for testing.
-     */
-    protected $debugdb;
+	/**
+	 * @var array Warning messages
+	 */
+	protected $warnings;
 
-    /**
-     * Initializes
-     * @global object $CFG
-     * @param tool_mergeusers_config $config local configuration.
-     * @param tool_mergeusers_logger $logger logger facility to save results of mergings.
-     */
-    public function __construct(tool_mergeusers_config $config = null, tool_mergeusers_logger $logger = null)
-    {
-        $this->logger = (is_null($logger)) ? new tool_mergeusers_logger() : $logger;
-        $config = (is_null($config)) ? tool_mergeusers_config::instance() : $config;
+	/**
+	 * Initializes
+	 *
+	 * @param tool_mergeusers_config|null $config local configuration.
+	 * @param tool_mergeusers_logger|null $logger logger facility to save results of mergings.
+	 *
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 * @throws moodle_exception
+	 * @noinspection PhpUndefinedFieldInspection*@global object $CFG
+	 * @noinspection PhpUndefinedFieldInspection
+	 */
+	public function __construct(tool_mergeusers_config $config = NULL, tool_mergeusers_logger $logger = NULL)
+	{
+		$this->logger = (is_null($logger)) ? new tool_mergeusers_logger() : $logger;
+		$config = (is_null($config)) ? tool_mergeusers_config::instance() : $config;
 
-        $this->checkTransactionSupport();
+		$this->checkTransactionSupport();
 
-        // These are tables we don't want to modify due to logging or security reasons.
-        // We flip key<-->value to accelerate lookups.
-        $this->tablesToSkip = array_flip($config->exceptions);
-        $excluded = explode(',', get_config('tool_mergeusers', 'excluded_exceptions'));
-        $excluded = array_flip($excluded);
-        if (!isset($excluded['none'])) {
-            foreach ($excluded as $exclude => $nonused) {
-                unset($this->tablesToSkip[$exclude]);
-            }
-        }
+		// These are tables we don't want to modify due to logging or security reasons.
+		// We flip key<-->value to accelerate lookups.
+		$this->tablesToSkip = array_flip($config->exceptions);
+		$excluded = explode(',', get_config('tool_mergeusers', 'excluded_exceptions'));
+		$excluded = array_flip($excluded);
+		if(!isset($excluded['none'])) {
+			foreach($excluded as $exclude => $nonused){
+				unset($this->tablesToSkip[$exclude]);
+			}
+		}
 
-        // These are special cases, corresponding to tables with compound indexes that need a special treatment.
-        $this->tablesWithCompoundIndex = $config->compoundindexes;
+		// These are special cases, corresponding to tables with compound indexes that need a special treatment.
+		$this->tablesWithCompoundIndex = $config->compoundindexes;
 
-        // Initializes user-related field names.
-        $this->userFieldNames = $config->userfieldnames;
+		// Initializes user-related field names.
+		$this->userFieldNames = $config->userfieldnames;
 
-        // Load available TableMerger tools.
-        $tableMergers = array();
-        $tablesProcessedByTableMergers = array();
-        foreach ($config->tablemergers as $tableName => $class) {
-            $tm = new $class();
-            // ensure any provided class is a class of TableMerger
-            if (!$tm instanceof TableMerger) {
-                // aborts execution by showing an error.
-                if (CLI_SCRIPT) {
-                    cli_error('Error: ' . __METHOD__ . ':: ' . get_string('notablemergerclass', 'tool_mergeusers',
-                                    $class));
-                } else {
-                    print_error('notablemergerclass', 'tool_mergeusers',
-                            new moodle_url('/admin/tool/mergeusers/index.php'), $class);
-                }
-            }
-            // Append any additional table to skip.
-            $tablesProcessedByTableMergers = array_merge($tablesProcessedByTableMergers, $tm->getTablesToSkip());
-            $tableMergers[$tableName] = $tm;
-        }
-        $this->tableMergers = $tableMergers;
-        $this->tablesProcessedByTableMergers = array_flip($tablesProcessedByTableMergers);
+		// Load available TableMerger tools.
+		$tableMergers = array();
+		$tablesProcessedByTableMergers = array();
+		foreach($config->tablemergers as $tableName => $class){
+			$tm = new $class();
+			// ensure any provided class is a class of TableMerger
+			if(!$tm instanceof TableMerger) {
+				// aborts execution by showing an error.
+				if(CLI_SCRIPT) {
+					cli_error('Error: ' . __METHOD__ . ':: ' . get_string('notablemergerclass', 'tool_mergeusers',
+																		  $class));
+				} else {
+					print_error('notablemergerclass', 'tool_mergeusers',
+								new moodle_url('/admin/tool/mergeusers/index.php'), $class);
+				}
+			}
+			// Append any additional table to skip.
+			$tablesProcessedByTableMergers = array_merge($tablesProcessedByTableMergers, $tm->getTablesToSkip());
+			$tableMergers[$tableName] = $tm;
+		}
+		$this->tableMergers = $tableMergers;
+		$this->tablesProcessedByTableMergers = array_flip($tablesProcessedByTableMergers);
 
-        $this->alwaysRollback = !empty($config->alwaysRollback);
-        $this->debugdb = !empty($config->debugdb);
+		$this->alwaysRollback = !empty($config->alwaysRollback);
+		$this->debugdb = !empty($config->debugdb);
 
-        // Initializes the list of fields and tables to check in the current database, given the local configuration.
-        $this->init();
-    }
+		// Initializes the list of fields and tables to check in the current database, given the local configuration.
+		$this->init();
+	}
 
-    /**
-     * Merges two users into one. User-related data records from user id $fromid are merged into the
-     * user with id $toid.
-     * @global object $CFG
-     * @global moodle_database $DB
-     * @param int $toid The user inheriting the data
-     * @param int $fromid The user being replaced
-     * @return array An array(bool, array, int) having the following cases: if array(true, log, id)
-     * users' merging was successful and log contains all actions done; if array(false, errors, id)
-     * means users' merging was aborted and errors contain the list of errors.
-     * The last id is the log id of the merging action for later visual revision.
-     */
-    public function merge($toid, $fromid)
-    {
-        list($success, $log) = $this->_merge($toid, $fromid);
+	/**
+	 * Merges two users into one. User-related data records from user id $fromid are merged into the
+	 * user with id $toid.
+	 *
+	 * @param int              $toid   The user inheriting the data
+	 * @param int              $fromid The user being replaced
+	 *
+	 * @return array An array(bool, array, int) having the following cases: if array(true, log, id)
+	 * users' merging was successful and log contains all actions done; if array(false, errors, id)
+	 * means users' merging was aborted and errors contain the list of errors.
+	 * The last id is the log id of the merging action for later visual revision.
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 * @throws dml_transaction_exception
+	 * @throws moodle_exception
+	 * @global object          $CFG
+	 * @global moodle_database $DB
+	 */
+	public function merge(int $toid, int $fromid): array
+	{
+		list($success, $log) = $this->_merge($toid, $fromid);
 
-        $eventpath = "\\tool_mergeusers\\event\\";
-        $eventpath .= ($success) ? "user_merged_success" : "user_merged_failure";
+		$eventpath = "\\tool_mergeusers\\event\\";
+		$eventpath .= ($success) ? "user_merged_success" : "user_merged_failure";
 
-        $event = $eventpath::create(array(
-            'context' => \context_system::instance(),
-            'other' => array(
-                'usersinvolved' => array(
-                    'toid' => $toid,
-                    'fromid' => $fromid,
-                ),
-                'log' => $log,
-            ),
-        ));
-        $event->trigger();
-        $logid = $this->logger->log($toid, $fromid, $success, $log);
-        return array($success, $log, $logid);
-    }
+		/** @noinspection PhpUndefinedMethodInspection */
+		// Method Reference /lib/classes/event/base.php::create() .
+		$event = $eventpath::create([
+										'context' => context_system::instance(),
+										'other' => [
+											'usersinvolved' => [
+												'toid' => $toid,
+												'fromid' => $fromid,
+											],
+											'log' => $log,
+										],
+									]);
+		$event->trigger();
+		$logid = $this->logger->log($toid, $fromid, $success, $log);
+		return [$success, $log, $logid];
+	}
 
-    /**
-     * Real method that performs the merging action.
-     * @global object $CFG
-     * @global moodle_database $DB
-     * @param int $toid The user inheriting the data
-     * @param int $fromid The user being replaced
-     * @return array An array(bool, array) having the following cases: if array(true, log)
-     * users' merging was successful and log contains all actions done; if array(false, errors)
-     * means users' merging was aborted and errors contain the list of errors.
-     */
-    private function _merge($toid, $fromid)
-    {
-        global $DB;
+	/**
+	 * Real method that performs the merging action.
+	 *
+	 * @param int              $toid   The user inheriting the data
+	 * @param int              $fromid The user being replaced
+	 *
+	 * @return array An array(bool, array) having the following cases: if array(true, log)
+	 * users' merging was successful and log contains all actions done; if array(false, errors)
+	 * means users' merging was aborted and errors contain the list of errors.
+	 * @throws coding_exception
+	 * @throws dml_transaction_exception
+	 * @global object          $CFG
+	 * @global moodle_database $DB
+	 */
+	private function _merge(int $toid, int $fromid): array
+	{
+		global $DB;
 
-        // initial checks.
-        // are they the same?
-        if ($fromid == $toid) {
-            // yes. do nothing.
-            return array(false, array(get_string('errorsameuser', 'tool_mergeusers')));
-        }
+		// initial checks.
+		// are they the same?
+		if($fromid == $toid) {
+			// yes. do nothing.
+			return array(FALSE, array(get_string('errorsameuser', 'tool_mergeusers')));
+		}
 
-        // ok, now we have to work;-)
-        // first of all... initialization!
-        $errorMessages = array();
-        $actionLog = array();
+		// ok, now we have to work;-)
+		// first of all... initialization!
+		$errorMessages = [];
+		$actionLog = [];
 
-        if ($this->debugdb) {
-            $DB->set_debug(true);
-        }
+		if($this->debugdb) {
+			$DB->set_debug(TRUE);
+		}
 
-        $startTime = time();
-        $startTimeString = get_string('starttime', 'tool_mergeusers', userdate($startTime));
-        $actionLog[] = $startTimeString;
+		$startTime = time();
+		$startTimeString = get_string('starttime', 'tool_mergeusers', userdate($startTime));
+		$actionLog[] = $startTimeString;
 
-        $transaction = $DB->start_delegated_transaction();
+		$transaction = $DB->start_delegated_transaction();
 
-        try {
-            // processing each table name
-            $data = array(
-                'toid' => $toid,
-                'fromid' => $fromid,
-            );
-            foreach ($this->userFieldsPerTable as $tableName => $userFields) {
-                $data['tableName'] = $tableName;
-                $data['userFields'] = $userFields;
-                if (isset($this->tablesWithCompoundIndex[$tableName])) {
-                    $data['compoundIndex'] = $this->tablesWithCompoundIndex[$tableName];
-                } else {
-                    unset($data['compoundIndex']);
-                }
+		try {
+			// processing each table name
+			$data = [
+				'toid' => $toid,
+				'fromid' => $fromid,
+			];
+			foreach($this->userFieldsPerTable as $tableName => $userFields){
+				$data['tableName'] = $tableName;
+				$data['userFields'] = $userFields;
+				if(isset($this->tablesWithCompoundIndex[$tableName])) {
+					$data['compoundIndex'] = $this->tablesWithCompoundIndex[$tableName];
+				} else {
+					unset($data['compoundIndex']);
+				}
 
-                $tableMerger = (isset($this->tableMergers[$tableName])) ?
-                        $this->tableMergers[$tableName] :
-                        $this->tableMergers['default'];
+				$tableMerger = (isset($this->tableMergers[$tableName])) ?
+					$this->tableMergers[$tableName] :
+					$this->tableMergers['default'];
 
-                // process the given $tableName.
-                $tableMerger->merge($data, $actionLog, $errorMessages);
-            }
+				// process the given $tableName.
+				$tableMerger->merge($data, $actionLog, $errorMessages);
+			}
 
-            $this->updateGrades($toid, $fromid);
-        } catch (Exception $e) {
-            $errorMessages[] = nl2br("Exception thrown when merging: '" . $e->getMessage() . '".' .
-                    html_writer::empty_tag('br') . $DB->get_last_error() . html_writer::empty_tag('br') .
-                    'Trace:' . html_writer::empty_tag('br') .
-                    $e->getTraceAsString() . html_writer::empty_tag('br'));
-        }
+			$this->updateGrades($toid, $fromid);
+		} catch(Exception $e) {
+			$errorMessages[] = nl2br("Exception thrown when merging: '" . $e->getMessage() . '".' .
+									 html_writer::empty_tag('br') . $DB->get_last_error() . html_writer::empty_tag('br') .
+									 'Trace:' . html_writer::empty_tag('br') .
+									 $e->getTraceAsString() . html_writer::empty_tag('br'));
+		}
 
-        if ($this->debugdb) {
-            $DB->set_debug(false);
-        }
+		if($this->debugdb) {
+			$DB->set_debug(FALSE);
+		}
 
-        if ($this->alwaysRollback) {
-            $transaction->rollback(new Exception('alwaysRollback option is set so rolling back transaction'));
-        }
+		if($this->alwaysRollback) {
+			$transaction->rollback(new Exception('alwaysRollback option is set so rolling back transaction'));
+		}
 
-        // concludes with true if no error
-        if (empty($errorMessages)) {
-            $transaction->allow_commit();
+		// concludes with true if no error
+		if(empty($errorMessages)) {
+			$transaction->allow_commit();
 
-            // add skipped tables as first action in log
-            $skippedTables = array();
-            if (!empty($this->tablesSkipped)) {
-                $skippedTables[] = get_string('tableskipped', 'tool_mergeusers', implode(", ", $this->tablesSkipped));
-            }
+			// add skipped tables as first action in log
+			$skippedTables = array();
+			if(!empty($this->tablesSkipped)) {
+				$skippedTables[] = get_string('tableskipped', 'tool_mergeusers', implode(", ", $this->tablesSkipped));
+			}
 
-            $finishTime = time();
-            $actionLog[] = get_string('finishtime', 'tool_mergeusers', userdate($finishTime));
-            $actionLog[] = get_string('timetaken', 'tool_mergeusers', $finishTime - $startTime);
+			$finishTime = time();
+			$actionLog[] = get_string('finishtime', 'tool_mergeusers', userdate($finishTime));
+			$actionLog[] = get_string('timetaken', 'tool_mergeusers', $finishTime - $startTime);
 
-            return array(true, array_merge($skippedTables, $actionLog));
-        } else {
-            try {
-                //thrown controlled exception.
-                $transaction->rollback(new Exception(__METHOD__ . ':: Rolling back transcation.'));
-            } catch (Exception $e) { /* do nothing, just for correctness */
-            }
-        }
+			return array(TRUE, array_merge($skippedTables, $actionLog));
+		} else {
+			try {
+				//thrown controlled exception.
+				$transaction->rollback(new Exception(__METHOD__ . ':: Rolling back transcation.'));
+			} catch(Exception $e) { /* do nothing, just for correctness */
+			}
+		}
 
-        $finishTime = time();
-        $errorMessages[] = $startTimeString;
-        $errorMessages[] = get_string('timetaken', 'tool_mergeusers', $finishTime - $startTime);
+		$finishTime = time();
+		$errorMessages[] = $startTimeString;
+		$errorMessages[] = get_string('timetaken', 'tool_mergeusers', $finishTime - $startTime);
 
-        // concludes with an array of error messages otherwise.
-        return array(false, $errorMessages);
-    }
+		// concludes with an array of error messages otherwise.
+		return array(FALSE, $errorMessages);
+	}
 
-    // ****************** INTERNAL UTILITY METHODS ***********************************************
+	// ****************** INTERNAL UTILITY METHODS ***********************************************
 
-    /**
-     * Initializes the list of database table names and user-related fields for each table.
-     * @global object $CFG
-     * @global moodle_database $DB
-     */
-    private function init()
-    {
-        global $DB;
+	/**
+	 * Initializes the list of database table names and user-related fields for each table.
+	 *
+	 * @global object          $CFG
+	 * @global moodle_database $DB
+	 */
+	private function init()
+	{
+		global $DB;
 
-        $userFieldsPerTable = array();
+		$userFieldsPerTable = array();
 
-        // Name of tables comes without db prefix.
-        $tableNames = $DB->get_tables(false);
+		// Name of tables comes without db prefix.
+		$tableNames = $DB->get_tables(FALSE);
 
-        foreach ($tableNames as $tableName) {
+		foreach($tableNames as $tableName){
 
-            if (!trim($tableName)) {
-                // This section should never be executed due to the way Moodle returns its resultsets.
-                // Skipping due to blank table name.
-                continue;
-            } else {
-                // Table specified to be excluded.
-                if (isset($this->tablesToSkip[$tableName])) {
-                    $this->tablesSkipped[$tableName] = $tableName;
-                    continue;
-                }
-                // Table specified to be processed additionally by a TableMerger.
-                if (isset($this->tablesProcessedByTableMergers[$tableName])) {
-                    continue;
-                }
-            }
+			if(!trim($tableName)) {
+				// This section should never be executed due to the way Moodle returns its resultsets.
+				// Skipping due to blank table name.
+				continue;
+			} else {
+				// Table specified to be excluded.
+				if(isset($this->tablesToSkip[$tableName])) {
+					$this->tablesSkipped[$tableName] = $tableName;
+					continue;
+				}
+				// Table specified to be processed additionally by a TableMerger.
+				if(isset($this->tablesProcessedByTableMergers[$tableName])) {
+					continue;
+				}
+			}
 
-            // detect available user-related fields among database tables.
-            $userFields = (isset($this->userFieldNames[$tableName])) ?
-                    $this->userFieldNames[$tableName] :
-                    $this->userFieldNames['default'];
+			// detect available user-related fields among database tables.
+			$userFields = (isset($this->userFieldNames[$tableName])) ?
+				$this->userFieldNames[$tableName] :
+				$this->userFieldNames['default'];
 
-            $arrayUserFields = array_flip($userFields);
-            $currentFields = $this->getCurrentUserFieldNames($tableName, $arrayUserFields);
+			$arrayUserFields = array_flip($userFields);
+			$currentFields = $this->getCurrentUserFieldNames($tableName, $arrayUserFields);
 
-            if ($currentFields !== false) {
-                $userFieldsPerTable[$tableName] = $currentFields;
-            }
-        }
+			if(is_array($currentFields) && count($currentFields) > 0) {
+				$userFieldsPerTable[$tableName] = $currentFields;
+			}
+		}
 
-        $this->userFieldsPerTable = $userFieldsPerTable;
+		$this->userFieldsPerTable = $userFieldsPerTable;
 
-        $existingCompoundIndexes = $this->tablesWithCompoundIndex;
-        foreach ($this->tablesWithCompoundIndex as $tableName => $columns) {
-            $chosenColumns = array_merge($columns['userfield'], $columns['otherfields']);
+		$existingCompoundIndexes = $this->tablesWithCompoundIndex;
+		foreach($this->tablesWithCompoundIndex as $tableName => $columns){
+			$chosenColumns = array_merge($columns['userfield'], $columns['otherfields']);
 
-            $columnNames = array();
-            foreach ($chosenColumns as $columnName) {
-                $columnNames[$columnName] = 0;
-            }
+			$columnNames = array();
+			foreach($chosenColumns as $columnName){
+				$columnNames[$columnName] = 0;
+			}
 
-            $tableColumns = $DB->get_columns($tableName, false);
+			$tableColumns = $DB->get_columns($tableName, FALSE);
 
-            foreach ($tableColumns as $column) {
-                if (isset($columnNames[$column->name])) {
-                    $columnNames[$column->name] = 1;
-                }
-            }
+			foreach($tableColumns as $column){
+				if(isset($columnNames[$column->name])) {
+					$columnNames[$column->name] = 1;
+				}
+			}
 
-            // If we find some compound index with missing columns,
-            // it is that loaded configuration does not corresponds to current database scheme
-            // and this index does not apply.
-            $found = array_sum($columnNames);
-            if (sizeof($columnNames) !== $found) {
-                unset($existingCompoundIndexes[$tableName]);
-            }
-        }
+			// If we find some compound index with missing columns,
+			// it is that loaded configuration does not corresponds to current database scheme
+			// and this index does not apply.
+			$found = array_sum($columnNames);
+			if(sizeof($columnNames) !== $found) {
+				unset($existingCompoundIndexes[$tableName]);
+			}
+		}
 
-        // update the attribute with the current existing compound indexes per table.
-        $this->tablesWithCompoundIndex = $existingCompoundIndexes;
-    }
+		// update the attribute with the current existing compound indexes per table.
+		$this->tablesWithCompoundIndex = $existingCompoundIndexes;
+	}
 
-    /**
-     * Checks whether the current database supports transactions.
-     * If settings of this plugin are set up to allow only transactions,
-     * this method aborts the execution. Otherwise, this method will return
-     * true or false whether the current database supports transactions or not,
-     * respectively.
-     * @return bool true if database transactions are supported. false otherwise.
-     */
-    public function checkTransactionSupport()
-    {
-        global $CFG;
+	/**
+	 * Checks whether the current database supports transactions.
+	 * If settings of this plugin are set up to allow only transactions,
+	 * this method aborts the execution. Otherwise, this method will return
+	 * true or false whether the current database supports transactions or not,
+	 * respectively.
+	 *
+	 * @return bool true if database transactions are supported. false otherwise.
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 * @throws moodle_exception
+	 */
+	public function checkTransactionSupport(): bool
+	{
+		global $CFG;
 
-        $transactionsSupported = tool_mergeusers_transactionssupported();
-        $forceOnlyTransactions = get_config('tool_mergeusers', 'transactions_only');
+		$transactionsSupported = tool_mergeusers_transactionssupported();
+		$forceOnlyTransactions = get_config('tool_mergeusers', 'transactions_only');
 
-        if (!$transactionsSupported && $forceOnlyTransactions) {
-            if (CLI_SCRIPT) {
-                cli_error('Error: ' . __METHOD__ . ':: ' . get_string('errortransactionsonly', 'tool_mergeusers',
-                                $CFG->dbtype));
-            } else {
-                print_error('errortransactionsonly', 'tool_mergeusers',
-                        new moodle_url('/admin/tool/mergeusers/index.php'), $CFG->dbtype);
-            }
-        }
+		if(!$transactionsSupported && $forceOnlyTransactions) {
+			if(CLI_SCRIPT) {
+				cli_error('Error: ' . __METHOD__ . ':: ' .
+						  get_string('errortransactionsonly', 'tool_mergeusers',
+									 $CFG->dbtype));
+			} else {
+				print_error('errortransactionsonly', 'tool_mergeusers',
+							new moodle_url('/admin/tool/mergeusers/index.php'), $CFG->dbtype);
+			}
+		}
 
-        return $transactionsSupported;
-    }
+		return $transactionsSupported;
+	}
 
-    /**
-     * Gets the matching fields on the given $tableName against the given $userFields.
-     * @param string $tableName database table name to analyse, with $CFG->prefix.
-     * @param string $userFields candidate user fields to check.
-     * @return bool | array false if no matching field name;
-     * string array with matching field names otherwise.
-     */
-    private function getCurrentUserFieldNames($tableName, $userFields)
-    {
-        global $DB;
-        $columns = $DB->get_columns($tableName,false);
-        $usercolumns = [];
-        foreach($columns as $column) {
-            if (isset($userFields[$column->name])) {
-                $usercolumns[$column->name] = $column->name;
-            }
-        }
-        return $usercolumns;
-    }
+	/**
+	 * Gets the matching fields on the given $tableName against the given $userFields.
+	 * string array with matching field names otherwise.
+	 *
+	 * @param string $tableName
+	 * @param array  $userFields candidate user fields to check.
+	 *
+	 * @return array
+	 */
+	private function getCurrentUserFieldNames(string $tableName, array $userFields): array
+	{
+		global $DB;
+		$columns = $DB->get_columns($tableName, FALSE);
+		$usercolumns = [];
+		foreach($columns as $column){
+			if(isset($userFields[$column->name])) {
+				$usercolumns[$column->name] = $column->name;
+			}
+		}
+		return $usercolumns;
+	}
 
-    /**
-     * Update all of the target user's grades.
-     * @param int $toid User id
-     */
-    private function updateGrades($toid, $fromid) {
-        global $DB, $CFG;
-        require_once($CFG->libdir.'/gradelib.php');
+	/**
+	 * Update all of the target user's grades.
+	 *
+	 * @param int $toid User id
+	 * @param int $fromid
+	 *
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 * @noinspection SqlDialectInspection
+	 */
+	private function updateGrades(int $toid, int $fromid)
+	{
+		global $DB, $CFG;
+		/** @noinspection PhpIncludeInspection */
+		require_once($CFG->libdir . '/gradelib.php');
 
-        $sql = "SELECT DISTINCT gi.iteminstance, gi.itemmodule, gi.courseid
+		$sql = "SELECT DISTINCT gi.id, gi.iteminstance, gi.itemmodule, gi.courseid
                 FROM {grade_grades} gg
                 INNER JOIN {grade_items} gi on gg.itemid = gi.id
                 WHERE itemtype = 'mod' AND (gg.userid = :toid OR gg.userid = :fromid)";
 
-        $iteminstances = $DB->get_records_sql($sql, array('toid' => $toid, 'fromid' => $fromid));
+		$iteminstances = $DB->get_records_sql($sql, array('toid' => $toid, 'fromid' => $fromid));
 
-        foreach ($iteminstances as $iteminstance) {
-            if (!$activity = $DB->get_record($iteminstance->itemmodule, array('id' => $iteminstance->iteminstance))) {
-                throw new \Exception("Can not find $iteminstance->itemmodule activity with id $iteminstance->iteminstance");
-            }
-            if (!$cm = get_coursemodule_from_instance($iteminstance->itemmodule, $activity->id, $iteminstance->courseid)) {
-                throw new \Exception('Can not find course module');
-            }
-
-            $activity->modname    = $iteminstance->itemmodule;
-            $activity->cmidnumber = $cm->idnumber;
-
-            grade_update_mod_grades($activity, $toid);
-        }
-    }
+		foreach($iteminstances as $iteminstance){
+			$cm = NULL;
+			$activity = $DB->get_record($iteminstance->itemmodule,
+										['id' => $iteminstance->iteminstance]);
+			if($activity) {
+				if($activity->id) {
+					$cm = get_coursemodule_from_instance($iteminstance->itemmodule,
+														 $activity->id, $iteminstance->courseid);
+				}
+				if($cm) {
+					$activity->modname = $iteminstance->itemmodule;
+					$activity->cmidnumber = $cm->idnumber;
+					grade_update_mod_grades($activity, $toid);
+				} else {
+					$this->warnings[] = "Can not find course {$iteminstance->courseid} "
+						. "module {$iteminstance->itemmodule}";
+				}
+			} else {
+				$this->warnings[] = "Can not find {$iteminstance->itemmodule}" .
+					" activity with id {$iteminstance->iteminstance}";
+			}
+		}
+	}
 }

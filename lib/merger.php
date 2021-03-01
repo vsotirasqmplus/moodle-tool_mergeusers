@@ -24,57 +24,72 @@
 
 require_once __DIR__ . '/autoload.php';
 
-class Merger {
-    /**
-     * @var MergeUserTool instance of the tool.
-     */
-    protected $mut;
+class Merger
+{
+	/**
+	 * @var MergeUserTool instance of the tool.
+	 */
+	protected $mut;
+	protected $logger;
 
-    /**
-     * Initializes the MergeUserTool to process any incoming merging action through
-     * any Gathering instance.
-     */
-    public function __construct(MergeUserTool $mut) {
-        $this->mut = $mut;
-        $this->logger = new tool_mergeusers_logger();
+	/**
+	 * Initializes the MergeUserTool to process any incoming merging action through
+	 * any Gathering instance.
+	 *
+	 * @param MergeUserTool $mut
+	 */
+	public function __construct(MergeUserTool $mut)
+	{
+		$this->mut = $mut;
+		$this->logger = new tool_mergeusers_logger();
 
-        // to catch Ctrl+C interruptions, we need this stuff.
-        declare(ticks = 1);
+		// to catch Ctrl+C interruptions, we need this stuff.
+		declare(ticks=1);
 
-        if (extension_loaded('pcntl')) {
-            pcntl_signal(SIGINT, array(
-                $this,
-                'aborting'
-            ));
-        }
-    }
+		if(extension_loaded('pcntl')) {
+			pcntl_signal(SIGINT, [$this, 'aborting']);
+		}
+	}
 
-    /**
-     * Called when aborting from command-line on Ctrl+C interruption.
-     * @param int $signo only SIGINT.
-     */
-    public function aborting($signo) {
-        if (defined("CLI_SCRIPT")) {
-            echo "\n\n" . get_string('ok') . ", exit!\n\n";
-        }
-        exit(0); //quiting normally after all ;-)
-    }
+	/**
+	 * Called when aborting from command-line on Ctrl+C interruption.
+	 *
+	 * @param int $signo only SIGINT.
+	 *
+	 * @throws coding_exception
+	 * @noinspection PhpMissingParamTypeInspection
+	 * @noinspection PhpUnusedParameterInspection
+	 */
+	public function aborting($signo)
+	{
+		if(defined("CLI_SCRIPT")) {
+			echo "\n\n" . get_string('ok') . ", exit!\n\n";
+		}
+		exit(0); //quiting normally after all ;-)
+	}
 
-    /**
-     * This iterates over all merging actions from the given Gathering instance and tries to
-     * perform it. The result of every action is logged internally for future checking.
-     * @param Gathering $gathering List of merging actions.
-     */
-    public function merge(Gathering $gathering) {
-        foreach ($gathering as $action) {
-            list($success, $log, $id) = $this->mut->merge($action->toid, $action->fromid);
+	/**
+	 * This iterates over all merging actions from the given Gathering instance and tries to
+	 * perform it. The result of every action is logged internally for future checking.
+	 *
+	 * @param Gathering $gathering List of merging actions.
+	 *
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 * @throws dml_exception
+	 * @noinspection PhpUnusedLocalVariableInspection
+	 */
+	public function merge(Gathering $gathering)
+	{
+		foreach($gathering as $action){
+			list($success, $log, $id) = $this->mut->merge($action->toid, $action->fromid);
 
-            // only shows results on cli script
-            if (defined("CLI_SCRIPT")) {
-                echo (($success)?get_string("success"):get_string("error")) . ". Log id: " . $id . "\n\n";
-            }
-        }
-        if (defined("CLI_SCRIPT")) {
+			// only shows results on cli script
+			if(defined("CLI_SCRIPT")) {
+				echo (($success) ? get_string("success") : get_string("error")) . ". Log id: " . $id . "\n\n";
+			}
+		}
+		if(defined("CLI_SCRIPT")) {
             echo get_string('ok') .", exit!\n\n";
         }
     }

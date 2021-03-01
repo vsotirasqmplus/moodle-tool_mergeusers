@@ -26,20 +26,16 @@ spl_autoload_register(function ($class) {
 
     $fileName = strtolower($class) . '.php';
     $fileDirname = dirname(__FILE__);
-    $dirs = array(
-        $fileDirname,
-        $fileDirname . '/table',
-        $fileDirname . '/local',
-        $fileDirname.'/../classes',
-    );
+	$dirs = [$fileDirname, $fileDirname . '/table', $fileDirname . '/local', $fileDirname . '/../classes',];
 
     foreach ($dirs as $dir) {
         if (is_file($dir . '/' . $fileName)) {
-            require_once $dir . '/' . $fileName;
-            if (class_exists($class)) {
-                return true;
-            }
-        }
+			/** @noinspection PhpIncludeInspection */
+			require_once $dir . '/' . $fileName;
+			if(class_exists($class)) {
+				return TRUE;
+			}
+		}
     }
     return false;
 });

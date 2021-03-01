@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<COMPATIBILITY_MATRIX>
+    <PLUGIN name="tool_mergeusers">
+        <PHP version="7.2" level="required"/>
+        <PHP_EXTENSIONS>
+            <PHP_EXTENSION name="pcntl" level="optional"/>
+            <PHP_EXTENSION name="json" level="required"/>
+        </PHP_EXTENSIONS>
+    </PLUGIN>
+</COMPATIBILITY_MATRIX>

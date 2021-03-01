@@ -18,7 +18,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
+/** @noinspection PhpIncludeInspection */
 require_once $CFG->dirroot . '/mod/quiz/lib.php';
+/** @noinspection PhpIncludeInspection */
 require_once $CFG->dirroot . '/mod/quiz/locallib.php';
 
 /**
@@ -42,11 +44,11 @@ require_once $CFG->dirroot . '/mod/quiz/locallib.php';
  *      - ACTION_RENUMBER: Moves attempts from old user to be the first attempts of the new user.
  *        Quiz operations are performed to normalize this new scenario.
  *      - ACTION_DELETE_FROM_SOURCE: Deletes quiz_attempts records from the old user attempts.
- *        This means that the attemps to have into account will be only the last ones (those made
+ *        This means that the attempts to have into account will be only the last ones (those made
  *        with the new user). Behavior suggested by John Hoopes (well, John proposed do nothing
  *        with those attempts, leaving them related to the old user; we ).
  *      - ACTION_DELETE_FROM_TARGET: Deletes quiz_attempts records from the new user attempts.
- *        This means that the old user's attempts are leaved, and removed those from the new user
+ *        This means that the old user's attempts are left, and removed those from the new user
  *        as if the new user was cheating. Behaviour suggested by Nicolas Dunand.
  *
  * @package     tool
@@ -68,82 +70,95 @@ class QuizAttemptsMerger extends GenericTableMerger
      * but renumbers attempts. */
     const ACTION_RENUMBER = 'renumber';
 
-    /** @var string Quiz attempts remain related to each user, without merging nor deleting them. */
-    const ACTION_REMAIN = 'remain';
+	/** @var string Quiz attempts remain related to each user, without merging nor deleting them. */
+	const ACTION_REMAIN = 'remain';
 
-    /**
-     * @var string current defined action.
-     */
-    protected $action;
+	/**
+	 * @var string current defined action.
+	 */
+	protected $action;
 
-    /**
-     * Loads the current action from settings to perform when cleaning records.
-     */
-    public function __construct()
-    {
-        $this->action = get_config('tool_mergeusers', 'quizattemptsaction');
-    }
+	/**
+	 * Loads the current action from settings to perform when cleaning records.
+	 * QuizAttemptsMerger constructor.
+	 *
+	 * @throws dml_exception
+	 */
+	public function __construct()
+	{
+		$this->action = get_config('tool_mergeusers', 'quizattemptsaction');
+		parent::__construct();
+	}
 
-    /**
-     * This TableMerger processes quiz_attempts accordingly, regrading when 
-     * necessary. So that tables quiz_grades and quiz_grades_history 
-     * have to be omitted from processing by other TableMergers.
-     *
-     * @return array
-     */
-    public function getTablesToSkip()
-    {
-        return array('quiz_grades', 'quiz_grades_history');
-    }
+	/**
+	 * This TableMerger processes quiz_attempts accordingly, regrading when
+	 * necessary. So that tables quiz_grades and quiz_grades_history
+	 * have to be omitted from processing by other TableMergers.
+	 *
+	 * @return array
+	 */
+	public function getTablesToSkip(): array
+	{
+		return ['quiz_grades', 'quiz_grades_history'];
+	}
 
-    /**
-     * Merges the records related to the given users given in $data,
-     * updating/appending the list of $errorMessages and $actionLog.
-     *
-     * @param array $data array with the necessary data for merging records.
-     * @param array $actionLog list of action performed.
-     * @param array $errorMessages list of error messages.
-     */
-    public function merge($data, &$actionLog, &$errorMessages)
-    {
-        switch ($this->action) {
-            case self::ACTION_REMAIN:
-                $tables = $data['tableName'] . ', ' . implode(', ', $this->getTablesToSkip());
-                $actionLog[] = get_string('qa_action_remain_log', 'tool_mergeusers', $tables);
-                break;
-            case self::ACTION_DELETE_FROM_SOURCE:
-                parent::merge($data, $actionLog, $errorMessages);
-                break;
-            case self::ACTION_DELETE_FROM_TARGET:
-                $newdata = $data;
-                $newdata['fromid'] = $data['toid'];
-                $newdata['toid'] = $data['fromid'];
-                parent::merge($data, $actionLog, $errorMessages);
-                break;
-            case self::ACTION_RENUMBER:
-                $this->renumber($data, $actionLog, $errorMessages);
-                break;
-        }
-    }
+	/**
+	 * Merges the records related to the given users given in $data,
+	 * updating/appending the list of $errorMessages and $actionLog.
+	 *
+	 * @param array $data          array with the necessary data for merging records.
+	 * @param array $errorMessages list of error messages.
+	 * @param array $actionLog
+	 *
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 * @throws Exception
+	 */
+	public function merge(array $data, array &$errorMessages, array &$actionLog)
+	{
+		switch($this->action) {
+			case self::ACTION_REMAIN:
+				$tables = $data['tableName'] . ', ' . implode(', ', $this->getTablesToSkip());
+				$actionLog[] = get_string('qa_action_remain_log', 'tool_mergeusers', $tables);
+				break;
+			case self::ACTION_DELETE_FROM_SOURCE:
+				parent::merge($data, $actionLog, $actionLog);
+				break;
+			case self::ACTION_DELETE_FROM_TARGET:
+//                $newdata = $data;
+//                $newdata['fromid'] = $data['toid'];
+//                $newdata['toid'] = $data['fromid'];
+				parent::merge($data, $actionLog, $actionLog);
+				break;
+			case self::ACTION_RENUMBER:
+				$this->renumber($data, $actionLog, $actionLog);
+				break;
+			default:
+				throw new Exception('Unexpected value');
+		}
+	}
 
-    /**
-     * Merges the records related to the given users given in $data,
-     * updating/appending the list of $errorMessages and $actionLog, 
-     * by having the union of all attempts and being renumbered by
-     * the timestart of each attempt.
-     *
-     * @param array $data array with the necessary data for merging records.
-     * @param array $actionLog list of action performed.
-     * @param array $errorMessages list of error messages.
-     */
-    protected function renumber($data, &$actionLog, &$errorMessages)
-    {
-        global $CFG, $DB;
+	/**
+	 * Merges the records related to the given users given in $data,
+	 * updating/appending the list of $errorMessages and $actionLog,
+	 * by having the union of all attempts and being renumbered by
+	 * the timestart of each attempt.
+	 *
+	 * @param array $data          array with the necessary data for merging records.
+	 * @param array $actionLog     list of action performed.
+	 * @param array $errorMessages list of error messages.
+	 *
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 */
+	protected function renumber(array $data, array &$actionLog, array &$errorMessages)
+	{
+		global $CFG, $DB;
 
-        $tableName = $CFG->prefix . $data['tableName'];
+		$tableName = $CFG->prefix . $data['tableName'];
 
-        // we want to find all quiz attempts made from both users if any.
-        $sql = "
+		// we want to find all quiz attempts made from both users if any.
+		$sql = "
             SELECT *
             FROM
                 " . $tableName . "
@@ -177,39 +192,39 @@ class QuizAttemptsMerger extends GenericTableMerger
             }
 
             // processing attempts quiz by quiz
-            foreach ($attemptsByQuiz as $quiz => $attempts) {
+            foreach ($attemptsByQuiz as $quiz => $attempts){
 
-                // do nothing when there is only the target user.
-                if (count($userids[$quiz]) === 1 && isset($userids[$quiz][$toid])) {
-                    // all attempts are for the target user only; do nothing.
-                    continue;
-                }
+				// do nothing when there is only the target user.
+				if(count($userids[$quiz]) === 1 && isset($userids[$quiz][$toid])) {
+					// all attempts are for the target user only; do nothing.
+					continue;
+				}
 
-                // Now we know that we have to gather all attempts and renumber them
-                // by their timestart.
-                // 
-                // In order to prevent key collisions for (userid, quiz and attempt), 
-                // we adopt the following procedure:
-                // 
-                //   1. Renumber all attempts updating their attempt to $max + $nattempt.
-                //   2. Update all above attempts to subtract $max to their attempt value.
-                //   
-                // In step 1. we have $max set to the total number of attempts from both
-                // users, and $nattempt is just an incremental value.
-                // 
-                // In step 2. we renumber all attempts to start from 1 by just subtracting
-                // the $max value to their attempt column.
-                // 
-                //
-                // total number of attempts from both users.
-                $max = count($attempts);
-                // update the list of quiz ids to be recalculated its grade.
-                $quizzes[$quiz] = $quiz;
-                // number of attempt when renumbering
-                $nattempt = 1;
+				// Now we know that we have to gather all attempts and renumber them
+				// by their timestart.
+				//
+				// In order to prevent key collisions for (userid, quiz and attempt),
+				// we adopt the following procedure:
+				//
+				//   1. Renumber all attempts updating their attempt to $max + $nattempt.
+				//   2. Update all above attempts to subtract $max to their attempt value.
+				//
+				// In step 1. we have $max set to the total number of attempts from both
+				// users, and $nattempt is just an incremental value.
+				//
+				// In step 2. we renumber all attempts to start from 1 by just subtracting
+				// the $max value to their attempt column.
+				//
+				//
+				// total number of attempts from both users.
+				$max = count($attempts);
+				// update the list of quiz ids to be recalculated its grade.
+				$quizzes[$quiz] = $quiz;
+				// number of attempt when renumbering
+				$nattempt = 1;
 
-                // Renumber all attempts and updating userid when necessary.
-                // All attempts have an offset of $max in their attempt column.
+				// Renumber all attempts and updating userid when necessary.
+				// All attempts have an offset of $max in their attempt column.
                 foreach ($attempts as $attempt) {
 
                     $sets = array();
@@ -239,57 +254,72 @@ class QuizAttemptsMerger extends GenericTableMerger
                 if ($DB->execute($updateAll)) {
                     $actionLog[] = $updateAll;
                 } else {
-                    $errorMessages[] = get_string('tableko', 'tool_mergeusers', $data['tableName']) .
-                            ': ' . $DB->get_last_error();
-                }
-            }
+					$errorMessages[] = get_string('tableko', 'tool_mergeusers', $data['tableName']) .
+						': ' . $DB->get_last_error();
+				}
+			}
 
-            // recalculate grades for updated quizzes.
-            $this->updateAllQuizzes($data, $quizzes, $actionLog);
-        }
-    }
+			// recalculate grades for updated quizzes.
+			$this->updateAllQuizzes($data, $quizzes, $actionLog);
+		}
+	}
 
-    /**
-     * Overriding the default implementation to add a final task: updateQuizzes.
-     * 
-     * @param array $data array with details of merging.
-     * @param array $recordsToModify list of record ids to update with $toid.
-     * @param string $fieldName field name of the table to update.
-     * @param array $actionLog list of performed actions.
-     * @param array $errorMessages list of error messages.
-     */
-    protected function updateAllRecords($data, $recordsToModify, $fieldName, &$actionLog, &$errorMessages)
-    {
-        parent::updateAllRecords($data, $recordsToModify, $fieldName, $actionLog, $errorMessages);
-        $this->updateAllQuizzes($data, $recordsToModify, $actionLog);
-    }
+	/**
+	 * Overriding the default implementation to add a final task: updateQuizzes.
+	 *
+	 * @param array  $data            array with details of merging.
+	 * @param array  $recordsToModify list of record ids to update with $toid.
+	 * @param string $fieldName       field name of the table to update.
+	 * @param array  $actionLog       list of performed actions.
+	 * @param array  $errorMessages   list of error messages.
+	 *
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 */
+	protected function updateAllRecords(array $data, array $recordsToModify, string $fieldName, array &$actionLog, array &$errorMessages)
+	{
+		parent::updateAllRecords($data, $recordsToModify, $fieldName, $actionLog, $errorMessages);
+		$this->updateAllQuizzes($data, $recordsToModify, $actionLog);
+	}
 
-    /**
-     * Recalculate grades for any affected quiz.
-     * @global moodle_database $DB
-     * @param array $data array with attributes, like 'tableName'
-     * @param array $ids ids of the table to be updated, and so, to update quiz grades.
-     */
-    protected function updateAllQuizzes($data, $ids, &$actionLog)
-    {
-        if (empty($ids)) {
-            // if no ids... do nothing.
-            return;
-        }
+	/**
+	 * Recalculate grades for any affected quiz.
+	 *
+	 * @param array $data array with attributes, like 'tableName'
+	 * @param array $ids  ids of the table to be updated, and so, to update quiz grades.
+	 * @param array $actionLog
+	 *
+	 * @noinspection PhpUnusedParameterInspection*@global moodle_database $DB
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 */
+	protected function updateAllQuizzes(array $data, array $ids, array &$actionLog)
+	{
+		if(empty($ids)) {
+			unset($data);
+			// if no ids... do nothing.
+			return;
+		}
+		$chunks = array_chunk($ids, static::CHUNK_SIZE);
+		foreach($chunks as $chunk){
+			$this->updateQuizzes($chunk, $actionLog);
+		}
+	}
 
-        $chunks = array_chunk($ids, static::CHUNK_SIZE);
-        foreach ($chunks as $chunk) {
-            $this->updateQuizzes($chunk, $actionLog);
-        }
-    }
+	/**
+	 * @param array $ids
+	 * @param array $actionLog
+	 *
+	 * @throws coding_exception
+	 * @throws dml_exception
+	 */
+	protected function updateQuizzes(array $ids, array &$actionLog)
+	{
+		global $DB;
 
-    protected function updateQuizzes(array $ids, array &$actionLog)
-    {
-        global $DB;
+		$idsstr = "'" . implode("', '", $ids) . "'";
 
-        $idsstr = "'" . implode("', '", $ids) . "'";
-
-        $sqlQuizzes = "
+		$sqlQuizzes = "
             SELECT * FROM {quiz} q
                     WHERE id IN ($idsstr)
         ";
