@@ -78,15 +78,15 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
 			[
 				[],
 				[1 => 1],
-                        $this->get_assign_submission_new(1, 1111),
-                        $this->get_assign_submission_draft(2, 2222)
-                ],
-                [
-                        [],
-                        [1 => 1],
-                        $this->get_assign_submission_new(1, 1111),
-                        $this->get_assign_submission_reopened(2, 2222)
-				],
+				$this->get_assign_submission_new(1, 1111),
+				$this->get_assign_submission_draft(2, 2222)
+			],
+			[
+				[],
+				[1 => 1],
+				$this->get_assign_submission_new(1, 1111),
+				$this->get_assign_submission_reopened(2, 2222)
+			],
 			[
 				[],
 				[1 => 1],
@@ -143,8 +143,8 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
 			[
 				[1 => 1],
 				[2 => 2],
-                        $this->get_assign_submission_draft(1, 1111),
-                        $this->get_assign_submission_new(2, 2222)
+				$this->get_assign_submission_draft(1, 1111),
+				$this->get_assign_submission_new(2, 2222)
 			],
 			[
 				[1 => 1],
@@ -202,9 +202,9 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
 			],
 			[
 				[1 => 1],
-                        [2 => 2],
-                        $this->get_assign_submission_draft_by_date(1, 1111, 123456),
-                        $this->get_assign_submission_submitted_by_date(2, 2222, 987654)
+				[2 => 2],
+				$this->get_assign_submission_draft_by_date(1, 1111, 123456),
+				$this->get_assign_submission_submitted_by_date(2, 2222, 987654)
 			],
 			[
 				[2 => 2],
@@ -281,6 +281,6 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
 		$anewassignsubmision->attemptnumber = 0;
 		$anewassignsubmision->latest = 1;
 
-        return $anewassignsubmision;
-    }
+		return $anewassignsubmision;
+	}
 }

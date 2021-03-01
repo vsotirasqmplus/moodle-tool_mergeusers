@@ -26,7 +26,8 @@ require_once(__DIR__ . '/duplicateddata.php');
 require_once(__DIR__ . '/../db/dbassignsubmission.php');
 require_once(__DIR__ . '/../db/assignsubmissionquery.php');
 
-class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger {
+class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger
+{
 	// This constants are located at mod/assign/locallib.php. We copy here to avoid loading full locallib.php file.
 	const ASSIGN_SUBMISSION_WITH_CONTENT = [
 		'submitted',

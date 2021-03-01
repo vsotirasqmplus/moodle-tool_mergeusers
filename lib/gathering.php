@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -32,6 +32,7 @@
  * in its constructor (__construct()). It is highly recommended to check all things are ok
  * in method rewind() to start the iteration.
  */
-interface Gathering extends Iterator {
+interface Gathering extends Iterator
+{
 
 }

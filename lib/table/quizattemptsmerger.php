@@ -60,15 +60,15 @@ require_once $CFG->dirroot . '/mod/quiz/locallib.php';
 class QuizAttemptsMerger extends GenericTableMerger
 {
 
-    /** @var string When cleaning up records, this action deletes records from old user. */
-    const ACTION_DELETE_FROM_SOURCE = 'delete_fromid';
+	/** @var string When cleaning up records, this action deletes records from old user. */
+	const ACTION_DELETE_FROM_SOURCE = 'delete_fromid';
 
-    /** @var string When cleaning up records, this action deletes records from new user. */
-    const ACTION_DELETE_FROM_TARGET = 'delete_toid';
+	/** @var string When cleaning up records, this action deletes records from new user. */
+	const ACTION_DELETE_FROM_TARGET = 'delete_toid';
 
-    /** @var string When cleaning up records, this action does not delete records,
-     * but renumbers attempts. */
-    const ACTION_RENUMBER = 'renumber';
+	/** @var string When cleaning up records, this action does not delete records,
+	 * but renumbers attempts. */
+	const ACTION_RENUMBER = 'renumber';
 
 	/** @var string Quiz attempts remain related to each user, without merging nor deleting them. */
 	const ACTION_REMAIN = 'remain';
@@ -167,32 +167,29 @@ class QuizAttemptsMerger extends GenericTableMerger
             ORDER BY quiz ASC, timestart ASC
         ";
 
-        $allAttempts = $DB->get_records_sql($sql, array($data['fromid'], $data['toid']));
+		$allAttempts = $DB->get_records_sql($sql, [$data['fromid'], $data['toid']]);
 
-        // when there are attempts, check what we have to do with them.
-        if ($allAttempts) {
+		// when there are attempts, check what we have to do with them.
+		if($allAttempts) {
 
-            $toid = $data['toid'];
-            $update = array(
-                'UPDATE ' . $tableName . ' SET ',
-                ' WHERE id = ',
-            );
+			$toid = $data['toid'];
+			$update = ['UPDATE ' . $tableName . ' SET ', ' WHERE id = ',];
 
-            // list of quiz ids necessary to recalculate.
-            $quizzes = array();
-            // list of attempts organized by quiz id
-            $attemptsByQuiz = array();
-            // list of users that have attempts per quiz
-            $userids = array();
+			// list of quiz ids necessary to recalculate.
+			$quizzes = [];
+			// list of attempts organized by quiz id
+			$attemptsByQuiz = [];
+			// list of users that have attempts per quiz
+			$userids = [];
 
-            // organize all attempts by quiz and userid
-            foreach ($allAttempts as $attempt) {
-                $attemptsByQuiz[$attempt->quiz][] = $attempt;
-                $userids[$attempt->quiz][$attempt->userid] = $attempt->userid;
-            }
+			// organize all attempts by quiz and userid
+			foreach($allAttempts as $attempt){
+				$attemptsByQuiz[$attempt->quiz][] = $attempt;
+				$userids[$attempt->quiz][$attempt->userid] = $attempt->userid;
+			}
 
-            // processing attempts quiz by quiz
-            foreach ($attemptsByQuiz as $quiz => $attempts){
+			// processing attempts quiz by quiz
+			foreach($attemptsByQuiz as $quiz => $attempts){
 
 				// do nothing when there is only the target user.
 				if(count($userids[$quiz]) === 1 && isset($userids[$quiz][$toid])) {
@@ -225,35 +222,35 @@ class QuizAttemptsMerger extends GenericTableMerger
 
 				// Renumber all attempts and updating userid when necessary.
 				// All attempts have an offset of $max in their attempt column.
-                foreach ($attempts as $attempt) {
+				foreach($attempts as $attempt){
 
-                    $sets = array();
-                    if ($attempt->userid != $toid) {
-                        $sets[] = 'userid = ' . $toid;
-                    }
-                    $sets[] = 'attempt = ' . ($max + $nattempt);
+					$sets = [];
+					if($attempt->userid != $toid) {
+						$sets[] = 'userid = ' . $toid;
+					}
+					$sets[] = 'attempt = ' . ($max + $nattempt);
 
-                    $updateSql = $update[0] . implode(', ', $sets) . $update[1] . $attempt->id;
-                    if ($DB->execute($updateSql)) {
-                        $actionLog[] = $updateSql;
-                    } else {
-                        $errorMessages[] = get_string('tableko', 'tool_mergeusers', $data['tableName']) .
-                                ': ' . $DB->get_last_error();
-                    }
+					$updateSql = $update[0] . implode(', ', $sets) . $update[1] . $attempt->id;
+					if($DB->execute($updateSql)) {
+						$actionLog[] = $updateSql;
+					} else {
+						$errorMessages[] = get_string('tableko', 'tool_mergeusers', $data['tableName']) .
+							': ' . $DB->get_last_error();
+					}
 
-                    $nattempt++;
-                    unset($sets); // free mem
-                }
+					$nattempt++;
+					unset($sets); // free mem
+				}
 
-                // Remove the offset of $max from their attempt column to make
-                // them start by 1 as expected.
-                $updateAll = "UPDATE " . $tableName .
-                    " SET attempt = attempt - $max " .
-                    " WHERE quiz = $quiz AND userid = $toid";
+				// Remove the offset of $max from their attempt column to make
+				// them start by 1 as expected.
+				$updateAll = "UPDATE " . $tableName .
+					" SET attempt = attempt - $max " .
+					" WHERE quiz = $quiz AND userid = $toid";
 
-                if ($DB->execute($updateAll)) {
-                    $actionLog[] = $updateAll;
-                } else {
+				if($DB->execute($updateAll)) {
+					$actionLog[] = $updateAll;
+				} else {
 					$errorMessages[] = get_string('tableko', 'tool_mergeusers', $data['tableName']) .
 						': ' . $DB->get_last_error();
 				}
@@ -324,15 +321,15 @@ class QuizAttemptsMerger extends GenericTableMerger
                     WHERE id IN ($idsstr)
         ";
 
-        $quizzes = $DB->get_records_sql($sqlQuizzes);
+		$quizzes = $DB->get_records_sql($sqlQuizzes);
 
-        if ($quizzes) {
-            $actionLog[] = get_string('qa_grades', 'tool_mergeusers', implode(', ', array_keys($quizzes)));
-            foreach ($quizzes as $quiz) {
-                // https://moodle.org/mod/forum/discuss.php?d=258979
-                // recalculate grades for affected quizzes.
-                quiz_update_all_final_grades($quiz);
-            }
-        }
-    }
+		if($quizzes) {
+			$actionLog[] = get_string('qa_grades', 'tool_mergeusers', implode(', ', array_keys($quizzes)));
+			foreach($quizzes as $quiz){
+				// https://moodle.org/mod/forum/discuss.php?d=258979
+				// recalculate grades for affected quizzes.
+				quiz_update_all_final_grades($quiz);
+			}
+		}
+	}
 }

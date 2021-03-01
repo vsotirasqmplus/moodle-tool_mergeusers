@@ -171,7 +171,7 @@ if(!empty($option)) {
 			}
 
 			// Merge the users
-			$log = array();
+			$log = [];
 			$success = TRUE;
 			/** @noinspection PhpUnhandledExceptionInspection */
 			list($success, $log, $logid) = $mut->merge($touser->id, $fromuser->id);

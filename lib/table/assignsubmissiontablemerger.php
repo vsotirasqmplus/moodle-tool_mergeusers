@@ -69,17 +69,17 @@ class AssignSubmissionTableMerger extends GenericTableMerger
 			$olduserlatestsubmission = $this->findassignsubmissions->latest_from_assign_and_user($assignid, $fromuserid);
 			$newuserlatestsubmission = $this->findassignsubmissions->latest_from_assign_and_user($assignid, $touserid);
 
-            if (!empty($newuserlatestsubmission)) {
-                $duplicateddata = $this->duplicateddatamerger->merge($olduserlatestsubmission, $newuserlatestsubmission);
-                $recordsToModify += $duplicateddata->to_modify();
-                $assignsubmissionstoremove += $duplicateddata->to_remove();
-                continue;
-            }
+			if(!empty($newuserlatestsubmission)) {
+				$duplicateddata = $this->duplicateddatamerger->merge($olduserlatestsubmission, $newuserlatestsubmission);
+				$recordsToModify += $duplicateddata->to_modify();
+				$assignsubmissionstoremove += $duplicateddata->to_remove();
+				continue;
+			}
 
-            if ($oldusersubmissions = $this->findassignsubmissions->all_from_assign_and_user($assignid, $fromuserid)) {
-                $assignsubmissionstomodify = array_keys($oldusersubmissions);
-                $recordsToModify += array_combine($assignsubmissionstomodify, $assignsubmissionstomodify);
-            }
+			if($oldusersubmissions = $this->findassignsubmissions->all_from_assign_and_user($assignid, $fromuserid)) {
+				$assignsubmissionstomodify = array_keys($oldusersubmissions);
+				$recordsToModify += array_combine($assignsubmissionstomodify, $assignsubmissionstomodify);
+			}
 		}
 
 		foreach($assignsubmissionstoremove as $assignsubmissionid){

@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -33,20 +33,21 @@ require_once $CFG->dirroot . '/lib/clilib.php';
  * Abstraction layer to use to get the list of merging actions to perform asked from command line.
  *
  */
-class CLIGathering implements Gathering {
+class CLIGathering implements Gathering
+{
 
-    /**
-     * @var stdClass object with fromid and toid user.id fields.
-     */
-    protected $current;
-    /**
-     * @var bool true if user chose to conclude with merging users. false if we are still merging.
-     */
-    protected $end;
-    /**
-     * @var int zero-based index of the number of asked merging operations.
-     */
-    protected $index;
+	/**
+	 * @var stdClass object with fromid and toid user.id fields.
+	 */
+	protected $current;
+	/**
+	 * @var bool true if user chose to conclude with merging users. false if we are still merging.
+	 */
+	protected $end;
+	/**
+	 * @var int zero-based index of the number of asked merging operations.
+	 */
+	protected $index;
 
 	/**
 	 * Initialization, also for capturing Ctrl+C interruptions.
@@ -86,19 +87,19 @@ class CLIGathering implements Gathering {
 			$record->fromid = intval(cli_input(get_string('cligathering:fromid', 'tool_mergeusers')));
 		}
 
-        //if we have to exit, do it just now ;-)
-        if ($record->fromid == -1) {
-            $this->end = true;
-            return;
-        }
+		//if we have to exit, do it just now ;-)
+		if($record->fromid == -1) {
+			$this->end = TRUE;
+			return;
+		}
 
-        //otherwise, ask for the target user id.
-        $record->toid = 0;
-        while ($record->toid <= 0 && $record->toid != -1) {
-            $record->toid = intval(cli_input(get_string('cligathering:toid', 'tool_mergeusers')));
-        }
+		//otherwise, ask for the target user id.
+		$record->toid = 0;
+		while($record->toid <= 0 && $record->toid != -1) {
+			$record->toid = intval(cli_input(get_string('cligathering:toid', 'tool_mergeusers')));
+		}
 
-        //updates related iterator fields.
+		//updates related iterator fields.
 		$this->end = $record->toid == -1;
 		$this->current = $record;
 		$this->index++;

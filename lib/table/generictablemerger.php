@@ -142,12 +142,12 @@ class GenericTableMerger implements TableMerger
 		$sql = 'SELECT id, ' . $userfield . ', ' . $otherfieldsstr .
 			' FROM {' . $data['tableName'] . '} ' .
 			' WHERE ' . $userfield . ' IN ( ?, ?)';
-		$result = $DB->get_records_sql($sql, array($data['fromid'], $data['toid']));
+		$result = $DB->get_records_sql($sql, [$data['fromid'], $data['toid']]);
 
-		$itemArr = array();
-		$idsToRemove = array();
+		$itemArr = [];
+		$idsToRemove = [];
 		foreach($result as $id => $resObj){
-			$keyfromother = array();
+			$keyfromother = [];
 			foreach($otherfields as $of){
 				$keyfromother[] = $resObj->$of;
 			}

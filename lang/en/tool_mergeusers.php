@@ -2,20 +2,21 @@
 
 /**
  * Define default English language strings for report
- * @author Forrest Gaston
- * @author Juan Pablo Torres Herrera
- * @author Shane Elliott, Pukunui Technology
- * @author Jordi Pujol-Ahulló, SREd, Universitat Rovira i Virgili
- * @author John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
+ *
+ * @author  Forrest Gaston
+ * @author  Juan Pablo Torres Herrera
+ * @author  Shane Elliott, Pukunui Technology
+ * @author  Jordi Pujol-Ahulló, SREd, Universitat Rovira i Virgili
+ * @author  John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
  * @package tool_mergeusers
- * @link http://moodle.org/mod/forum/discuss.php?d=103425
+ * @link    http://moodle.org/mod/forum/discuss.php?d=103425
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Merge user accounts';
 $string['header'] = 'Merge two users into a single account';
 $string['header_help'] =
-'<p>Given a user to be deleted and a user to keep, this will merge the user data
+	'<p>Given a user to be deleted and a user to keep, this will merge the user data
  associated with the former user into the latter user. Note that both users must
  already exist and no accounts will actually be deleted. That process is left to the
  administrator to do manually.</p>
@@ -52,7 +53,7 @@ second one. The first user id (fromid) will 'lose' all its data to be 'migrated'
 into the second one (toid). The user 'toid' will include data from both users.";
 $string['cligathering:stopping'] = 'To stop merging, Ctrl+C or type -1 either on fromid or toid fields.';
 $string['cligathering:fromid'] = 'Source user id (fromid):';
-$string['cligathering:toid'] =   'Target user id   (toid):';
+$string['cligathering:toid'] = 'Target user id   (toid):';
 $string['viewlog'] = 'See merging logs';
 $string['loglist'] = 'All these records are merging actions done, showing if they went ok:';
 $string['newuseridonlog'] = 'User kept';

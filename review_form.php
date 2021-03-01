@@ -37,70 +37,71 @@ class reviewuserform extends moodleform
 	/** @var UserSelectTable Table to select users. */
 	protected $urt;
 
-    /** @var renderer_base renderer */
-    protected $output;
+	/** @var renderer_base renderer */
+	protected $output;
 
-    /** @var bool if user is in the merge process step. */
-    protected $review_step;
+	/** @var bool if user is in the merge process step. */
+	protected $review_step;
 
-    public function __construct(UserReviewTable $urt, $renderer, $review_step)
-    {
-        //just before parent's construct
-        $this->urt = $urt;
-        $this->output = $renderer;
-        $this->review_step = $review_step;
-        parent::__construct();
-    }
+	public function __construct(UserReviewTable $urt, $renderer, $review_step)
+	{
+		//just before parent's construct
+		$this->urt = $urt;
+		$this->output = $renderer;
+		$this->review_step = $review_step;
+		parent::__construct();
+	}
 
-    /**
-     * Form definition
-     *
-     * @uses $CFG
-     */
-    public function definition()
-    {
-        // if there are no rows in the table, return.
-        // (won't be rows if both olduser and newuser are NULL in session stdClass)
-        if (empty($this->urt->data)) {
-            return '';
-        }
+	/**
+	 * Form definition
+	 *
+	 * @throws coding_exception
+	 * @uses $CFG
+	 */
+	public function definition()
+	{
+		// if there are no rows in the table, return.
+		// (won't be rows if both olduser and newuser are NULL in session stdClass)
+		if(empty($this->urt->data)) {
+			return;
+		}
 
-        $mform = & $this->_form;
+		$mform = &$this->_form;
 
-        // header
-        $mform->addElement('header', 'reviewusers', get_string('userreviewtable_legend', 'tool_mergeusers'));
+		// header
+		$mform->addElement('header', 'reviewusers', get_string('userreviewtable_legend', 'tool_mergeusers'));
 
-        // table content
-        $mform->addElement('static', 'reviewuserslist', '', html_writer::table($this->urt));
+		// table content
+		$mform->addElement('static', 'reviewuserslist', '', html_writer::table($this->urt));
 
-        // buttons
-        // set up url here so the same url can be used more than once
-        $mergeurl = new moodle_url('/admin/tool/mergeusers/index.php');
-        $buttonarray = array();
-        if ($this->review_step) {
-            $mergeurl->param('option', 'mergeusers');
-            $mergeusersbutton = new single_button($mergeurl, get_string('mergeusers', 'tool_mergeusers'));
-            $mergeusersbutton->add_confirm_action(get_string('mergeusers_confirm', 'tool_mergeusers'));
-            $buttonarray[0][] = $this->output->render($mergeusersbutton);
-        } else if (count($this->urt->data) === 2) {
-            $mergeurl->param('option', 'continueselection');
-            $mergeusersbutton = new single_button($mergeurl, get_string('saveselection_submit', 'tool_mergeusers'));
-            $buttonarray[0][] = $this->output->render($mergeusersbutton);
-        }
-        $mergeurl->param('option', 'clearselection');
-        $mergeusersbutton = new single_button($mergeurl, get_string('clear_selection', 'tool_mergeusers'));
-        $buttonarray[0][] = $this->output->render($mergeusersbutton);
+		// buttons
+		// set up url here so the same url can be used more than once
+		$mergeurl = new moodle_url('/admin/tool/mergeusers/index.php');
+		$buttonarray = [];
+		if($this->review_step) {
+			$mergeurl->param('option', 'mergeusers');
+			$mergeusersbutton = new single_button($mergeurl, get_string('mergeusers', 'tool_mergeusers'));
+			$mergeusersbutton->add_confirm_action(get_string('mergeusers_confirm', 'tool_mergeusers'));
+			$buttonarray[0][] = $this->output->render($mergeusersbutton);
+		} else if(count($this->urt->data) === 2) {
+			$mergeurl->param('option', 'continueselection');
+			$mergeusersbutton = new single_button($mergeurl, get_string('saveselection_submit', 'tool_mergeusers'));
+			$buttonarray[0][] = $this->output->render($mergeusersbutton);
+		}
+		$mergeurl->param('option', 'clearselection');
+		$mergeusersbutton = new single_button($mergeurl, get_string('clear_selection', 'tool_mergeusers'));
+		$buttonarray[0][] = $this->output->render($mergeusersbutton);
 
-        if ($this->review_step) {
-            $mergeurl->param('option', 'searchusers');
-            $mergeusersbutton = new single_button($mergeurl, get_string('cancel'));
-            $buttonarray[0][] = $this->output->render($mergeusersbutton);
-        }
-        $htmltable = new html_table();
-        $htmltable->attributes['class'] = 'clearfix';
-        $htmltable->data = $buttonarray;
+		if($this->review_step) {
+			$mergeurl->param('option', 'searchusers');
+			$mergeusersbutton = new single_button($mergeurl, get_string('cancel'));
+			$buttonarray[0][] = $this->output->render($mergeusersbutton);
+		}
+		$htmltable = new html_table();
+		$htmltable->attributes['class'] = 'clearfix';
+		$htmltable->data = $buttonarray;
 
-        $mform->addElement('static', 'buttonar', '', html_writer::table($htmltable));
-        $mform->closeHeaderBefore('buttonar');
-    }
+		$mform->addElement('static', 'buttonar', '', html_writer::table($htmltable));
+		$mform->closeHeaderBefore('buttonar');
+	}
 }

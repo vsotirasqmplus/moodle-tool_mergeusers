@@ -19,14 +19,15 @@
  *
  * The base class for merge user accounts related actions.
  *
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Gerard Cuello Adell <gerard.urv@gmail.com>
- * @copyright 2016 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Gerard Cuello Adell <gerard.urv@gmail.com>
+ * @copyright  2016 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace tool_mergeusers\event;
+
 use core\event\base;
 use stdClass;
 
@@ -44,8 +45,8 @@ defined('MOODLE_INTERNAL') || die();
  *      - string log: the log data associated to.
  * }
  *
- * @since Moodle 3.0.2+
- * @author Gerard Cuello Adell <gerard.urv@gmail.com>
+ * @since     Moodle 3.0.2+
+ * @author    Gerard Cuello Adell <gerard.urv@gmail.com>
  * @copyright 2016 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

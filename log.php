@@ -59,14 +59,14 @@ if(empty($log)) {
 	//aborts execution
 }
 try {
-	$from = $DB->get_record('user', array('id' => $log->fromuserid), 'id, username');
+	$from = $DB->get_record('user', ['id' => $log->fromuserid], 'id, username');
 	if(!$from) {
 		$from = new stdClass();
 		$from->id = $log->fromuserid;
 		$from->username = get_string('deleted');
 	}
 
-	$to = $DB->get_record('user', array('id' => $log->touserid), 'id, username');
+	$to = $DB->get_record('user', ['id' => $log->touserid], 'id, username');
 	if(!$to) {
 		$to = new stdClass();
 		$to->id = $log->touserid;

@@ -62,6 +62,7 @@ class UserSelectTable extends html_table implements renderable
 	 * @param tool_mergeusers_renderer $renderer
 	 *
 	 * @throws coding_exception
+	 * @throws moodle_exception
 	 */
 	public function __construct(array $users, tool_mergeusers_renderer $renderer)
 	{
@@ -76,37 +77,38 @@ class UserSelectTable extends html_table implements renderable
 	 * @param array $users array of user results
 	 *
 	 * @throws coding_exception
+	 * @throws moodle_exception
 	 */
 	protected function buildtable(array $users)
 	{
 		// Reset any existing data
-		$this->data = array();
+		$this->data = [];
 
 		$this->id = 'merge_users_tool_user_select_table';
 		$this->attributes['class'] = 'generaltable boxaligncenter';
 
-		$columns = array(
+		$columns = [
 			'col_select_olduser' => get_string('olduser', 'tool_mergeusers'),
 			'col_master_newuser' => get_string('newuser', 'tool_mergeusers'),
-            'col_userid' => 'Id',
-            'col_username' => get_string('user'),
-            'col_email' => get_string('email'),
-            'col_idnumber' => get_string('idnumber'),
-        );
+			'col_userid' => 'Id',
+			'col_username' => get_string('user'),
+			'col_email' => get_string('email'),
+			'col_idnumber' => get_string('idnumber'),
+		];
 
-        $this->head = array_values($columns);
-        $this->colclasses = array_keys($columns);
+		$this->head = array_values($columns);
+		$this->colclasses = array_keys($columns);
 
-        foreach ($users as $userid => $user) {
-            $row = array();
-            $spanclass = ($user->suspended) ? ('usersuspended') : ('');
-            $row[] = html_writer::empty_tag('input', array('type' => 'radio', 'name' => 'olduser', 'value' => $userid, 'id' => 'olduser' . $userid));
-            $row[] = html_writer::empty_tag('input', array('type' => 'radio', 'name' => 'newuser', 'value' => $userid, 'id' => 'newuser' . $userid));
-            $row[] = html_writer::tag('span', $user->id, array('class' => $spanclass));
-            $row[] = html_writer::tag('span', $this->renderer->show_user($user->id, $user), array('class' => $spanclass));
-            $row[] = html_writer::tag('span', $user->email, array('class' => $spanclass));
-            $row[] = html_writer::tag('span', $user->idnumber, array('class' => $spanclass));
-            $this->data[] = $row;
-        }
-    }
+		foreach($users as $userid => $user){
+			$row = [];
+			$spanclass = ($user->suspended) ? ('usersuspended') : ('');
+			$row[] = html_writer::empty_tag('input', ['type' => 'radio', 'name' => 'olduser', 'value' => $userid, 'id' => 'olduser' . $userid]);
+			$row[] = html_writer::empty_tag('input', ['type' => 'radio', 'name' => 'newuser', 'value' => $userid, 'id' => 'newuser' . $userid]);
+			$row[] = html_writer::tag('span', $user->id, ['class' => $spanclass]);
+			$row[] = html_writer::tag('span', $this->renderer->show_user($user->id, $user), ['class' => $spanclass]);
+			$row[] = html_writer::tag('span', $user->email, ['class' => $spanclass]);
+			$row[] = html_writer::tag('span', $user->idnumber, ['class' => $spanclass]);
+			$this->data[] = $row;
+		}
+	}
 }

@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @author John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @author     John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
+ * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -74,12 +74,12 @@ function tool_mergeusers_old_user_suspend(object $event): bool
 	$context = context_user::instance($oldid);
 	if(($newrev = process_new_icon($context, 'user', 'icon', 0, $fullpath))) {
 		try {
-			$DB->set_field('user', 'picture', $newrev, array('id' => $oldid));
+			$DB->set_field('user', 'picture', $newrev, ['id' => $oldid]);
 		} catch(dml_exception $e) {
 			mtrace($e->getMessage());
 			return FALSE;
 		}
 	}
 
-    return true;
+	return TRUE;
 }

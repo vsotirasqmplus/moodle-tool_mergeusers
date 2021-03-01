@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -51,24 +51,26 @@
  * If the key 'both' appears, means that both columns are user-related and must be searched for
  * both. See the README.txt for more details on special cases.
  */
-class tool_mergeusers_config {
-    /**
-     * @var tool_mergeusers_config singleton instance.
-     */
-    private static $instance = null;
+class tool_mergeusers_config
+{
+	/**
+	 * @var tool_mergeusers_config singleton instance.
+	 */
+	private static $instance = NULL;
 
-    /**
-     * @var array settings
-     */
-    private $config;
+	/**
+	 * @var array settings
+	 */
+	private $config;
 
-    /**
-     * Private constructor for the singleton.
-     */
-    private function __construct() {
-        $config = include dirname(__DIR__) . '/config/config.php';
+	/**
+	 * Private constructor for the singleton.
+	 */
+	private function __construct()
+	{
+		$config = include dirname(__DIR__) . '/config/config.php';
 
-        if (file_exists(dirname(__DIR__) . '/config/config.local.php')) {
+		if(file_exists(dirname(__DIR__) . '/config/config.local.php')) {
 			$localconfig = include dirname(__DIR__) . '/config/config.local.php';
 			$config = array_replace_recursive($config, $localconfig);
 		}

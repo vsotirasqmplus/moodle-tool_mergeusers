@@ -49,7 +49,7 @@ class tool_mergeusers_clioptions_testcase extends advanced_testcase
 	 * @throws coding_exception
 	 * @throws dml_exception
 	 * @throws dml_transaction_exception
-	 * @throws moodle_exception
+	 * @throws moodle_exception|ReflectionException
 	 */
 	public function test_alwaysrollback()
 	{
@@ -63,10 +63,10 @@ class tool_mergeusers_clioptions_testcase extends advanced_testcase
 		$mut->merge($user_keep->id, $user_remove->id);
 
 		// Check $user_remove is suspended.
-		$user_remove = $DB->get_record('user', array('id' => $user_remove->id));
+		$user_remove = $DB->get_record('user', ['id' => $user_remove->id]);
 		$this->assertEquals(1, $user_remove->suspended);
 
-		$user_keep = $DB->get_record('user', array('id' => $user_keep->id));
+		$user_keep = $DB->get_record('user', ['id' => $user_keep->id]);
 		$this->assertEquals(0, $user_keep->suspended);
 
 		$user_remove_2 = $this->getDataGenerator()->create_user();
@@ -91,7 +91,7 @@ class tool_mergeusers_clioptions_testcase extends advanced_testcase
 	 * @throws coding_exception
 	 * @throws dml_exception
 	 * @throws dml_transaction_exception
-	 * @throws moodle_exception
+	 * @throws moodle_exception|ReflectionException
 	 */
 	public function test_debugdb()
 	{
@@ -106,10 +106,10 @@ class tool_mergeusers_clioptions_testcase extends advanced_testcase
 		$this->assertFalse($this->hasOutput());
 
 		// Check $user_remove is suspended.
-		$user_remove = $DB->get_record('user', array('id' => $user_remove->id));
+		$user_remove = $DB->get_record('user', ['id' => $user_remove->id]);
 		$this->assertEquals(1, $user_remove->suspended);
 
-		$user_keep = $DB->get_record('user', array('id' => $user_keep->id));
+		$user_keep = $DB->get_record('user', ['id' => $user_keep->id]);
 		$this->assertEquals(0, $user_keep->suspended);
 
 		$user_remove_2 = $this->getDataGenerator()->create_user();

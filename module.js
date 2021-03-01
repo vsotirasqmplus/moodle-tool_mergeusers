@@ -1,3 +1,4 @@
+/* eslint-disable */
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -21,12 +22,14 @@
 M.tool_mergeusers = {
     init_select_table: function (Y) {
         Y.use('node', function (Y) {
-            radiobuttons = Y.all('#merge_users_tool_user_select_table input');
-            radiobuttons.each(function (node){
-                node.on('click', function(e) {
-
-                    current = e.currentTarget.get('name');
-                    if ( current == 'olduser' ) {
+            var radiobuttons = Y.all('#merge_users_tool_user_select_table input');
+            radiobuttons.each(function (node) {
+                node.on('click', function (e) {
+                    var target;
+                    var lastselected;
+                    var lastvalue;
+                    var current = e.currentTarget.get('name');
+                    if (current === 'olduser') {
                         target = 'newuser';
                         lastselected = Y.one('input[name=selectedolduser]');
                         lastvalue = lastselected.get('value');
@@ -36,14 +39,14 @@ M.tool_mergeusers = {
                         lastvalue = lastselected.get('value');
                     }
 
-                    // first disable sibling radio button
-                    id = e.currentTarget.get('value');
-                    radiobutton = Y.one('#' + target + id);
+                    // First disable sibling radio button
+                    var id = e.currentTarget.get('value');
+                    var radiobutton = Y.one('#' + target + id);
                     radiobutton.setAttribute('disabled', 'disabled');
 
-                    // after that, reenable old sibling radio button
-                    if ( lastvalue != "" && lastvalue != id) {
-                        last = Y.one("#"+target+lastvalue);
+                    // After that, re-enable old sibling radio button
+                    if (lastvalue !== "" && lastvalue !== id) {
+                        var last = Y.one("#" + target + lastvalue);
                         last.removeAttribute('disabled');
                     }
                     lastselected.set('value', id);

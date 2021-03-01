@@ -17,14 +17,15 @@
 /**
  * The user_merged_failure event.
  *
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Gerard Cuello Adell <gerard.urv@gmail.com>
- * @copyright 2016 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Gerard Cuello Adell <gerard.urv@gmail.com>
+ * @copyright  2016 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace tool_mergeusers\event;
+
 use coding_exception;
 use lang_string;
 

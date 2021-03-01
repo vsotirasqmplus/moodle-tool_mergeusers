@@ -51,7 +51,7 @@ function tool_mergeusers_build_exceptions_options(): stdClass
 
 	$config = tool_mergeusers_config::instance();
 	$none = get_string('none');
-	$options = array('none' => $none);
+	$options = ['none' => $none];
 	/** @noinspection PhpUndefinedFieldInspection */
 	foreach($config->exceptions as $exception){
 		$options[$exception] = $exception;
@@ -81,17 +81,17 @@ function tool_mergeusers_build_quiz_options(): stdClass
 	$quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET, 'tool_mergeusers');
 	$quizStrings->{QuizAttemptsMerger::ACTION_REMAIN} = get_string('qa_action_' . QuizAttemptsMerger::ACTION_REMAIN, 'tool_mergeusers');
 
-	$quizOptions = array(
-        QuizAttemptsMerger::ACTION_RENUMBER => $quizStrings->{QuizAttemptsMerger::ACTION_RENUMBER},
-        QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE => $quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE},
-        QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET => $quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET},
-        QuizAttemptsMerger::ACTION_REMAIN => $quizStrings->{QuizAttemptsMerger::ACTION_REMAIN},
-    );
+	$quizOptions = [
+		QuizAttemptsMerger::ACTION_RENUMBER => $quizStrings->{QuizAttemptsMerger::ACTION_RENUMBER},
+		QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE => $quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE},
+		QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET => $quizStrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET},
+		QuizAttemptsMerger::ACTION_REMAIN => $quizStrings->{QuizAttemptsMerger::ACTION_REMAIN},
+	];
 
-    $result = new stdClass();
-    $result->allstrings = $quizStrings;
-    $result->defaultkey = QuizAttemptsMerger::ACTION_REMAIN;
-    $result->options = $quizOptions;
+	$result = new stdClass();
+	$result->allstrings = $quizStrings;
+	$result->defaultkey = QuizAttemptsMerger::ACTION_REMAIN;
+	$result->options = $quizOptions;
 
-    return $result;
+	return $result;
 }

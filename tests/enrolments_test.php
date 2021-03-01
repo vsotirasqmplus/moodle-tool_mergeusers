@@ -77,7 +77,7 @@ class tool_mergeusers_enrolments_testcase extends advanced_testcase
 
 		$manual = enrol_get_plugin('manual');
 
-		$studentrole = $DB->get_record('role', array('shortname' => 'student'));
+		$studentrole = $DB->get_record('role', ['shortname' => 'student']);
 
 		// Enrol $user_remove on course 1 + 2 and $user_keep on course 2 + 3.
 		$manual->enrol_user($maninstance1, $user_remove->id, $studentrole->id);
@@ -92,25 +92,25 @@ class tool_mergeusers_enrolments_testcase extends advanced_testcase
 		}
 		ksort($courses);
 		$this->assertCount(2, $courses);
-		$this->assertEquals(array($course1->id, $course2->id), array_keys($courses));
+		$this->assertEquals([$course1->id, $course2->id], array_keys($courses));
 
 		// Check initial state of enrolments for $user_keep.
 		$courses = enrol_get_all_users_courses($user_keep->id);
 		ksort($courses);
 		$this->assertCount(2, $courses);
-		$this->assertEquals(array($course2->id, $course3->id), array_keys($courses));
+		$this->assertEquals([$course2->id, $course3->id], array_keys($courses));
 
 		$mut = new MergeUserTool();
 		$mut->merge($user_keep->id, $user_remove->id);
 
 		// Check $user_remove is suspended.
-		$user_remove = $DB->get_record('user', array('id' => $user_remove->id));
+		$user_remove = $DB->get_record('user', ['id' => $user_remove->id]);
 		$this->assertEquals(1, $user_remove->suspended);
 
 		// Check $user_keep is now enrolled on all three courses.
 		$courses = enrol_get_all_users_courses($user_keep->id);
 		ksort($courses);
 		$this->assertCount(3, $courses);
-		$this->assertEquals(array($course1->id, $course2->id, $course3->id), array_keys($courses));
+		$this->assertEquals([$course1->id, $course2->id, $course3->id], array_keys($courses));
 	}
 }

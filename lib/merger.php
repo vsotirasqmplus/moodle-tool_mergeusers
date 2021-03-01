@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -76,7 +76,7 @@ class Merger
 	 *
 	 * @throws coding_exception
 	 * @throws dml_exception
-	 * @throws dml_exception
+	 * @throws dml_exception|moodle_exception
 	 * @noinspection PhpUnusedLocalVariableInspection
 	 */
 	public function merge(Gathering $gathering)
@@ -90,7 +90,7 @@ class Merger
 			}
 		}
 		if(defined("CLI_SCRIPT")) {
-            echo get_string('ok') .", exit!\n\n";
-        }
-    }
+			echo get_string('ok') . ", exit!\n\n";
+		}
+	}
 }

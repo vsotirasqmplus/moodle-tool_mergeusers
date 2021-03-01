@@ -66,65 +66,48 @@ class MergeUserSearch
 		switch($searchfield) {
 			case 'id': // search on id field
 
-				$params = array(
-					'userid' => $input,
-				);
+				$params = ['userid' => $input,];
 				$sql = 'SELECT * FROM {user} WHERE id = :userid';
 
-                break;
-            case 'username': // search on username
+				break;
+			case 'username': // search on username
 
-                $params = array(
-                    'username' => '%' . $input . '%',
-                );
-                $sql = 'SELECT * FROM {user} WHERE username LIKE :username';
+				$params = ['username' => '%' . $input . '%',];
+				$sql = 'SELECT * FROM {user} WHERE username LIKE :username';
 
-                break;
-            case 'firstname': // search on firstname
+				break;
+			case 'firstname': // search on firstname
 
-                $params = array(
-                    'firstname' => '%' . $input . '%',
-                );
-                $sql = 'SELECT * FROM {user} WHERE firstname LIKE :firstname';
+				$params = ['firstname' => '%' . $input . '%',];
+				$sql = 'SELECT * FROM {user} WHERE firstname LIKE :firstname';
 
-                break;
-            case 'lastname': // search on lastname
+				break;
+			case 'lastname': // search on lastname
 
-                $params = array(
-                    'lastname' => '%' . $input . '%',
-                );
-                $sql = 'SELECT * FROM {user} WHERE lastname LIKE :lastname';
+				$params = ['lastname' => '%' . $input . '%',];
+				$sql = 'SELECT * FROM {user} WHERE lastname LIKE :lastname';
 
-                break;
-            case 'email': // search on email
+				break;
+			case 'email': // search on email
 
-                $params = array(
-                    'email' => '%' . $input . '%',
-                );
-                $sql = 'SELECT * FROM {user} WHERE email LIKE :email';
+				$params = ['email' => '%' . $input . '%',];
+				$sql = 'SELECT * FROM {user} WHERE email LIKE :email';
 
-                break;
-            case 'idnumber': // search on idnumber
+				break;
+			case 'idnumber': // search on idnumber
 
-                $params = array(
-                    'idnumber' => '%' . $input . '%',
-                );
-                $sql = 'SELECT * FROM {user} WHERE idnumber LIKE :idnumber';
+				$params = ['idnumber' => '%' . $input . '%',];
+				$sql = 'SELECT * FROM {user} WHERE idnumber LIKE :idnumber';
 
-                break;
-            default: // search on all fields by default
+				break;
+			default: // search on all fields by default
 
-                $params = array(
-                    'userid'     =>  $input,
-                    'username'   => '%' . $input . '%',
-                    'firstname'  => '%' . $input . '%',
-                    'lastname'   => '%' . $input . '%',
-                    'email'      => '%' . $input . '%',
-                    'idnumber'      => '%' . $input . '%'
-                );
+				$params = ['userid' => $input, 'username' => '%' . $input . '%',
+					'firstname' => '%' . $input . '%', 'lastname' => '%' . $input . '%',
+					'email' => '%' . $input . '%', 'idnumber' => '%' . $input . '%'];
 
-                $sql =
-                   'SELECT *
+				$sql =
+					'SELECT *
                     FROM {user}
                     WHERE
                         id = :userid OR
@@ -161,14 +144,14 @@ class MergeUserSearch
 		global $DB;
 		$message = '';
 		try {
-			$user = $DB->get_record('user', array($column => $userinfo), '*', MUST_EXIST);
+			$user = $DB->get_record('user', [$column => $userinfo], '*', MUST_EXIST);
 		} catch(Exception $e) {
 			$message = get_string('invaliduser', 'tool_mergeusers') . '(' . $column . '=>' . $userinfo . '): ' . $e->getMessage();
 			$user = NULL;
 		}
 
-		return array($user, $message);
-    }
+		return [$user, $message];
+	}
 
 
 }

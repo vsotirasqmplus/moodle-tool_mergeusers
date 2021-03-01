@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,7 +27,7 @@ require_once __DIR__ . '/../../../../config.php';
 global $CFG;
 
 /** @noinspection PhpIncludeInspection */
-require_once $CFG->dirroot .'/lib/clilib.php';
+require_once $CFG->dirroot . '/lib/clilib.php';
 
 /**
  * Class to manage logging actions for this tool.
@@ -61,8 +61,8 @@ class tool_mergeusers_logger
 
 		try {
 			return $DB->insert_record('tool_mergeusers', $record); //exception is thrown on any error
-		} catch (Exception $e) {
-            $msg = __METHOD__ . ' : Cannot insert new record on log. Reason: "' . $DB->get_last_error() .
+		} catch(Exception $e) {
+			$msg = __METHOD__ . ' : Cannot insert new record on log. Reason: "' . $DB->get_last_error() .
 				'". Message: "' . $e->getMessage() . '". Trace' . $e->getTraceAsString();
 			if(CLI_SCRIPT) {
 				cli_error($msg);
@@ -93,8 +93,8 @@ class tool_mergeusers_logger
 			return $logs;
 		}
 		foreach($logs as $id => $log){
-			$log->to = $DB->get_record('user', array('id' => $log->touserid));
-			$log->from = $DB->get_record('user', array('id' => $log->fromuserid));
+			$log->to = $DB->get_record('user', ['id' => $log->touserid]);
+			$log->from = $DB->get_record('user', ['id' => $log->fromuserid]);
 		}
 		return $logs;
 	}
@@ -110,7 +110,7 @@ class tool_mergeusers_logger
 	public function getDetail(int $logid): stdClass
 	{
 		global $DB;
-		$log = $DB->get_record('tool_mergeusers', array('id' => $logid), '*', MUST_EXIST);
+		$log = $DB->get_record('tool_mergeusers', ['id' => $logid], '*', MUST_EXIST);
 		$log->log = json_decode($log->log);
 		return $log;
 	}

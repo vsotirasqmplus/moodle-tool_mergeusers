@@ -16,26 +16,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @author     Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-spl_autoload_register(function ($class) {
+spl_autoload_register(function($class) {
 
-    $fileName = strtolower($class) . '.php';
-    $fileDirname = dirname(__FILE__);
+	$fileName = strtolower($class) . '.php';
+	$fileDirname = dirname(__FILE__);
 	$dirs = [$fileDirname, $fileDirname . '/table', $fileDirname . '/local', $fileDirname . '/../classes',];
 
-    foreach ($dirs as $dir) {
-        if (is_file($dir . '/' . $fileName)) {
+	foreach($dirs as $dir){
+		if(is_file($dir . '/' . $fileName)) {
 			/** @noinspection PhpIncludeInspection */
 			require_once $dir . '/' . $fileName;
 			if(class_exists($class)) {
 				return TRUE;
 			}
 		}
-    }
-    return false;
+	}
+	return FALSE;
 });

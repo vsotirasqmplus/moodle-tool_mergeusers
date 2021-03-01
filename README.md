@@ -112,11 +112,11 @@ See lib/cligathering for an example.
 ```php
 <?php
 
-return array(
+return [
 
     // gathering tool
     'gathering' => 'MyGathering',
-);
+];
 ```
 3. Run as a command line in a form like this: *$ time php cli/climerger.php*.
 

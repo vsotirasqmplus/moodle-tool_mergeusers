@@ -126,8 +126,9 @@ class MergeUserTool
 	 * @throws coding_exception
 	 * @throws dml_exception
 	 * @throws moodle_exception
-	 * @noinspection PhpUndefinedFieldInspection*@global object $CFG
+	 * @throws ReflectionException
 	 * @noinspection PhpUndefinedFieldInspection
+	 * @global object                     $CFG
 	 */
 	public function __construct(tool_mergeusers_config $config = NULL, tool_mergeusers_logger $logger = NULL)
 	{
@@ -154,8 +155,8 @@ class MergeUserTool
 		$this->userFieldNames = $config->userfieldnames;
 
 		// Load available TableMerger tools.
-		$tableMergers = array();
-		$tablesProcessedByTableMergers = array();
+		$tableMergers = [];
+		$tablesProcessedByTableMergers = [];
 		foreach($config->tablemergers as $tableName => $class){
 			$tm = new $class();
 			// ensure any provided class is a class of TableMerger
@@ -247,7 +248,7 @@ class MergeUserTool
 		// are they the same?
 		if($fromid == $toid) {
 			// yes. do nothing.
-			return array(FALSE, array(get_string('errorsameuser', 'tool_mergeusers')));
+			return [FALSE, [get_string('errorsameuser', 'tool_mergeusers')]];
 		}
 
 		// ok, now we have to work;-)
@@ -309,7 +310,7 @@ class MergeUserTool
 			$transaction->allow_commit();
 
 			// add skipped tables as first action in log
-			$skippedTables = array();
+			$skippedTables = [];
 			if(!empty($this->tablesSkipped)) {
 				$skippedTables[] = get_string('tableskipped', 'tool_mergeusers', implode(", ", $this->tablesSkipped));
 			}
@@ -318,7 +319,7 @@ class MergeUserTool
 			$actionLog[] = get_string('finishtime', 'tool_mergeusers', userdate($finishTime));
 			$actionLog[] = get_string('timetaken', 'tool_mergeusers', $finishTime - $startTime);
 
-			return array(TRUE, array_merge($skippedTables, $actionLog));
+			return [TRUE, array_merge($skippedTables, $actionLog)];
 		} else {
 			try {
 				//thrown controlled exception.
@@ -332,7 +333,7 @@ class MergeUserTool
 		$errorMessages[] = get_string('timetaken', 'tool_mergeusers', $finishTime - $startTime);
 
 		// concludes with an array of error messages otherwise.
-		return array(FALSE, $errorMessages);
+		return [FALSE, $errorMessages];
 	}
 
 	// ****************** INTERNAL UTILITY METHODS ***********************************************
@@ -347,7 +348,7 @@ class MergeUserTool
 	{
 		global $DB;
 
-		$userFieldsPerTable = array();
+		$userFieldsPerTable = [];
 
 		// Name of tables comes without db prefix.
 		$tableNames = $DB->get_tables(FALSE);
@@ -389,7 +390,7 @@ class MergeUserTool
 		foreach($this->tablesWithCompoundIndex as $tableName => $columns){
 			$chosenColumns = array_merge($columns['userfield'], $columns['otherfields']);
 
-			$columnNames = array();
+			$columnNames = [];
 			foreach($chosenColumns as $columnName){
 				$columnNames[$columnName] = 0;
 			}
@@ -426,6 +427,7 @@ class MergeUserTool
 	 * @throws coding_exception
 	 * @throws dml_exception
 	 * @throws moodle_exception
+	 * @throws ReflectionException
 	 */
 	public function checkTransactionSupport(): bool
 	{
@@ -491,7 +493,7 @@ class MergeUserTool
                 INNER JOIN {grade_items} gi on gg.itemid = gi.id
                 WHERE itemtype = 'mod' AND (gg.userid = :toid OR gg.userid = :fromid)";
 
-		$iteminstances = $DB->get_records_sql($sql, array('toid' => $toid, 'fromid' => $fromid));
+		$iteminstances = $DB->get_records_sql($sql, ['toid' => $toid, 'fromid' => $fromid]);
 
 		foreach($iteminstances as $iteminstance){
 			$cm = NULL;

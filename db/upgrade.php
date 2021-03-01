@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package tool
+ * @package    tool
  * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author     Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
@@ -55,22 +55,22 @@ function xmldb_tool_mergeusers_upgrade(int $oldversion): bool
 		$table->add_field('log', XMLDB_TYPE_TEXT, NULL, NULL, XMLDB_NOTNULL);
 
 		// Adding keys to table tool_mergeusers
-		$table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+		$table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
 		// Adding indexes to table tool_mergeusers
-		$table->add_index('mdl_toolmerg_tou_ix', XMLDB_INDEX_NOTUNIQUE, array('touserid'));
-		$table->add_index('mdl_toolmerg_fru_ix', XMLDB_INDEX_NOTUNIQUE, array('fromuserid'));
-		$table->add_index('mdl_toolmerg_suc_ix', XMLDB_INDEX_NOTUNIQUE, array('success'));
-		$table->add_index('mdl_toolmerg_tfs_ix', XMLDB_INDEX_NOTUNIQUE, array('touserid', 'fromuserid', 'success'));
+		$table->add_index('mdl_toolmerg_tou_ix', XMLDB_INDEX_NOTUNIQUE, ['touserid']);
+		$table->add_index('mdl_toolmerg_fru_ix', XMLDB_INDEX_NOTUNIQUE, ['fromuserid']);
+		$table->add_index('mdl_toolmerg_suc_ix', XMLDB_INDEX_NOTUNIQUE, ['success']);
+		$table->add_index('mdl_toolmerg_tfs_ix', XMLDB_INDEX_NOTUNIQUE, ['touserid', 'fromuserid', 'success']);
 
 		// Conditionally launch create table for tool_mergeusers
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
+		if(!$dbman->table_exists($table)) {
+			$dbman->create_table($table);
+		}
 
-        // mergeusers savepoint reached
-        upgrade_plugin_savepoint(true, 2013112912, 'tool', 'mergeusers');
-    }
+		// mergeusers savepoint reached
+		upgrade_plugin_savepoint(TRUE, 2013112912, 'tool', 'mergeusers');
+	}
 
-    return true;
+	return TRUE;
 }
