@@ -19,23 +19,27 @@ cache:
 jobs:
   include:
     - php: 7.2
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
       services:
         postgresql
       addons:
          postgresql: "9.4"
     - php: 7.2
-      env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
+      env: DB=mysqli MOODLE_BRANCH=MOODLE_38_STABLE
       services:
         mysql
     - php: 7.4
-      env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
+      env: DB=pgsql MOODLE_BRANCH=MOODLE_38_STABLE
       services:
         postgresql
       addons:
         postgresql: "9.4"
     - php: 7.4
-      env: DB=pgsql  MOODLE_BRANCH=master
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
+      services:
+        mysql
+    - php: 7.4
+      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
       services:
         postgresql
       addons:
