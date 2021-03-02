@@ -47,14 +47,12 @@ jobs:
 
 before_install:
   - phpenv config-rm xdebug.ini
-  - nvm install 8.9
-  - nvm use 8.9
+  - nvm install 14.15.0
+  - nvm use 14.15.0
   - cd ../..
-#  - composer self-update --1 --snapshot
   - composer self-update 1.8.6
   - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
-#  - composer self-update --rollback
 install:
   - moodle-plugin-ci install
 
@@ -62,10 +60,10 @@ script:
   - moodle-plugin-ci phplint
   - moodle-plugin-ci phpcpd
   - moodle-plugin-ci phpmd
-#  - moodle-plugin-ci codechecker
+  - moodle-plugin-ci codechecker
   - moodle-plugin-ci validate
   - moodle-plugin-ci savepoints
-#  - moodle-plugin-ci mustache
-#  - moodle-plugin-ci grunt
+  - moodle-plugin-ci mustache
+  - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat
