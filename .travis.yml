@@ -14,38 +14,40 @@ cache:
     - $HOME/.npm
 
 # Alternate tests - 3.4 -> master on mysql/postgres and php.
-matrix:
+jobs:
   include:
     - php: 7.0
       env: DB=pgsql  MOODLE_BRANCH=MOODLE_34_STABLE
-      services: postgresql
+      services:
+        postgresql
       addons:
-        - postgresql: "9.4"
+        postgresql: "9.4"
     - php: 7.0
       env: DB=mysqli  MOODLE_BRANCH=MOODLE_35_STABLE
-      services: mysql
-      addons:
-        - mysql: "5.7"
+      services:
+        mysql
     - php: 7.2
       env: DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
-      services: postgresql
+      services:
+        postgresql
       addons:
-        - postgresql: "9.4"
+         postgresql: "9.4"
     - php: 7.2
       env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
-      services: mysql
-      addons:
-        - mysql: "5.7"
+      services:
+        mysql
     - php: 7.3
       env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
-      services: postgresql
+      services:
+        postgresql
       addons:
-        - postgresql: "9.4"
+        postgresql: "9.4"
     - php: 7.3
       env: DB=pgsql  MOODLE_BRANCH=master
-      services: postgresql
+      services:
+        postgresql
       addons:
-        - postgresql: "9.5"
+         postgresql: "9.5"
 
 before_install:
   - phpenv config-rm xdebug.ini
@@ -65,7 +67,7 @@ script:
 #  - moodle-plugin-ci codechecker
   - moodle-plugin-ci validate
   - moodle-plugin-ci savepoints
-  - moodle-plugin-ci mustache
+#  - moodle-plugin-ci mustache
 #  - moodle-plugin-ci grunt
   - moodle-plugin-ci phpunit
   - moodle-plugin-ci behat
