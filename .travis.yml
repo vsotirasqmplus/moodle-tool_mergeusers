@@ -1,6 +1,8 @@
 language: php
 
-sudo: true
+dist: xenial
+
+os: linux
 
 addons:
   firefox: "47.0.1"
@@ -56,7 +58,7 @@ before_install:
   - cd ../..
   - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
-
+  - composer self-update --1
 install:
   - moodle-plugin-ci install
 
