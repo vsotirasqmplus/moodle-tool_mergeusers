@@ -18,16 +18,6 @@ cache:
 # Alternate tests - 3.4 -> master on mysql/postgres and php.
 jobs:
   include:
-    - php: 7.0
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_34_STABLE
-      services:
-        postgresql
-      addons:
-        postgresql: "9.4"
-    - php: 7.0
-      env: DB=mysqli  MOODLE_BRANCH=MOODLE_35_STABLE
-      services:
-        mysql
     - php: 7.2
       env: DB=pgsql MOODLE_BRANCH=MOODLE_36_STABLE
       services:
@@ -38,13 +28,13 @@ jobs:
       env: DB=mysqli MOODLE_BRANCH=MOODLE_37_STABLE
       services:
         mysql
-    - php: 7.3
+    - php: 7.4
       env: DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE
       services:
         postgresql
       addons:
         postgresql: "9.4"
-    - php: 7.3
+    - php: 7.4
       env: DB=pgsql  MOODLE_BRANCH=master
       services:
         postgresql
@@ -58,7 +48,8 @@ before_install:
   - cd ../..
   - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
-  - composer self-update --1
+  - composer self-update --1 --snapshot
+  - composer self-update --rollback
 install:
   - moodle-plugin-ci install
 
