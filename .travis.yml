@@ -46,7 +46,8 @@ before_install:
   - nvm install 8.9
   - nvm use 8.9
   - cd ../..
-  - composer self-update --1 --snapshot
+#  - composer self-update --1 --snapshot
+  - composer self-update 1.8.6
   - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci ^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
 #  - composer self-update --rollback
