@@ -22,106 +22,103 @@
  * @author     Andrew Hancox <andrewdchancox@googlemail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_mergeusers_clioptions_testcase extends advanced_testcase
-{
+class tool_mergeusers_clioptions_testcase extends advanced_testcase {
 
-	/** @noinspection PhpIncludeInspection */
-	public function setUp()
-	{
-		global $CFG;
-		require_once("$CFG->dirroot/admin/tool/mergeusers/lib/mergeusertool.php");
-		$this->resetAfterTest();
-	}
+    /**
+     * @noinspection PhpIncludeInspection
+     */
+    public function setUp() {
+        global $CFG;
+        include_once("$CFG->dirroot/admin/tool/mergeusers/lib/mergeusertool.php");
+        $this->resetAfterTest();
+    }
 
-	public function tearDown()
-	{
-		$config = tool_mergeusers_config::instance();
-		unset($config->alwaysRollback);
-		unset($config->debugdb);
-	}
+    public function tearDown() {
+        $config = tool_mergeusers_config::instance();
+        unset($config->alwaysRollback);
+        unset($config->debugdb);
+    }
 
-	/**
-	 * Test option to always rollback merges.
-	 *
-	 * @group        tool_mergeusers
-	 * @group        tool_mergeusers_clioptions
-	 * @noinspection PhpUndefinedMethodInspection
-	 * @throws coding_exception
-	 * @throws dml_exception
-	 * @throws dml_transaction_exception
-	 * @throws moodle_exception|ReflectionException
-	 */
-	public function test_alwaysrollback()
-	{
-		global $DB;
+    /**
+     * Test option to always rollback merges.
+     *
+     * @group        tool_mergeusers
+     * @group        tool_mergeusers_clioptions
+     * @noinspection PhpUndefinedMethodInspection
+     * @throws       coding_exception
+     * @throws       dml_exception
+     * @throws       dml_transaction_exception
+     * @throws       moodle_exception|ReflectionException
+     */
+    public function test_alwaysrollback() {
+        global $DB;
 
-		// Setup two users to merge.
-		$user_remove = $this->getDataGenerator()->create_user();
-		$user_keep = $this->getDataGenerator()->create_user();
+        // Setup two users to merge.
+        $userremove = $this->getDataGenerator()->create_user();
+        $userkeep = $this->getDataGenerator()->create_user();
 
-		$mut = new MergeUserTool();
-		$mut->merge($user_keep->id, $user_remove->id);
+        $mut = new MergeUserTool();
+        $mut->merge($userkeep->id, $userremove->id);
 
-		// Check $user_remove is suspended.
-		$user_remove = $DB->get_record('user', ['id' => $user_remove->id]);
-		$this->assertEquals(1, $user_remove->suspended);
+        // Check $user_remove is suspended.
+        $userremove = $DB->get_record('user', ['id' => $userremove->id]);
+        $this->assertEquals(1, $userremove->suspended);
 
-		$user_keep = $DB->get_record('user', ['id' => $user_keep->id]);
-		$this->assertEquals(0, $user_keep->suspended);
+        $userkeep = $DB->get_record('user', ['id' => $userkeep->id]);
+        $this->assertEquals(0, $userkeep->suspended);
 
-		$user_remove_2 = $this->getDataGenerator()->create_user();
+        $userremove2 = $this->getDataGenerator()->create_user();
 
-		$config = tool_mergeusers_config::instance();
-		/** @noinspection PhpUndefinedFieldInspection */
-		$config->alwaysRollback = TRUE;
+        $config = tool_mergeusers_config::instance();
+        // 0 /** @noinspection PhpUndefinedFieldInspection */.
+        $config->alwaysRollback = true;
 
-		$mut = new MergeUserTool($config);
+        $mut = new MergeUserTool($config);
 
-		$this->expectException('Exception');
-		$this->expectExceptionMessage('alwaysRollback option is set so rolling back transaction');
-		$mut->merge($user_keep->id, $user_remove_2->id);
-	}
+        $this->expectException('Exception');
+        $this->expectExceptionMessage('alwaysRollback option is set so rolling back transaction');
+        $mut->merge($userkeep->id, $userremove2->id);
+    }
 
-	/**
-	 * Test option to always rollback merges.
-	 *
-	 * @group        tool_mergeusers
-	 * @group        tool_mergeusers_clioptions
-	 * @noinspection PhpUndefinedMethodInspection
-	 * @throws coding_exception
-	 * @throws dml_exception
-	 * @throws dml_transaction_exception
-	 * @throws moodle_exception|ReflectionException
-	 */
-	public function test_debugdb()
-	{
-		global $DB;
+    /**
+     * Test option to always rollback merges.
+     *
+     * @group        tool_mergeusers
+     * @group        tool_mergeusers_clioptions
+     * @noinspection PhpUndefinedMethodInspection
+     * @throws       coding_exception
+     * @throws       dml_exception
+     * @throws       dml_transaction_exception
+     * @throws       moodle_exception|ReflectionException
+     */
+    public function test_debugdb() {
+        global $DB;
 
-		// Setup two users to merge.
-		$user_remove = $this->getDataGenerator()->create_user();
-		$user_keep = $this->getDataGenerator()->create_user();
+        // Setup two users to merge.
+        $userremove = $this->getDataGenerator()->create_user();
+        $userkeep = $this->getDataGenerator()->create_user();
 
-		$mut = new MergeUserTool();
-		$mut->merge($user_keep->id, $user_remove->id);
-		$this->assertFalse($this->hasOutput());
+        $mut = new MergeUserTool();
+        $mut->merge($userkeep->id, $userremove->id);
+        $this->assertFalse($this->hasOutput());
 
-		// Check $user_remove is suspended.
-		$user_remove = $DB->get_record('user', ['id' => $user_remove->id]);
-		$this->assertEquals(1, $user_remove->suspended);
+        // Check $user_remove is suspended.
+        $userremove = $DB->get_record('user', ['id' => $userremove->id]);
+        $this->assertEquals(1, $userremove->suspended);
 
-		$user_keep = $DB->get_record('user', ['id' => $user_keep->id]);
-		$this->assertEquals(0, $user_keep->suspended);
+        $userkeep = $DB->get_record('user', ['id' => $userkeep->id]);
+        $this->assertEquals(0, $userkeep->suspended);
 
-		$user_remove_2 = $this->getDataGenerator()->create_user();
+        $userremove2 = $this->getDataGenerator()->create_user();
 
-		$config = tool_mergeusers_config::instance();
-		/** @noinspection PhpUndefinedFieldInspection */
-		$config->debugdb = TRUE;
+        $config = tool_mergeusers_config::instance();
+        // 0 /** @noinspection PhpUndefinedFieldInspection */.
+        $config->debugdb = true;
 
-		$mut = new MergeUserTool($config);
+        $mut = new MergeUserTool($config);
 
-		$mut->merge($user_keep->id, $user_remove_2->id);
+        $mut->merge($userkeep->id, $userremove2->id);
 
-		$this->expectOutputRegex('/Query took/');
-	}
+        $this->expectOutputRegex('/Query took/');
+    }
 }

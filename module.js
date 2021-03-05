@@ -15,43 +15,49 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+ * @author    Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
  * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  */
 
 M.tool_mergeusers = {
     init_select_table: function (Y) {
-        Y.use('node', function (Y) {
-            var radiobuttons = Y.all('#merge_users_tool_user_select_table input');
-            radiobuttons.each(function (node) {
-                node.on('click', function (e) {
-                    var target;
-                    var lastselected;
-                    var lastvalue;
-                    var current = e.currentTarget.get('name');
-                    if (current === 'olduser') {
-                        target = 'newuser';
-                        lastselected = Y.one('input[name=selectedolduser]');
-                        lastvalue = lastselected.get('value');
-                    } else {
-                        target = 'olduser';
-                        lastselected = Y.one('input[name=selectednewuser]');
-                        lastvalue = lastselected.get('value');
-                    }
+        Y.use(
+            'node', function (Y) {
+                var radiobuttons = Y.all('#merge_users_tool_user_select_table input');
+                radiobuttons.each(
+                    function (node) {
+                        node.on(
+                            'click', function (e) {
+                                var target;
+                                var lastselected;
+                                var lastvalue;
+                                var current = e.currentTarget.get('name');
+                                if (current === 'olduser') {
+                                    target = 'newuser';
+                                    lastselected = Y.one('input[name=selectedolduser]');
+                                    lastvalue = lastselected.get('value');
+                                } else {
+                                    target = 'olduser';
+                                    lastselected = Y.one('input[name=selectednewuser]');
+                                    lastvalue = lastselected.get('value');
+                                }
 
-                    // First disable sibling radio button
-                    var id = e.currentTarget.get('value');
-                    var radiobutton = Y.one('#' + target + id);
-                    radiobutton.setAttribute('disabled', 'disabled');
+                                // First disable sibling radio button
+                                var id = e.currentTarget.get('value');
+                                var radiobutton = Y.one('#' + target + id);
+                                radiobutton.setAttribute('disabled', 'disabled');
 
-                    // After that, re-enable old sibling radio button
-                    if (lastvalue !== "" && lastvalue !== id) {
-                        var last = Y.one("#" + target + lastvalue);
-                        last.removeAttribute('disabled');
+                                // After that, re-enable old sibling radio button
+                                if (lastvalue !== "" && lastvalue !== id) {
+                                    var last = Y.one("#" + target + lastvalue);
+                                    last.removeAttribute('disabled');
+                                }
+                                lastselected.set('value', id);
+                            }
+                        );
                     }
-                    lastselected.set('value', id);
-                });
-            });
-        });
+                );
+            }
+        );
     }
 }

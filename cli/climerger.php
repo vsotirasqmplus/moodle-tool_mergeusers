@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpUnhandledExceptionInspection */
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -22,59 +22,60 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define("CLI_SCRIPT", TRUE);
+// I /** @noinspection PhpUnhandledExceptionInspection */.
+define('CLI_SCRIPT', true);
 
-require_once __DIR__ . '/../../../../config.php';
+require_once(__DIR__ . '/../../../../config.php');
 
-ini_set('display_errors', TRUE);
+ini_set('display_errors', true);
 ini_set('error_reporting', E_ALL | E_STRICT);
 
 global $CFG;
 
-/** @noinspection PhpIncludeInspection */
-require_once $CFG->dirroot . '/lib/clilib.php';
-require_once __DIR__ . '/../lib/autoload.php';
+// I /** @noinspection PhpIncludeInspection */.
+require_once($CFG->dirroot . '/lib/clilib.php');
+require_once(__DIR__ . '/../lib/autoload.php');
 
 // Now get cli options.
-list($options, $unrecognized) = cli_get_params(['debugdb' => FALSE, 'alwaysRollback' => FALSE, 'help' => FALSE,]);
+list($options, $unrecognized) = cli_get_params(['debugdb' => false, 'alwaysRollback' => false, 'help' => false]);
 
-if($unrecognized) {
-	$unrecognized = implode("\n  ", $unrecognized);
-	cli_error(get_string('cliunknowoption', 'admin', $unrecognized), 2);
+if ($unrecognized) {
+    $unrecognized = implode("\n  ", $unrecognized);
+    cli_error(get_string('cliunknowoption', 'admin', $unrecognized), 2);
 }
 
-if($options['help']) {
-	$help =
-		"Command Line user merger. These are the available options:
+if ($options['help']) {
+    $help =
+            'Command Line user merger. These are the available options:
 
 Options:
 --help            Print out this help
 --debugdb         Output all db statements used to do the merge
 --alwaysRollback  Do the full merge but rollback the transaction at the last opportunity
-";
+';
 
-	echo $help;
-	exit(0);
+    echo $help;
+    exit(0);
 }
 
-// loads current configuration
+// Loads current configuration.
 $config = tool_mergeusers_config::instance();
 
-/** @noinspection PhpUndefinedFieldInspection */
+// I /** @noinspection PhpUndefinedFieldInspection */.
 $config->debugdb = !empty($options['debugdb']);
-/** @noinspection PhpUndefinedFieldInspection */
+// I /** @noinspection PhpUndefinedFieldInspection */.
 $config->alwaysRollback = !empty($options['alwaysRollback']);
 
-// initializes merger tool
-$mut = new MergeUserTool($config); //may abort execution if database is not supported
+// Initializes merger tool.
+$mut = new MergeUserTool($config); // May abort execution if database is not supported.
 $merger = new Merger($mut);
 
-// initializes gathering instance
-/** @noinspection PhpUndefinedFieldInspection */
+// Initializes gathering instance.
+// I /** @noinspection PhpUndefinedFieldInspection */.
 $gatheringname = $config->gathering;
 $gathering = new $gatheringname();
 
-//collects and performs user mergings
+// Collects and performs user mergings.
 $merger->merge($gathering);
 
-exit(0); // if arrived here, all ok ;-)
+exit(0); // If arrived here, all ok ;-).

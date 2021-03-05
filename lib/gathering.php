@@ -32,7 +32,6 @@
  * in its constructor (__construct()). It is highly recommended to check all things are ok
  * in method rewind() to start the iteration.
  */
-interface Gathering extends Iterator
-{
+interface Gathering extends Iterator {
 
 }

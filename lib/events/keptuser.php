@@ -29,24 +29,23 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @param object $event stdClass with all event data.
  *
- * @return bool
+ * @return       bool
  * @noinspection PhpUnused
  */
-function tool_mergeusers_make_kept_user_as_not_suspended(object $event): bool
-{
-	global $DB;
+function tool_mergeusers_make_kept_user_as_not_suspended(object $event): bool {
+    global $DB;
 
-	$userid = $event->other['usersinvolved']['toid'];
+    $userid = $event->other['usersinvolved']['toid'];
 
-	$userkept = new stdClass();
-	$userkept->id = $userid;
-	$userkept->suspended = 0;
-	$userkept->timemodified = time();
-	try {
-		$DB->update_record('user', $userkept);
-	} catch(dml_exception $e) {
-		return FALSE;
-	}
+    $userkept = new stdClass();
+    $userkept->id = $userid;
+    $userkept->suspended = 0;
+    $userkept->timemodified = time();
+    try {
+        $DB->update_record('user', $userkept);
+    } catch (dml_exception $e) {
+        return false;
+    }
 
-	return TRUE;
+    return true;
 }

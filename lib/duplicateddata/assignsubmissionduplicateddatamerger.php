@@ -26,99 +26,109 @@ require_once(__DIR__ . '/duplicateddata.php');
 require_once(__DIR__ . '/../db/dbassignsubmission.php');
 require_once(__DIR__ . '/../db/assignsubmissionquery.php');
 
-class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger
-{
-	// This constants are located at mod/assign/locallib.php. We copy here to avoid loading full locallib.php file.
-	const ASSIGN_SUBMISSION_WITH_CONTENT = [
-		'submitted',
-		'draft',
-		'reopened',
-	];
-	const ASSIGN_SUBMISSION_NEW = 'new';
+class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger {
+    // This constants are located at mod/assign/locallib.php. We copy here to avoid loading full locallib.php file.
+    const ASSIGN_SUBMISSION_WITH_CONTENT = [
+            'submitted',
+            'draft',
+            'reopened',
+    ];
+    const ASSIGN_SUBMISSION_NEW = 'new';
 
-	private $findassignsubmissionbyid;
+    private $findassignsubmissionbyid;
 
-	/**
-	 * AssignSubmissionDuplicatedDataMerger constructor.
-	 *
-	 * @param assign_submission_query|null $findbyquery
-	 */
-	public function __construct(assign_submission_query $findbyquery = NULL)
-	{
-		$this->findassignsubmissionbyid = $findbyquery ?? new db_assign_submission();
-	}
+    /**
+     * AssignSubmissionDuplicatedDataMerger constructor.
+     *
+     * @param assign_submission_query|null $findbyquery
+     */
+    public function __construct(assign_submission_query $findbyquery = null) {
+        $this->findassignsubmissionbyid = $findbyquery ?? new db_assign_submission();
+    }
 
-	/**
-	 * @param $olddata
-	 * @param $newdata
-	 *
-	 * @return DuplicatedData
-	 * @throws dml_exception
-	 */
-	public function merge($olddata, $newdata): DuplicatedData
-	{
-		if($this->old_submission_has_content_and_new_has_no_content($olddata, $newdata)) {
-			return DuplicatedData::from_remove_and_modify(
-				array_keys($this->findassignsubmissionbyid->all_from_assign_and_user($newdata->assignment,
-																					 $newdata->userid)),
-				array_keys($this->findassignsubmissionbyid->all_from_assign_and_user($olddata->assignment,
-																					 $olddata->userid))
-			);
-		}
+    /**
+     * @param $olddata
+     * @param $newdata
+     *
+     * @return DuplicatedData
+     * @throws dml_exception
+     */
+    public function merge($olddata, $newdata): DuplicatedData {
+        if ($this->old_submission_has_content_and_new_has_no_content($olddata, $newdata)) {
+            return DuplicatedData::from_remove_and_modify(
+                    array_keys(
+                            $this->findassignsubmissionbyid->all_from_assign_and_user(
+                                    $newdata->assignment,
+                                    $newdata->userid
+                            )
+                    ),
+                    array_keys(
+                            $this->findassignsubmissionbyid->all_from_assign_and_user(
+                                    $olddata->assignment,
+                                    $olddata->userid
+                            )
+                    )
+            );
+        }
 
-		if($this->both_submissions_have_content($olddata, $newdata)) {
-			$submissiontomodify = $newdata;
-			$submissiontoremove = $olddata;
-			if($this->old_user_submission_is_older_than_new_user_submission($olddata, $newdata)) {
-				$submissiontomodify = $olddata;
-				$submissiontoremove = $newdata;
-			}
-			$modifyid = $this->findassignsubmissionbyid->all_from_assign_and_user($submissiontomodify->assignment,
-																				  $submissiontomodify->userid);
-			$removeid = $this->findassignsubmissionbyid->all_from_assign_and_user($submissiontoremove->assignment,
-																				  $submissiontoremove->userid);
+        if ($this->both_submissions_have_content($olddata, $newdata)) {
+            $submissiontomodify = $newdata;
+            $submissiontoremove = $olddata;
+            if ($this->old_user_submission_is_older_than_new_user_submission($olddata, $newdata)) {
+                $submissiontomodify = $olddata;
+                $submissiontoremove = $newdata;
+            }
+            $modifyid = $this->findassignsubmissionbyid->all_from_assign_and_user(
+                    $submissiontomodify->assignment,
+                    $submissiontomodify->userid
+            );
+            $removeid = $this->findassignsubmissionbyid->all_from_assign_and_user(
+                    $submissiontoremove->assignment,
+                    $submissiontoremove->userid
+            );
 
-			return DuplicatedData::from_remove_and_modify(array_keys($removeid), array_keys($modifyid));
-		}
+            return DuplicatedData::from_remove_and_modify(array_keys($removeid), array_keys($modifyid));
+        }
 
-		return DuplicatedData::from_remove(
-			array_keys($this->findassignsubmissionbyid->all_from_assign_and_user($olddata->assignment,
-																				 $olddata->userid))
-		);
-	}
+        return DuplicatedData::from_remove(
+                array_keys(
+                        $this->findassignsubmissionbyid->all_from_assign_and_user(
+                                $olddata->assignment,
+                                $olddata->userid
+                        )
+                )
+        );
+    }
 
-	/**
-	 * @param $oldsubmission
-	 * @param $newsubmission
-	 *
-	 * @return bool
-	 */
-	private function old_submission_has_content_and_new_has_no_content($oldsubmission, $newsubmission): bool
-	{
-		return in_array($oldsubmission->status, self::ASSIGN_SUBMISSION_WITH_CONTENT, TRUE) &&
-			$newsubmission->status == self::ASSIGN_SUBMISSION_NEW;
-	}
+    /**
+     * @param $oldsubmission
+     * @param $newsubmission
+     *
+     * @return bool
+     */
+    private function old_submission_has_content_and_new_has_no_content($oldsubmission, $newsubmission): bool {
+        return in_array($oldsubmission->status, self::ASSIGN_SUBMISSION_WITH_CONTENT, true) &&
+                $newsubmission->status == self::ASSIGN_SUBMISSION_NEW;
+    }
 
-	/**
-	 * @param $oldsubmission
-	 * @param $newsubmission
-	 *
-	 * @return bool
-	 */
-	private function both_submissions_have_content($oldsubmission, $newsubmission): bool
-	{
-		return in_array($oldsubmission->status, self::ASSIGN_SUBMISSION_WITH_CONTENT) &&
-			in_array($newsubmission->status, self::ASSIGN_SUBMISSION_WITH_CONTENT);
-	}
+    /**
+     * @param $oldsubmission
+     * @param $newsubmission
+     *
+     * @return bool
+     */
+    private function both_submissions_have_content($oldsubmission, $newsubmission): bool {
+        return in_array($oldsubmission->status, self::ASSIGN_SUBMISSION_WITH_CONTENT) &&
+                in_array($newsubmission->status, self::ASSIGN_SUBMISSION_WITH_CONTENT);
+    }
 
-	/**
-	 * @param $oldsubmission
-	 * @param $newsubmission
-	 *
-	 * @return bool
-	 */
-	private function old_user_submission_is_older_than_new_user_submission($oldsubmission, $newsubmission): bool
-	{
-		return $oldsubmission->timemodified <= $newsubmission->timemodified;
-	}
+    /**
+     * @param $oldsubmission
+     * @param $newsubmission
+     *
+     * @return bool
+     */
+    private function old_user_submission_is_older_than_new_user_submission($oldsubmission, $newsubmission): bool {
+        return $oldsubmission->timemodified <= $newsubmission->timemodified;
+    }
 }

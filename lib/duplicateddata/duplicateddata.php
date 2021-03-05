@@ -21,66 +21,59 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-class DuplicatedData
-{
-	private $toremove;
+class DuplicatedData {
+    private $toremove;
 
-	private $tomodify;
+    private $tomodify;
 
-	/**
-	 * @return DuplicatedData
-	 */
-	public static function from_empty(): DuplicatedData
-	{
-		return new static([], []);
-	}
+    /**
+     * @return DuplicatedData
+     */
+    public static function from_empty(): DuplicatedData {
+        return new static([], []);
+    }
 
-	/**
-	 * @param $toremove
-	 * @param $tomodify
-	 *
-	 * @return DuplicatedData
-	 */
-	public static function from_remove_and_modify($toremove, $tomodify): DuplicatedData
-	{
-		return new static(array_combine($toremove, $toremove), array_combine($tomodify, $tomodify));
-	}
+    /**
+     * @param $toremove
+     * @param $tomodify
+     *
+     * @return DuplicatedData
+     */
+    public static function from_remove_and_modify($toremove, $tomodify): DuplicatedData {
+        return new static(array_combine($toremove, $toremove), array_combine($tomodify, $tomodify));
+    }
 
-	/**
-	 * @param $toremove
-	 *
-	 * @return DuplicatedData
-	 */
-	public static function from_remove($toremove): DuplicatedData
-	{
-		return new static(array_combine($toremove, $toremove), []);
-	}
+    /**
+     * @param $toremove
+     *
+     * @return DuplicatedData
+     */
+    public static function from_remove($toremove): DuplicatedData {
+        return new static(array_combine($toremove, $toremove), []);
+    }
 
-	/**
-	 * DuplicatedData constructor.
-	 *
-	 * @param $toremove
-	 * @param $tomodify
-	 */
-	private function __construct($toremove, $tomodify)
-	{
-		$this->toremove = $toremove;
-		$this->tomodify = $tomodify;
-	}
+    /**
+     * DuplicatedData constructor.
+     *
+     * @param $toremove
+     * @param $tomodify
+     */
+    private function __construct($toremove, $tomodify) {
+        $this->toremove = $toremove;
+        $this->tomodify = $tomodify;
+    }
 
-	/**
-	 * @return mixed
-	 */
-	public function to_remove()
-	{
-		return $this->toremove;
-	}
+    /**
+     * @return mixed
+     */
+    public function to_remove() {
+        return $this->toremove;
+    }
 
-	/**
-	 * @return mixed
-	 */
-	public function to_modify()
-	{
-		return $this->tomodify;
-	}
+    /**
+     * @return mixed
+     */
+    public function to_modify() {
+        return $this->tomodify;
+    }
 }

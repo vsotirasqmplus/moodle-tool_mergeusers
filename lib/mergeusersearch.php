@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -32,82 +31,79 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php';
-
+require_once(dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php');
+require_login();
 global $CFG;
 
-/** @noinspection PhpIncludeInspection */
-require_once $CFG->dirroot . '/lib/clilib.php';
-require_once __DIR__ . '/autoload.php';
+// 0 /** @noinspection PhpIncludeInspection */.
+require_once($CFG->dirroot . '/lib/clilib.php');
+require_once(__DIR__ . '/autoload.php');
 
 /**
  * A class to perform user search and lookup (verification)
  *
  * @author John Hoopes <hoopes@wisc.edu>
  */
-class MergeUserSearch
-{
+class MergeUserSearch {
 
+    /**
+     * Searches the user table based on the input.
+     *
+     * @param mixed $input input
+     * @param string $searchfield The field to search on.  empty string means all fields
+     *
+     * @return       array $results the results of the search
+     * @throws       dml_exception
+     * @noinspection SqlDialectInspection
+     */
+    public function search_users($input, string $searchfield): array {
+        global $DB;
 
-	/**
-	 * Searches the user table based on the input.
-	 *
-	 * @param mixed  $input       input
-	 * @param string $searchfield The field to search on.  empty string means all fields
-	 *
-	 * @return array $results the results of the search
-	 * @throws dml_exception
-	 * @noinspection SqlDialectInspection
-	 */
-	public function search_users($input, string $searchfield): array
-	{
-		global $DB;
+        switch ($searchfield) {
+            case 'id': // Search on id field.
 
-		switch($searchfield) {
-			case 'id': // search on id field
+                $params = ['userid' => $input];
+                $sql = 'SELECT * FROM {user} WHERE id = :userid';
 
-				$params = ['userid' => $input,];
-				$sql = 'SELECT * FROM {user} WHERE id = :userid';
+                break;
+            case 'username': // Search on username.
 
-				break;
-			case 'username': // search on username
+                $params = ['username' => '%' . $input . '%'];
+                $sql = 'SELECT * FROM {user} WHERE username LIKE :username';
 
-				$params = ['username' => '%' . $input . '%',];
-				$sql = 'SELECT * FROM {user} WHERE username LIKE :username';
+                break;
+            case 'firstname': // Search on firstname.
 
-				break;
-			case 'firstname': // search on firstname
+                $params = ['firstname' => '%' . $input . '%'];
+                $sql = 'SELECT * FROM {user} WHERE firstname LIKE :firstname';
 
-				$params = ['firstname' => '%' . $input . '%',];
-				$sql = 'SELECT * FROM {user} WHERE firstname LIKE :firstname';
+                break;
+            case 'lastname': // Search on lastname.
 
-				break;
-			case 'lastname': // search on lastname
+                $params = ['lastname' => '%' . $input . '%'];
+                $sql = 'SELECT * FROM {user} WHERE lastname LIKE :lastname';
 
-				$params = ['lastname' => '%' . $input . '%',];
-				$sql = 'SELECT * FROM {user} WHERE lastname LIKE :lastname';
+                break;
+            case 'email': // Search on email.
 
-				break;
-			case 'email': // search on email
+                $params = ['email' => '%' . $input . '%'];
+                $sql = 'SELECT * FROM {user} WHERE email LIKE :email';
 
-				$params = ['email' => '%' . $input . '%',];
-				$sql = 'SELECT * FROM {user} WHERE email LIKE :email';
+                break;
+            case 'idnumber': // Search on idnumber.
 
-				break;
-			case 'idnumber': // search on idnumber
+                $params = ['idnumber' => '%' . $input . '%'];
+                $sql = 'SELECT * FROM {user} WHERE idnumber LIKE :idnumber';
 
-				$params = ['idnumber' => '%' . $input . '%',];
-				$sql = 'SELECT * FROM {user} WHERE idnumber LIKE :idnumber';
+                break;
+            default: // Search on all fields by default.
 
-				break;
-			default: // search on all fields by default
+                $params = ['userid' => $input, 'username' => '%' . $input . '%',
+                        'firstname' => '%' . $input . '%', 'lastname' => '%' . $input . '%',
+                        'email' => '%' . $input . '%', 'idnumber' => '%' . $input . '%'];
 
-				$params = ['userid' => $input, 'username' => '%' . $input . '%',
-					'firstname' => '%' . $input . '%', 'lastname' => '%' . $input . '%',
-					'email' => '%' . $input . '%', 'idnumber' => '%' . $input . '%'];
-
-				$sql =
-					'SELECT *
+                $sql =
+                        'SELECT *
                     FROM {user}
                     WHERE
                         id = :userid OR
@@ -117,41 +113,39 @@ class MergeUserSearch
                         email LIKE :email OR
                         idnumber LIKE :idnumber';
 
-				break;
-		}
+                break;
+        }
 
-		$ordering = ' ORDER BY lastname, firstname';
+        $ordering = ' ORDER BY lastname, firstname';
 
-		return $DB->get_records_sql($sql . $ordering, $params);
-	}
+        return $DB->get_records_sql($sql . $ordering, $params);
+    }
 
-	/**
-	 * Verifies whether or not a user exists based upon the user information
-	 * to verify and the column that matches that information
-	 *
-	 * @param mixed  $userinfo The identifying information about the user
-	 * @param string $column   The column name to verify against.  (should not be direct user input)
-	 *
-	 * @return array
-	 *      (
-	 *          0 => Either NULL or the user object.  Will be NULL if not valid user,
-	 *          1 => Message for invalid user to display/log
-	 *      )
-	 * @throws coding_exception
-	 */
-	public function verify_user($userinfo, string $column): array
-	{
-		global $DB;
-		$message = '';
-		try {
-			$user = $DB->get_record('user', [$column => $userinfo], '*', MUST_EXIST);
-		} catch(Exception $e) {
-			$message = get_string('invaliduser', 'tool_mergeusers') . '(' . $column . '=>' . $userinfo . '): ' . $e->getMessage();
-			$user = NULL;
-		}
+    /**
+     * Verifies whether or not a user exists based upon the user information
+     * to verify and the column that matches that information
+     *
+     * @param mixed $userinfo The identifying information about the user
+     * @param string $column The column name to verify against.  (should not be direct user input)
+     *
+     * @return array
+     *      (
+     *          0 => Either NULL or the user object.  Will be NULL if not valid user,
+     *          1 => Message for invalid user to display/log
+     *      )
+     * @throws coding_exception
+     */
+    public function verify_user($userinfo, string $column): array {
+        global $DB;
+        $message = '';
+        try {
+            $user = $DB->get_record('user', [$column => $userinfo], '*', MUST_EXIST);
+        } catch (Exception $e) {
+            $message = get_string('invaliduser', 'tool_mergeusers') . '(' . $column . '=>' . $userinfo . '): ' . $e->getMessage();
+            $user = null;
+        }
 
-		return [$user, $message];
-	}
-
+        return [$user, $message];
+    }
 
 }

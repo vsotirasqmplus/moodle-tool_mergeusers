@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpUnused */
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+// 0 /**  @noinspection PhpUnused */.
 /**
  * @package    tool
  * @subpackage mergeusers
@@ -21,118 +22,110 @@
  * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-(defined("MOODLE_INTERNAL") && defined("CLI_SCRIPT")) || die();
+defined('MOODLE_INTERNAL') || die();
+defined('CLI_SCRIPT') || die();
 
 global $CFG;
 
-/** @noinspection PhpIncludeInspection */
-require_once $CFG->dirroot . '/lib/clilib.php';
+// 0 /** @noinspection PhpIncludeInspection */.
+require_once($CFG->dirroot . '/lib/clilib.php');
 
 /**
  * Abstraction layer to use to get the list of merging actions to perform asked from command line.
- *
  */
-class CLIGathering implements Gathering
-{
+class CLIGathering implements Gathering {
 
-	/**
-	 * @var stdClass object with fromid and toid user.id fields.
-	 */
-	protected $current;
-	/**
-	 * @var bool true if user chose to conclude with merging users. false if we are still merging.
-	 */
-	protected $end;
-	/**
-	 * @var int zero-based index of the number of asked merging operations.
-	 */
-	protected $index;
+    /**
+     * @var stdClass object with fromid and toid user.id fields.
+     */
+    protected $current;
+    /**
+     * @var bool true if user chose to conclude with merging users. false if we are still merging.
+     */
+    protected $end;
+    /**
+     * @var int zero-based index of the number of asked merging operations.
+     */
+    protected $index;
 
-	/**
-	 * Initialization, also for capturing Ctrl+C interruptions.
-	 */
-	public function __construct()
-	{
-		$this->index = -1;
-		$this->end = FALSE;
-	}
+    /**
+     * Initialization, also for capturing Ctrl+C interruptions.
+     */
+    public function __construct() {
+        $this->index = -1;
+        $this->end = false;
+    }
 
-	/**
-	 * Asks by command line both users to merge, with a header telling what to do.
-	 *
-	 * @throws coding_exception
-	 */
-	public function rewind()
-	{
-		cli_heading(get_string('pluginname', 'tool_mergeusers'));
-		echo get_string('cligathering:description', 'tool_mergeusers') . "\n\n";
-		echo get_string('cligathering:stopping', 'tool_mergeusers') . "\n\n";
-		$this->next();
-	}
+    /**
+     * Asks by command line both users to merge, with a header telling what to do.
+     *
+     * @throws coding_exception
+     */
+    public function rewind() {
+        cli_heading(get_string('pluginname', 'tool_mergeusers'));
+        echo get_string('cligathering:description', 'tool_mergeusers') . "\n\n";
+        echo get_string('cligathering:stopping', 'tool_mergeusers') . "\n\n";
+        $this->next();
+    }
 
-	/**
-	 * Asks for the next pair of users' id to merge.
-	 * It also detects when anything but a number is introduced, to re-ask for any user id.
-	 *
-	 * @throws coding_exception
-	 */
-	public function next()
-	{
-		$record = new stdClass();
+    /**
+     * Asks for the next pair of users' id to merge.
+     * It also detects when anything but a number is introduced, to re-ask for any user id.
+     *
+     * @throws coding_exception
+     */
+    public function next() {
+        $record = new stdClass();
 
-		//ask for the source user id.
-		$record->fromid = 0;
-		while($record->fromid <= 0 && $record->fromid != -1) {
-			$record->fromid = intval(cli_input(get_string('cligathering:fromid', 'tool_mergeusers')));
-		}
+        // Ask for the source user id.
+        $record->fromid = 0;
+        while ($record->fromid <= 0 && $record->fromid != -1) {
+            $record->fromid = intval(cli_input(get_string('cligathering:fromid', 'tool_mergeusers')));
+        }
 
-		//if we have to exit, do it just now ;-)
-		if($record->fromid == -1) {
-			$this->end = TRUE;
-			return;
-		}
+        // If we have to exit, do it just now ;-) !
+        if ($record->fromid == -1) {
+            $this->end = true;
+            return;
+        }
 
-		//otherwise, ask for the target user id.
-		$record->toid = 0;
-		while($record->toid <= 0 && $record->toid != -1) {
-			$record->toid = intval(cli_input(get_string('cligathering:toid', 'tool_mergeusers')));
-		}
+        // Otherwise, ask for the target user id.
+        $record->toid = 0;
+        while ($record->toid <= 0 && $record->toid != -1) {
+            $record->toid = intval(cli_input(get_string('cligathering:toid', 'tool_mergeusers')));
+        }
 
-		//updates related iterator fields.
-		$this->end = $record->toid == -1;
-		$this->current = $record;
-		$this->index++;
-	}
+        // Updates related iterator fields.
+        $this->end = $record->toid == -1;
+        $this->current = $record;
+        $this->index++;
+    }
 
-	/**
-	 * Tells whether to conclude iteration.
-	 *
-	 * @return bool true if to go on with the iteration (we have a pair of users to merge).
-	 * false to conclude.
-	 */
-	public function valid(): bool
-	{
-		return !$this->end;
-	}
+    /**
+     * Tells whether to conclude iteration.
+     *
+     * @return bool true if to go on with the iteration (we have a pair of users to merge).
+     * false to conclude.
+     */
+    public function valid(): bool {
+        return !$this->end;
+    }
 
-	/**
-	 * Gets the current pair of users to merge.
-	 *
-	 * @return stdClass object with fromid and toid fields
-	 */
-	public function current(): stdClass
-	{
-		return $this->current;
-	}
+    /**
+     * Gets the current pair of users to merge.
+     *
+     * @return stdClass object with fromid and toid fields
+     */
+    public function current(): stdClass {
+        return $this->current;
+    }
 
-	/**
-	 * Gets current int zero-based index.
-	 *
-	 * @return int zero-based index value
-	 */
-	public function key(): int
-	{
-		return $this->index;
-	}
+    /**
+     * Gets current int zero-based index.
+     *
+     * @return int zero-based index value
+     */
+    public function key(): int {
+        return $this->index;
+    }
 }

@@ -22,9 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined("MOODLE_INTERNAL") || die();
+defined('MOODLE_INTERNAL') || die();
 
-/**
+/*
  * This is the default settings for the correct behaviour of the plugin, given the knowledge base
  * of our experience.
  *
@@ -34,130 +34,130 @@ defined("MOODLE_INTERNAL") || die();
  */
 return [
 
-	// gathering tool
-	'gathering' => 'CLIGathering',
+    // Gathering tool.
+        'gathering' => 'CLIGathering',
 
-	// Database tables to be excluded from normal processing.
-	// You normally will add tables. Be very cautious if you delete any of them.
-	'exceptions' => [
-		'user_preferences',
-		'user_private_key',
-		'user_info_data',
-		'my_pages',
-		'plagiarism_turnitin_users'
-	],
+    // Database tables to be excluded from normal processing.
+    // You normally will add tables. Be very cautious if you delete any of them.
+        'exceptions' => [
+                'user_preferences',
+                'user_private_key',
+                'user_info_data',
+                'my_pages',
+                'plagiarism_turnitin_users'
+        ],
 
-	// List of compound indexes.
-	// This list may vary from Moodle instance to another, given that the Moodle version,
-	// local changes and non-core plugins may add new special cases to be processed.
-	// Put in 'userfield' all column names related to a user (i.e., user.id), and all the rest column names
-	// into 'otherfields'.
-	// See README.txt for details on special cases.
-	// Table names must be without $CFG->prefix.
-	'compoundindexes' => [
-		'grade_grades' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['itemid'],
-		],
-		'groups_members' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['groupid'],
-		],
-		'journal_entries' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['journal'],
-		],
-		'course_completions' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['course'],
-		],
-		'message_contacts' => [//both fields are user.id values
-			'userfield' => ['userid', 'contactid'],
-			'otherfields' => [],
-		],
-		'role_assignments' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['contextid', 'roleid'], // mdl_roleassi_useconrol_ix (not unique)
-		],
-		'user_lastaccess' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['courseid'], // mdl_userlast_usecou_ui (unique)
-		],
-		'quiz_attempts' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['quiz', 'attempt'], // mdl_quizatte_quiuseatt_uix (unique)
-		],
-		'cohort_members' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['cohortid'],
-		],
-		'certif_completion' => [  // mdl_certcomp_ceruse_uix (unique)
-			'userfield' => ['userid'],
-			'otherfields' => ['certifid'],
-		],
-		'course_modules_completion' => [ // mdl_courmoducomp_usecou_uix (unique)
-			'userfield' => ['userid'],
-			'otherfields' => ['coursemoduleid'],
-		],
-		'scorm_scoes_track' => [ //mdl_scorscoetrac_usescosco_uix (unique)
-			'userfield' => ['userid'],
-			'otherfields' => ['scormid', 'scoid', 'attempt', 'element'],
-		],
-		'assign_grades' => [ //UNIQUE KEY mdl_assigrad_assuseatt_uix
-			'userfield' => ['userid'],
-			'otherfields' => ['assignment', 'attemptnumber'],
-		],
-		'badge_issued' => [ // unique key mdl_badgissu_baduse_uix
-			'userfield' => ['userid'],
-			'otherfields' => ['badgeid'],
-		],
-		'assign_submission' => [ // unique key mdl_assisubm_assusegroatt_uix
-			'userfield' => ['userid'],
-			'otherfields' => ['assignment', 'groupid', 'attemptnumber'],
-		],
-		'wiki_pages' => [ //unique key mdl_wikipage_subtituse_uix
-			'userfield' => ['userid'],
-			'otherfields' => ['subwikiid', 'title'],
-		],
-		'wiki_subwikis' => [ //unique key mdl_wikisubw_wikgrouse_uix
-			'userfield' => ['userid'],
-			'otherfields' => ['wikiid', 'groupid'],
-		],
-		'user_enrolments' => [
-			'userfield' => ['userid'],
-			'otherfields' => ['enrolid'],
-		],
-		'assign_user_flags' => [ // They are actually a unique key, but not in DDL.
-			'userfield' => ['userid'],
-			'otherfields' => ['assignment'],
-		],
-		'assign_user_mapping' => [ // They are actually a unique key, but not in DDL.
-			'userfield' => ['userid'],
-			'otherfields' => ['assignment'],
-		],
-	],
+    // List of compound indexes.
+    // This list may vary from Moodle instance to another, given that the Moodle version,
+    // local changes and non-core plugins may add new special cases to be processed.
+    // Put in 'userfield' all column names related to a user (i.e., user.id), and all the rest column names
+    // into 'otherfields'.
+    // See README.txt for details on special cases.
+    // Table names must be without $CFG->prefix.
+        'compoundindexes' => [
+                'grade_grades' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['itemid'],
+                ],
+                'groups_members' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['groupid'],
+                ],
+                'journal_entries' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['journal'],
+                ],
+                'course_completions' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['course'],
+                ],
+                'message_contacts' => [ // Both fields are user.id values.
+                        'userfield' => ['userid', 'contactid'],
+                        'otherfields' => [],
+                ],
+                'role_assignments' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['contextid', 'roleid'], // I mdl_roleassi_useconrol_ix (not unique).
+                ],
+                'user_lastaccess' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['courseid'], // I mdl_userlast_usecou_ui (unique).
+                ],
+                'quiz_attempts' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['quiz', 'attempt'], // I mdl_quizatte_quiuseatt_uix (unique).
+                ],
+                'cohort_members' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['cohortid'],
+                ],
+                'certif_completion' => [  // I mdl_certcomp_ceruse_uix (unique).
+                        'userfield' => ['userid'],
+                        'otherfields' => ['certifid'],
+                ],
+                'course_modules_completion' => [ // I mdl_courmoducomp_usecou_uix (unique).
+                        'userfield' => ['userid'],
+                        'otherfields' => ['coursemoduleid'],
+                ],
+                'scorm_scoes_track' => [ // I mdl_scorscoetrac_usescosco_uix (unique).
+                        'userfield' => ['userid'],
+                        'otherfields' => ['scormid', 'scoid', 'attempt', 'element'],
+                ],
+                'assign_grades' => [ // UNIQUE KEY mdl_assigrad_assuseatt_uix.
+                        'userfield' => ['userid'],
+                        'otherfields' => ['assignment', 'attemptnumber'],
+                ],
+                'badge_issued' => [ // I unique key mdl_badgissu_baduse_uix.
+                        'userfield' => ['userid'],
+                        'otherfields' => ['badgeid'],
+                ],
+                'assign_submission' => [ // I unique key mdl_assisubm_assusegroatt_uix.
+                        'userfield' => ['userid'],
+                        'otherfields' => ['assignment', 'groupid', 'attemptnumber'],
+                ],
+                'wiki_pages' => [ // I unique key mdl_wikipage_subtituse_uix.
+                        'userfield' => ['userid'],
+                        'otherfields' => ['subwikiid', 'title'],
+                ],
+                'wiki_subwikis' => [ // I unique key mdl_wikisubw_wikgrouse_uix.
+                        'userfield' => ['userid'],
+                        'otherfields' => ['wikiid', 'groupid'],
+                ],
+                'user_enrolments' => [
+                        'userfield' => ['userid'],
+                        'otherfields' => ['enrolid'],
+                ],
+                'assign_user_flags' => [ // They are actually a unique key, but not in DDL.
+                        'userfield' => ['userid'],
+                        'otherfields' => ['assignment'],
+                ],
+                'assign_user_mapping' => [ // They are actually a unique key, but not in DDL.
+                        'userfield' => ['userid'],
+                        'otherfields' => ['assignment'],
+                ],
+        ],
 
-	// List of column names per table, where their content is a user.id.
-	// These are necessary for matching passed by userids in these column names.
-	// In other words, only column names given below will be search for matching user ids.
-	// The key 'default' will be applied for any non matching table name.
-	'userfieldnames' => [
-		'logstore_standard_log' => ['userid', 'relateduserid'],
-		'message_contacts' => ['userid', 'contactid'], //compound index
-		'message' => ['useridfrom', 'useridto'],
-		'message_read' => ['useridfrom', 'useridto'],
-		'question' => ['createdby', 'modifiedby'],
-		'default' => ['authorid', 'reviewerid', 'userid', 'user_id', 'id_user', 'user'], //may appear compound index
-	],
+    // List of column names per table, where their content is a user.id.
+    // These are necessary for matching passed by userids in these column names.
+    // In other words, only column names given below will be search for matching user ids.
+    // The key 'default' will be applied for any non matching table name.
+        'userfieldnames' => [
+                'logstore_standard_log' => ['userid', 'relateduserid'],
+                'message_contacts' => ['userid', 'contactid'], // Compound index.
+                'message' => ['useridfrom', 'useridto'],
+                'message_read' => ['useridfrom', 'useridto'],
+                'question' => ['createdby', 'modifiedby'],
+                'default' => ['authorid', 'reviewerid', 'userid', 'user_id', 'id_user', 'user'], // May appear compound index.
+        ],
 
-	// TableMergers to process each database table.
-	// 'default' is applied when no specific TableMerger is specified.
-	'tablemergers' => [
-		'default' => 'GenericTableMerger',
-		'quiz_attempts' => 'QuizAttemptsMerger',
-		'assign_submission' => 'AssignSubmissionTableMerger',
-	],
+    // TableMergers to process each database table.
+    // 'default' is applied when no specific TableMerger is specified.
+        'tablemergers' => [
+                'default' => 'GenericTableMerger',
+                'quiz_attempts' => 'QuizAttemptsMerger',
+                'assign_submission' => 'AssignSubmissionTableMerger',
+        ],
 
-	'alwaysRollback' => FALSE,
-	'debugdb' => FALSE,
+        'alwaysRollback' => false,
+        'debugdb' => false,
 ];

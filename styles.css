@@ -28,14 +28,14 @@
 */
 
 .result > .title {
-  display: block;
-  font-weight: bold;
+    display: block;
+    font-weight: bold;
 }
 
 .result > .resultsetko {
-  color: red;
+    color: red;
 }
 
 .align-center {
-  text-align: center;
+    text-align: center;
 }

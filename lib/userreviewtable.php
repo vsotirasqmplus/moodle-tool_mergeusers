@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 
 /**
  * User review table util file
@@ -32,14 +30,14 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php');
-
+require_login();
 global $CFG;
 
-// require needed library files
-/** @noinspection PhpIncludeInspection */
+// Require needed library files.
+// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
-/** @noinspection PhpIncludeInspection */
+// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/outputcomponents.php');
 
 /**
@@ -49,108 +47,112 @@ require_once($CFG->dirroot . '/lib/outputcomponents.php');
  * @author  John Hoopes <hoopes@wisc.edu>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class UserReviewTable extends html_table implements renderable
-{
-	/** @var stdClass $olduser The olduser db object */
-	protected $olduser;
+class UserReviewTable extends html_table implements renderable {
+    /**
+     * @var stdClass $olduser The olduser db object
+     */
+    protected $olduser;
 
-	/** @var stdClass $newuser The newuser db object */
-	protected $newuser;
+    /**
+     * @var stdClass $newuser The newuser db object
+     */
+    protected $newuser;
 
-	/** @var tool_mergeusers_renderer Render to help showing user info. */
-	protected $renderer;
+    /**
+     * @var tool_mergeusers_renderer Render to help showing user info.
+     */
+    protected $renderer;
 
-	/**
-	 * Call parent construct and then build table
-	 *
-	 * @param tool_mergeusers_renderer $renderer
-	 *
-	 * @throws coding_exception
-	 * @throws moodle_exception
-	 */
-	public function __construct(tool_mergeusers_renderer $renderer)
-	{
-		global $SESSION;
+    /**
+     * Call parent construct and then build table
+     *
+     * @param tool_mergeusers_renderer $renderer
+     *
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    public function __construct(tool_mergeusers_renderer $renderer) {
+        global $SESSION;
 
-		$this->renderer = $renderer;
+        $this->renderer = $renderer;
 
-		// Call parent constructor
-		parent::__construct();
+        // Call parent constructor.
+        parent::__construct();
 
-		if(!empty($SESSION->mut)) {
-			if(!empty($SESSION->mut->olduser)) {
-				$this->olduser = $SESSION->mut->olduser;
-			}
-			if(!empty($SESSION->mut->newuser)) {
-				$this->newuser = $SESSION->mut->newuser;
-			}
-		}
-		$this->buildtable();
-	}
+        if (!empty($SESSION->mut)) {
+            if (!empty($SESSION->mut->olduser)) {
+                $this->olduser = $SESSION->mut->olduser;
+            }
+            if (!empty($SESSION->mut->newuser)) {
+                $this->newuser = $SESSION->mut->newuser;
+            }
+        }
+        $this->buildtable();
+    }
 
-	/**
-	 * Build the user select table using the extension of html_table
-	 *
-	 * @throws coding_exception
-	 * @throws moodle_exception
-	 */
-	protected function buildtable()
-	{
-		// Reset any existing data
-		$this->data = [];
+    /**
+     * Build the user select table using the extension of html_table
+     *
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    protected function buildtable() {
+        // Reset any existing data.
+        $this->data = [];
 
-		if(!empty($this->olduser) || !empty($this->newuser)) { // if there is a user add table rows and columns
-			$this->id = 'merge_users_tool_user_review_table';
-			$this->attributes['class'] = 'generaltable boxaligncenter';
+        if (!empty($this->olduser) || !empty($this->newuser)) { // If there is a user add table rows and columns.
+            $this->id = 'merge_users_tool_user_review_table';
+            $this->attributes['class'] = 'generaltable boxaligncenter';
 
-			if((isset($this->olduser->idnumber) && !empty($this->olduser->idnumber))
-				|| (isset($this->newuser->idnumber) && !empty($this->newuser->idnumber))) {
-				$extrafield = 'idnumber';
-			} else {
-				$extrafield = 'description';
-			}
-			$columns = [
-				'col_label' => '',
-				'col_userid' => 'Id',
-				'col_username' => get_string('user'),
-				'col_email' => get_string('email'),
-				'col_extra' => get_string($extrafield)
-			];
-			$this->head = array_values($columns);
-			$this->colclasses = array_keys($columns);
+            if ((isset($this->olduser->idnumber) && !empty($this->olduser->idnumber))
+                    || (isset($this->newuser->idnumber) && !empty($this->newuser->idnumber))
+            ) {
+                $extrafield = 'idnumber';
+            } else {
+                $extrafield = 'description';
+            }
+            $columns = [
+                    'col_label' => '',
+                    'col_userid' => 'Id',
+                    'col_username' => get_string('user'),
+                    'col_email' => get_string('email'),
+                    'col_extra' => get_string($extrafield)
+            ];
+            $this->head = array_values($columns);
+            $this->colclasses = array_keys($columns);
 
-			// Always display both rows so that the end user can see what is selected/not selected
-			// Add old user row
-			$olduserrow = [];
-			$olduserrow[] = get_string('olduser', 'tool_mergeusers');
-			if(!empty($this->olduser)) { // if there is an old user display it
-				$olduserrow[] = $this->olduser->id;
-				$olduserrow[] = $this->renderer->show_user($this->olduser->id, $this->olduser);
-				$olduserrow[] = $this->olduser->email;
-				$olduserrow[] = $this->olduser->$extrafield;
-			} else { // otherwise display empty fields
-				$olduserrow[] = '';
-				$olduserrow[] = '';
-				$olduserrow[] = '';
-				$olduserrow[] = '';
-			}
-			$this->data[] = $olduserrow;
+            // Always display both rows so that the end user can see what is selected/not selected.
+            // Add old user row.
+            $olduserrow = [];
+            $olduserrow[] = get_string('olduser', 'tool_mergeusers');
+            if (!empty($this->olduser)) { // If there is an old user display it.
+                $olduserrow[] = $this->olduser->id;
+                $olduserrow[] = $this->renderer->show_user($this->olduser->id, $this->olduser);
+                $olduserrow[] = $this->olduser->email;
+                $olduserrow[] = $this->olduser->$extrafield;
+            } else { // Otherwise display empty fields.
+                $olduserrow[] = '';
+                $olduserrow[] = '';
+                $olduserrow[] = '';
+                $olduserrow[] = '';
+            }
+            $this->data[] = $olduserrow;
 
-			// Add new user row
-			$newuserrow = [];
-			$newuserrow[] = get_string('newuser', 'tool_mergeusers');
-			if(!empty($this->newuser)) { // if there is an new user display it
-				$newuserrow[] = $this->newuser->id;
-				$newuserrow[] = $this->renderer->show_user($this->newuser->id, $this->newuser);
-				$newuserrow[] = $this->newuser->email;
-				$newuserrow[] = $this->newuser->$extrafield;
-			} else { // otherwise display empty fields
-				$newuserrow[] = '';
-				$newuserrow[] = '';
-				$newuserrow[] = '';
-				$newuserrow[] = '';
-			}
-			$this->data[] = $newuserrow;
-		}
-	}
+            // Add new user row.
+            $newuserrow = [];
+            $newuserrow[] = get_string('newuser', 'tool_mergeusers');
+            if (!empty($this->newuser)) { // If there is an new user display it.
+                $newuserrow[] = $this->newuser->id;
+                $newuserrow[] = $this->renderer->show_user($this->newuser->id, $this->newuser);
+                $newuserrow[] = $this->newuser->email;
+                $newuserrow[] = $this->newuser->$extrafield;
+            } else { // Otherwise display empty fields.
+                $newuserrow[] = '';
+                $newuserrow[] = '';
+                $newuserrow[] = '';
+                $newuserrow[] = '';
+            }
+            $this->data[] = $newuserrow;
+        }
+    }
 }

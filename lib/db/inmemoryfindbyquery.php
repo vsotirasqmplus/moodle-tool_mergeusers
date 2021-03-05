@@ -23,28 +23,24 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/assignsubmissionquery.php');
 
-class in_memory_assign_submission_query implements assign_submission_query
-{
-	private $memory;
+class in_memory_assign_submission_query implements assign_submission_query {
+    private $memory;
 
-	public function __construct($entitieswithkey)
-	{
-		$this->memory = $entitieswithkey;
-	}
+    public function __construct($entitieswithkey) {
+        $this->memory = $entitieswithkey;
+    }
 
-	/**
-	 * @param $assignid
-	 * @param $userid
-	 *
-	 * @return mixed|null
-	 */
-	public function latest_from_assign_and_user($assignid, $userid)
-	{
-		return $this->memory[$assignid] ?? NULL;
-	}
+    /**
+     * @param $assignid
+     * @param $userid
+     *
+     * @return mixed|null
+     */
+    public function latest_from_assign_and_user($assignid, $userid) {
+        return $this->memory[$assignid] ?? null;
+    }
 
-	public function all_from_assign_and_user($assignid, $userid)
-	{
-		return $this->memory[$assignid] ?? NULL;
-	}
+    public function all_from_assign_and_user($assignid, $userid) {
+        return $this->memory[$assignid] ?? null;
+    }
 }

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 
 /**
  * User select table util file
@@ -32,14 +30,14 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php');
-
+require_login();
 global $CFG;
 
-// require needed library files
-/** @noinspection PhpIncludeInspection */
+// Require needed library files.
+// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
-/** @noinspection PhpIncludeInspection */
+// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/outputcomponents.php');
 
 /**
@@ -49,66 +47,67 @@ require_once($CFG->dirroot . '/lib/outputcomponents.php');
  * @author  John Hoopes <hoopes@wisc.edu>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class UserSelectTable extends html_table implements renderable
-{
+class UserSelectTable extends html_table implements renderable {
 
-	/** @var tool_mergeusers_renderer Renderer to show user info. */
-	protected $renderer;
+    /**
+     * @var tool_mergeusers_renderer Renderer to show user info.
+     */
+    protected $renderer;
 
-	/**
-	 * Call parent construct
-	 *
-	 * @param array                    $users
-	 * @param tool_mergeusers_renderer $renderer
-	 *
-	 * @throws coding_exception
-	 * @throws moodle_exception
-	 */
-	public function __construct(array $users, tool_mergeusers_renderer $renderer)
-	{
-		parent::__construct();
-		$this->renderer = $renderer;
-		$this->buildtable($users);
-	}
+    /**
+     * Call parent construct
+     *
+     * @param array $users
+     * @param tool_mergeusers_renderer $renderer
+     *
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    public function __construct(array $users, tool_mergeusers_renderer $renderer) {
+        parent::__construct();
+        $this->renderer = $renderer;
+        $this->buildtable($users);
+    }
 
-	/**
-	 * Build the user select table using the extension of html_table
-	 *
-	 * @param array $users array of user results
-	 *
-	 * @throws coding_exception
-	 * @throws moodle_exception
-	 */
-	protected function buildtable(array $users)
-	{
-		// Reset any existing data
-		$this->data = [];
+    /**
+     * Build the user select table using the extension of html_table
+     *
+     * @param array $users array of user results
+     *
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    protected function buildtable(array $users) {
+        // Reset any existing data.
+        $this->data = [];
 
-		$this->id = 'merge_users_tool_user_select_table';
-		$this->attributes['class'] = 'generaltable boxaligncenter';
+        $this->id = 'merge_users_tool_user_select_table';
+        $this->attributes['class'] = 'generaltable boxaligncenter';
 
-		$columns = [
-			'col_select_olduser' => get_string('olduser', 'tool_mergeusers'),
-			'col_master_newuser' => get_string('newuser', 'tool_mergeusers'),
-			'col_userid' => 'Id',
-			'col_username' => get_string('user'),
-			'col_email' => get_string('email'),
-			'col_idnumber' => get_string('idnumber'),
-		];
+        $columns = [
+                'col_select_olduser' => get_string('olduser', 'tool_mergeusers'),
+                'col_master_newuser' => get_string('newuser', 'tool_mergeusers'),
+                'col_userid' => 'Id',
+                'col_username' => get_string('user'),
+                'col_email' => get_string('email'),
+                'col_idnumber' => get_string('idnumber'),
+        ];
 
-		$this->head = array_values($columns);
-		$this->colclasses = array_keys($columns);
+        $this->head = array_values($columns);
+        $this->colclasses = array_keys($columns);
 
-		foreach($users as $userid => $user){
-			$row = [];
-			$spanclass = ($user->suspended) ? ('usersuspended') : ('');
-			$row[] = html_writer::empty_tag('input', ['type' => 'radio', 'name' => 'olduser', 'value' => $userid, 'id' => 'olduser' . $userid]);
-			$row[] = html_writer::empty_tag('input', ['type' => 'radio', 'name' => 'newuser', 'value' => $userid, 'id' => 'newuser' . $userid]);
-			$row[] = html_writer::tag('span', $user->id, ['class' => $spanclass]);
-			$row[] = html_writer::tag('span', $this->renderer->show_user($user->id, $user), ['class' => $spanclass]);
-			$row[] = html_writer::tag('span', $user->email, ['class' => $spanclass]);
-			$row[] = html_writer::tag('span', $user->idnumber, ['class' => $spanclass]);
-			$this->data[] = $row;
-		}
-	}
+        foreach ($users as $userid => $user) {
+            $row = [];
+            $spanclass = ($user->suspended) ? ('usersuspended') : ('');
+            $row[] = html_writer::empty_tag('input',
+                    ['type' => 'radio', 'name' => 'olduser', 'value' => $userid, 'id' => 'olduser' . $userid]);
+            $row[] = html_writer::empty_tag('input',
+                    ['type' => 'radio', 'name' => 'newuser', 'value' => $userid, 'id' => 'newuser' . $userid]);
+            $row[] = html_writer::tag('span', $user->id, ['class' => $spanclass]);
+            $row[] = html_writer::tag('span', $this->renderer->show_user($user->id, $user), ['class' => $spanclass]);
+            $row[] = html_writer::tag('span', $user->email, ['class' => $spanclass]);
+            $row[] = html_writer::tag('span', $user->idnumber, ['class' => $spanclass]);
+            $this->data[] = $row;
+        }
+    }
 }

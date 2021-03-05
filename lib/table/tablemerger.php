@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -50,29 +49,27 @@
  *    by any other TableMerger.
  * b. The invocation to merge('table1',...) processes both tables, table1 and
  *    table1_aux according to some specific rules.
- *
  */
-interface TableMerger
-{
-	const PRIMARY_KEY = 'id';
+interface TableMerger {
+    const PRIMARY_KEY = 'id';
 
-	/**
-	 * The given TableMerger can assist the merging of the users in
-	 * a table, but affecting to multiple tables. If so, return an
-	 * array with the list of table names to skip.
-	 *
-	 * @return array List of database table names without the $CFG->prefix.
-	 * Returns an empty array when nothing to do.
-	 */
-	public function getTablesToSkip(): array;
+    /**
+     * The given TableMerger can assist the merging of the users in
+     * a table, but affecting to multiple tables. If so, return an
+     * array with the list of table names to skip.
+     *
+     * @return array List of database table names without the $CFG->prefix.
+     * Returns an empty array when nothing to do.
+     */
+    public function gettablestoskip(): array;
 
-	/**
-	 * Merges the records related to the given users given in $data,
-	 * updating/appending the list of $errorMessages and $actionLog.
-	 *
-	 * @param array $data          array with the necessary data for merging records.
-	 * @param array $errorMessages list of error messages.
-	 * @param array $actionLog     list of action performed.
-	 */
-	public function merge(array $data, array &$errorMessages, array &$actionLog);
+    /**
+     * Merges the records related to the given users given in $data,
+     * updating/appending the list of $errorMessages and $actionLog.
+     *
+     * @param array $data array with the necessary data for merging records.
+     * @param array $errormessages list of error messages.
+     * @param array $actionlog list of action performed.
+     */
+    public function merge(array $data, array &$errormessages, array &$actionlog);
 }

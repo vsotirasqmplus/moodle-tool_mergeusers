@@ -22,96 +22,94 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once __DIR__ . '/../../../../config.php';
-
+defined('MOODLE_INTERNAL') || die();
+require_once(__DIR__ . '/../../../../config.php');
+require_login();
 global $CFG;
 
-/** @noinspection PhpIncludeInspection */
-require_once $CFG->dirroot . '/lib/clilib.php';
+// I /** @noinspection PhpIncludeInspection */.
+require_once($CFG->dirroot . '/lib/clilib.php');
 
 /**
  * Class to manage logging actions for this tool.
  * General log table cannot be used for log.info field length restrictions.
  */
-class tool_mergeusers_logger
-{
+class tool_mergeusers_logger {
 
-	/**
-	 * Adds a merging action log into tool log.
-	 *
-	 * @param int   $touserid   user.id where all data from $fromuserid will be merged into.
-	 * @param int   $fromuserid user.id moving all data into $touserid.
-	 * @param bool  $success    true if merging action was ok; false otherwise.
-	 * @param array $log        list of actions performed for a successful merging;
-	 *                          or a problem description if merging failed.
-	 *
-	 * @return bool|int
-	 * @throws moodle_exception
-	 */
-	public function log(int $touserid, int $fromuserid, bool $success, array $log)
-	{
-		global $DB;
+    /**
+     * Adds a merging action log into tool log.
+     *
+     * @param int $touserid user.id where all data from $fromuserid will be merged into.
+     * @param int $fromuserid user.id moving all data into $touserid.
+     * @param bool $success true if merging action was ok; false otherwise.
+     * @param array $log list of actions performed for a successful merging;
+     *                          or a problem description if merging failed.
+     *
+     * @return bool|int
+     * @throws moodle_exception
+     */
+    public function log(int $touserid, int $fromuserid, bool $success, array $log) {
+        global $DB;
 
-		$record = new stdClass();
-		$record->touserid = $touserid;
-		$record->fromuserid = $fromuserid;
-		$record->timemodified = time();
-		$record->success = (int)$success;
-		$record->log = json_encode($log); //to get it
+        $record = new stdClass();
+        $record->touserid = $touserid;
+        $record->fromuserid = $fromuserid;
+        $record->timemodified = time();
+        $record->success = (int) $success;
+        $record->log = json_encode($log); // To get it.
 
-		try {
-			return $DB->insert_record('tool_mergeusers', $record); //exception is thrown on any error
-		} catch(Exception $e) {
-			$msg = __METHOD__ . ' : Cannot insert new record on log. Reason: "' . $DB->get_last_error() .
-				'". Message: "' . $e->getMessage() . '". Trace' . $e->getTraceAsString();
-			if(CLI_SCRIPT) {
-				cli_error($msg);
-			} else {
-				print_error($msg, NULL, new moodle_url('/admin/tool/mergeusers/index.php'));
-			}
-			return FALSE;
-		}
-	}
+        try {
+            return $DB->insert_record('tool_mergeusers', $record); // Exception is thrown on any error.
+        } catch (Exception $e) {
+            $msg = __METHOD__ . ' : Cannot insert new record on log. Reason: "' . $DB->get_last_error() .
+                    '". Message: "' . $e->getMessage() . '". Trace' . $e->getTraceAsString();
+            if (CLI_SCRIPT) {
+                cli_error($msg);
+            } else {
+                print_error($msg, null, new moodle_url('/admin/tool/mergeusers/index.php'));
+            }
+            return false;
+        }
+    }
 
-	/**
-	 * Gets the merging logs and stores on to and from attributes the related user records.
-	 *
-	 * @param null   $filter    associative array with conditions to match for getting results.
-	 *                          If empty, this will return all logs.
-	 * @param int    $limitfrom starting number of record to get. 0 to get all.
-	 * @param int    $limitnum  maximum number of records to get. 0 to get all.
-	 * @param string $sort
-	 *
-	 * @return array|null
-	 * @throws dml_exception
-	 */
-	public function get($filter = NULL, $limitfrom = 0, $limitnum = 0, $sort = "timemodified DESC"): ?array
-	{
-		global $DB;
-		$logs = $DB->get_records('tool_mergeusers', $filter, $sort, 'id, touserid, fromuserid, success, timemodified', $limitfrom, $limitnum);
-		if(!$logs) {
-			return $logs;
-		}
-		foreach($logs as $id => $log){
-			$log->to = $DB->get_record('user', ['id' => $log->touserid]);
-			$log->from = $DB->get_record('user', ['id' => $log->fromuserid]);
-		}
-		return $logs;
-	}
+    /**
+     * Gets the merging logs and stores on to and from attributes the related user records.
+     *
+     * @param null $filter associative array with conditions to match for getting results.
+     *                          If empty, this will return all logs.
+     * @param int $limitfrom starting number of record to get. 0 to get all.
+     * @param int $limitnum maximum number of records to get. 0 to get all.
+     * @param string $sort
+     *
+     * @return array|null
+     * @throws dml_exception
+     */
+    public function get($filter = null, $limitfrom = 0, $limitnum = 0, $sort = 'timemodified DESC'): ?array {
+        global $DB;
+        $logs = $DB->get_records('tool_mergeusers', $filter, $sort, 'id, touserid, fromuserid, success, timemodified', $limitfrom,
+                $limitnum);
+        if (!$logs) {
+            return $logs;
+        }
+        foreach ($logs as $id => $log) {
+            $log->to = $DB->get_record('user', ['id' => $log->touserid]);
+            $log->from = $DB->get_record('user', ['id' => $log->fromuserid]);
+        }
+        return $logs;
+    }
 
-	/**
-	 * Get the whole detail of a log id.
-	 *
-	 * @param int $logid
-	 *
-	 * @return stdClass the whole record related to the $logid
-	 * @throws dml_exception
-	 */
-	public function getDetail(int $logid): stdClass
-	{
-		global $DB;
-		$log = $DB->get_record('tool_mergeusers', ['id' => $logid], '*', MUST_EXIST);
-		$log->log = json_decode($log->log);
-		return $log;
-	}
+    /**
+     * Get the whole detail of a log id.
+     *
+     * @param int $logid
+     *
+     * @return stdClass the whole record related to the $logid
+     * @throws dml_exception
+     */
+    public function getdetail(int $logid): stdClass {
+        global $DB;
+        $log = $DB->get_record('tool_mergeusers', ['id' => $logid], '*', MUST_EXIST);
+        $log->log = json_decode($log->log);
+        return $log;
+    }
 }

@@ -25,61 +25,60 @@
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-/** @noinspection PhpIncludeInspection */
-require_once $CFG->libdir . '/gdlib.php';
+// 0 /** @noinspection PhpIncludeInspection */.
+require_once($CFG->libdir . '/gdlib.php');
 
 /**
- * Suspend the old user, by suspending its account, and updating the profile picture
+ * Suspend the old user, by suspending its account, and updating the profile picture.
  * to a generic one.
  *
- * @param object           $event stdClass with all event data.
+ * @param object $event stdClass with all event data.
  *
- * @return bool
- * @throws dml_exception
- * @global moodle_database $DB
+ * @return       bool
+ * @throws       dml_exception
+ * @global       moodle_database $DB
  * @noinspection PhpUnused
  */
-function tool_mergeusers_old_user_suspend(object $event): bool
-{
-	global $DB;
+function tool_mergeusers_old_user_suspend(object $event): bool {
+    global $DB;
 
-	$oldid = $event->other['usersinvolved']['fromid'];
+    $oldid = $event->other['usersinvolved']['fromid'];
 
-	// Check configuration to see if the old user gets suspended
-	$enabled = (int)get_config('tool_mergeusers', 'suspenduser');
-	if($enabled !== 1) {
-		return TRUE;
-	}
+    // Check configuration to see if the old user gets suspended.
+    $enabled = (int) get_config('tool_mergeusers', 'suspenduser');
+    if ($enabled !== 1) {
+        return true;
+    }
 
-	// 1. update suspended flag
-	$olduser = new stdClass();
-	$olduser->id = $oldid;
-	$olduser->suspended = 1;
-	$olduser->timemodified = time();
-	try {
-		$DB->update_record('user', $olduser);
-	} catch(dml_exception $e) {
-		mtrace($e->getMessage());
-		return FALSE;
-	}
+    // 1. update suspended flag.
+    $olduser = new stdClass();
+    $olduser->id = $oldid;
+    $olduser->suspended = 1;
+    $olduser->timemodified = time();
+    try {
+        $DB->update_record('user', $olduser);
+    } catch (dml_exception $e) {
+        mtrace($e->getMessage());
+        return false;
+    }
 
-	// 2. update profile picture
-	// get source, common image
-	$fullpath = dirname(dirname(__DIR__)) . "/pix/suspended.jpg";
-	if(!file_exists($fullpath)) {
-		return FALSE; //do nothing; aborting, given that the image does not exist
-	}
+    // 2. update profile picture.
+    // get source, common image.
+    $fullpath = dirname(dirname(__DIR__)) . '/pix/suspended.jpg';
+    if (!file_exists($fullpath)) {
+        return false; // Do nothing; aborting, given that the image does not exist.
+    }
 
-	// put the common image as the profile picture.
-	$context = context_user::instance($oldid);
-	if(($newrev = process_new_icon($context, 'user', 'icon', 0, $fullpath))) {
-		try {
-			$DB->set_field('user', 'picture', $newrev, ['id' => $oldid]);
-		} catch(dml_exception $e) {
-			mtrace($e->getMessage());
-			return FALSE;
-		}
-	}
+    // Put the common image as the profile picture.
+    $context = context_user::instance($oldid);
+    if (($newrev = process_new_icon($context, 'user', 'icon', 0, $fullpath))) {
+        try {
+            $DB->set_field('user', 'picture', $newrev, ['id' => $oldid]);
+        } catch (dml_exception $e) {
+            mtrace($e->getMessage());
+            return false;
+        }
+    }
 
-	return TRUE;
+    return true;
 }

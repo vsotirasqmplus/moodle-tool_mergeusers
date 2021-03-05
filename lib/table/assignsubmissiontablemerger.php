@@ -24,84 +24,79 @@ defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../duplicateddata/assignsubmissionduplicateddatamerger.php');
 require_once(__DIR__ . '/../db/dbassignsubmission.php');
 
-class AssignSubmissionTableMerger extends GenericTableMerger
-{
+class AssignSubmissionTableMerger extends GenericTableMerger {
 
-	private $findassignsubmissions;
-	private $duplicateddatamerger;
+    private $findassignsubmissions;
+    private $duplicateddatamerger;
 
-	/**
-	 * AssignSubmissionTableMerger constructor.
-	 *
-	 * @throws dml_exception
-	 */
-	public function __construct()
-	{
-		// parent::__construct(new AssignSubmissionDuplicatedDataMerger());
-		parent::__construct();
-		$this->findassignsubmissions = new db_assign_submission();
-		$this->duplicateddatamerger = new AssignSubmissionDuplicatedDataMerger();
-	}
+    /**
+     * AssignSubmissionTableMerger constructor.
+     *
+     * @throws dml_exception
+     */
+    public function __construct() {
+        parent::__construct();
+        $this->findassignsubmissions = new db_assign_submission();
+        $this->duplicateddatamerger = new AssignSubmissionDuplicatedDataMerger();
+    }
 
+    /**
+     * @param array $data
+     * @param string $userfield
+     * @param array $otherfields
+     * @param array $recordstomodify
+     * @param array $actionlog
+     * @param array $errormessages
+     *
+     * @throws dml_exception
+     * @throws coding_exception
+     */
+    public function mergeccompoundindex(array $data, string $userfield, array $otherfields,
+            array &$recordstomodify, array &$actionlog, array &$errormessages
+    ) {
 
-	/**
-	 * @param array  $data
-	 * @param string $userfield
-	 * @param array  $otherfields
-	 * @param array  $recordsToModify
-	 * @param array  $actionLog
-	 * @param array  $errorMessages
-	 *
-	 * @throws dml_exception
-	 * @throws coding_exception
-	 */
-	public function mergeCompoundIndex(array $data, string $userfield, array $otherfields,
-									   array &$recordsToModify, array &$actionLog, array &$errorMessages)
-	{
+        $fromuserid = $data['fromid'];
+        $touserid = $data['toid'];
+        $assignstocheck = $recordstomodify;
+        $recordstomodify = [];
+        $assignsubmissionstoremove = [];
 
-		$fromuserid = $data['fromid'];
-		$touserid = $data['toid'];
-		$assignstocheck = $recordsToModify;
-		$recordsToModify = [];
-		$assignsubmissionstoremove = [];
+        foreach ($assignstocheck as $assignid) {
+            $olduserlatestsubmission = $this->findassignsubmissions->latest_from_assign_and_user($assignid, $fromuserid);
+            $newuserlatestsubmission = $this->findassignsubmissions->latest_from_assign_and_user($assignid, $touserid);
 
-		foreach($assignstocheck as $assignid){
-			$olduserlatestsubmission = $this->findassignsubmissions->latest_from_assign_and_user($assignid, $fromuserid);
-			$newuserlatestsubmission = $this->findassignsubmissions->latest_from_assign_and_user($assignid, $touserid);
+            if (!empty($newuserlatestsubmission)) {
+                $duplicateddata = $this->duplicateddatamerger->merge($olduserlatestsubmission, $newuserlatestsubmission);
+                $recordstomodify += $duplicateddata->to_modify();
+                $assignsubmissionstoremove += $duplicateddata->to_remove();
+                continue;
+            }
 
-			if(!empty($newuserlatestsubmission)) {
-				$duplicateddata = $this->duplicateddatamerger->merge($olduserlatestsubmission, $newuserlatestsubmission);
-				$recordsToModify += $duplicateddata->to_modify();
-				$assignsubmissionstoremove += $duplicateddata->to_remove();
-				continue;
-			}
+            if ($oldusersubmissions = $this->findassignsubmissions->all_from_assign_and_user($assignid, $fromuserid)) {
+                $assignsubmissionstomodify = array_keys($oldusersubmissions);
+                $recordstomodify += array_combine($assignsubmissionstomodify, $assignsubmissionstomodify);
+            }
+        }
 
-			if($oldusersubmissions = $this->findassignsubmissions->all_from_assign_and_user($assignid, $fromuserid)) {
-				$assignsubmissionstomodify = array_keys($oldusersubmissions);
-				$recordsToModify += array_combine($assignsubmissionstomodify, $assignsubmissionstomodify);
-			}
-		}
+        foreach ($assignsubmissionstoremove as $assignsubmissionid) {
+            if (isset($recordstomodify[$assignsubmissionid])) {
+                unset($recordstomodify[$assignsubmissionid]);
+            }
+        }
 
-		foreach($assignsubmissionstoremove as $assignsubmissionid){
-			if(isset($recordsToModify[$assignsubmissionid])) {
-				unset($recordsToModify[$assignsubmissionid]);
-			}
-		}
+        $this->cleanrecordsoncompoundindex($data, $assignsubmissionstoremove, $actionlog, $errormessages);
+    }
 
-		$this->cleanRecordsOnCompoundIndex($data, $assignsubmissionstoremove, $actionLog, $errorMessages);
-	}
-
-	/**
-	 * @param $data
-	 * @param $fieldName
-	 *
-	 * @return array
-	 * @throws dml_exception
-	 */
-	protected function get_records_to_be_updated($data, $fieldName): ?array
-	{
-		global $DB;
-		// Assign submissions may have attempts. We need a unique list of assignment ids.
-		return $DB->get_records($data['tableName'], [$fieldName => $data['fromid']], '', 'DISTINCT assignment');
-	}
+    /**
+     * @param $data
+     * @param $fieldname
+     *
+     * @return array
+     * @throws dml_exception
+     */
+    protected function getrecordstobeupdated($data, $fieldname): ?array {
+        global $DB;
+        // Assign submissions may have attempts. We need a unique list of assignment ids.
+        return $DB->get_records($data['tableName'], [$fieldname => $data['fromid']], '', 'DISTINCT assignment');
+    }
 }

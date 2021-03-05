@@ -22,230 +22,227 @@
  * @author     Andrew Hancox <andrewdchancox@googlemail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class tool_mergeusers_quiz_testcase extends advanced_testcase
-{
-	private $quiz1;
-	private $user_keep;
-	private $quiz2;
-	private $user_remove;
-	private $course2;
-	private $course1;
+class tool_mergeusers_quiz_testcase extends advanced_testcase {
+    private $quiz1;
+    private $user_keep;
+    private $quiz2;
+    private $user_remove;
+    private $course2;
+    private $course1;
 
-	/**
-	 * Configure the test.
-	 * Create two courses with a quiz in each.
-	 * Create two users.
-	 * Enrol the users onto the courses.
-	 *
-	 * @noinspection PhpIncludeInspection
-	 * @throws coding_exception
-	 * @throws coding_exception
-	 * @throws dml_exception
-	 * @throws dml_exception
-	 * @throws dml_exception
-	 * @throws coding_exception
-	 */
-	public function setUp()
-	{
-		global $CFG, $DB;
-		require_once("$CFG->dirroot/admin/tool/mergeusers/lib/mergeusertool.php");
-		$this->resetAfterTest();
+    /**
+     * Configure the test.
+     * Create two courses with a quiz in each.
+     * Create two users.
+     * Enrol the users onto the courses.
+     *
+     * @noinspection PhpIncludeInspection
+     * @throws       coding_exception
+     * @throws       coding_exception
+     * @throws       dml_exception
+     * @throws       dml_exception
+     * @throws       dml_exception
+     * @throws       coding_exception
+     */
+    public function setUp() {
+        global $CFG, $DB;
+        include_once "$CFG->dirroot/admin/tool/mergeusers/lib/mergeusertool.php";
+        $this->resetAfterTest();
 
-		// Setup two users to merge.
-		$this->user_remove = $this->getDataGenerator()->create_user();
-		$this->user_keep = $this->getDataGenerator()->create_user();
+        // Setup two users to merge.
+        $this->user_remove = $this->getDataGenerator()->create_user();
+        $this->user_keep = $this->getDataGenerator()->create_user();
 
-		// Create three courses.
-		$this->course1 = $this->getDataGenerator()->create_course();
-		$this->course2 = $this->getDataGenerator()->create_course();
+        // Create three courses.
+        $this->course1 = $this->getDataGenerator()->create_course();
+        $this->course2 = $this->getDataGenerator()->create_course();
 
-		$this->quiz1 = $this->add_quiz_to_course($this->course1);
-		$this->quiz2 = $this->add_quiz_to_course($this->course2);
+        $this->quiz1 = $this->add_quiz_to_course($this->course1);
+        $this->quiz2 = $this->add_quiz_to_course($this->course2);
 
-		$maninstance1 = $DB->get_record('enrol', ['courseid' => $this->course1->id, 'enrol' => 'manual']
-			, '*', MUST_EXIST);
+        $maninstance1 = $DB->get_record(
+                'enrol', ['courseid' => $this->course1->id, 'enrol' => 'manual'],
+                '*', MUST_EXIST
+        );
 
-		$maninstance2 = $DB->get_record('enrol', ['courseid' => $this->course2->id, 'enrol' => 'manual']
-			, '*', MUST_EXIST);
+        $maninstance2 = $DB->get_record(
+                'enrol', ['courseid' => $this->course2->id, 'enrol' => 'manual'],
+                '*', MUST_EXIST
+        );
 
-		$manual = enrol_get_plugin('manual');
+        $manual = enrol_get_plugin('manual');
 
-		$studentrole = $DB->get_record('role', ['shortname' => 'student']);
+        $studentrole = $DB->get_record('role', ['shortname' => 'student']);
 
-		// Enrol the users on the courses.
-		$manual->enrol_user($maninstance1, $this->user_remove->id, $studentrole->id);
-		$manual->enrol_user($maninstance1, $this->user_keep->id, $studentrole->id);
+        // Enrol the users on the courses.
+        $manual->enrol_user($maninstance1, $this->user_remove->id, $studentrole->id);
+        $manual->enrol_user($maninstance1, $this->user_keep->id, $studentrole->id);
 
-		$manual->enrol_user($maninstance2, $this->user_remove->id, $studentrole->id);
-		$manual->enrol_user($maninstance2, $this->user_keep->id, $studentrole->id);
-	}
+        $manual->enrol_user($maninstance2, $this->user_remove->id, $studentrole->id);
+        $manual->enrol_user($maninstance2, $this->user_keep->id, $studentrole->id);
+    }
 
-	/**
-	 * Utility method to add a quiz to a course.
-	 *
-	 * @param $course
-	 *
-	 * @return testable_assign
-	 * @throws coding_exception
-	 * @noinspection PhpPossiblePolymorphicInvocationInspection
-	 */
-	private function add_quiz_to_course($course): testable_assign
-	{
-		// Add a quiz to the course.
-		$quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
-		$quiz = $quizgenerator->create_instance([
-													'course' => $course->id,
-													'questionsperpage' => 0,
-													'grade' => 100.0,
-													'sumgrades' => 2
-												]);
+    /**
+     * Utility method to add a quiz to a course.
+     *
+     * @param $course
+     *
+     * @return       testable_assign
+     * @throws       coding_exception
+     * @noinspection PhpPossiblePolymorphicInvocationInspection
+     */
+    private function add_quiz_to_course($course): testable_assign {
+        // Add a quiz to the course.
+        $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+        $quiz = $quizgenerator->create_instance(
+                [
+                        'course' => $course->id,
+                        'questionsperpage' => 0,
+                        'grade' => 100.0,
+                        'sumgrades' => 2
+                ]
+        );
 
-		// Create a couple of questions using test data in mod_quiz.
-		$questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
-		$cat = $questiongenerator->create_question_category();
-		$saq = $questiongenerator->create_question('shortanswer', NULL, ['category' => $cat->id]);
-		$numq = $questiongenerator->create_question('numerical', NULL, ['category' => $cat->id]);
+        // Create a couple of questions using test data in mod_quiz.
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category();
+        $saq = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
+        $numq = $questiongenerator->create_question('numerical', null, ['category' => $cat->id]);
 
-		// Add them to the quiz.
-		quiz_add_quiz_question($saq->id, $quiz);
-		quiz_add_quiz_question($numq->id, $quiz);
+        // Add them to the quiz.
+        quiz_add_quiz_question($saq->id, $quiz);
+        quiz_add_quiz_question($numq->id, $quiz);
 
-		return $quiz;
-	}
+        return $quiz;
+    }
 
-	/**
-	 * Get an answer to the quiz that is 50% right.
-	 *
-	 * @return array
-	 */
-	private function get_fiftypercent_answers(): array
-	{
-		return [1 => ['answer' => 'frog'], 2 => ['answer' => '3.15']];
-	}
+    /**
+     * Get an answer to the quiz that is 50% right.
+     *
+     * @return array
+     */
+    private function get_fiftypercent_answers(): array {
+        return [1 => ['answer' => 'frog'], 2 => ['answer' => '3.15']];
+    }
 
-	/**
-	 * Utility method to get the grade for a user.
-	 *
-	 * @param $user
-	 * @param $quiz
-	 * @param $course
-	 *
-	 * @return testable_assign
-	 */
-	private function get_user_quiz_grade($user, $quiz, $course): testable_assign
-	{
-		$gradebookgrades = grade_get_grades($course->id, 'mod', 'quiz', $quiz->id, $user->id);
-		$gradebookitem = array_shift($gradebookgrades->items);
-		$grade = $gradebookitem->grades[$user->id];
-		return $grade->str_grade;
-	}
+    /**
+     * Utility method to get the grade for a user.
+     *
+     * @param $user
+     * @param $quiz
+     * @param $course
+     *
+     * @return testable_assign
+     */
+    private function get_user_quiz_grade($user, $quiz, $course): testable_assign {
+        $gradebookgrades = grade_get_grades($course->id, 'mod', 'quiz', $quiz->id, $user->id);
+        $gradebookitem = array_shift($gradebookgrades->items);
+        $grade = $gradebookitem->grades[$user->id];
+        return $grade->str_grade;
+    }
 
-	/**
-	 * Get an answer to the quiz that is 100% right.
-	 *
-	 * @return array
-	 */
-	private function get_hundredpercent_answers(): array
-	{
-		return [1 => ['answer' => 'frog'], 2 => ['answer' => '3.14']];
-	}
+    /**
+     * Get an answer to the quiz that is 100% right.
+     *
+     * @return array
+     */
+    private function get_hundredpercent_answers(): array {
+        return [1 => ['answer' => 'frog'], 2 => ['answer' => '3.14']];
+    }
 
-	/**
-	 * Utility method to submit an attempt on a quiz.
-	 *
-	 * @param $quiz
-	 * @param $user
-	 * @param $answers
-	 *
-	 * @return int|testable_assign
-	 * @throws moodle_exception
-	 */
-	private function submit_quiz_attempt($quiz, $user, $answers)
-	{
-		// Create a quiz attempt for the user.
-		$quizobj = quiz::create($quiz->id, $user->id);
+    /**
+     * Utility method to submit an attempt on a quiz.
+     *
+     * @param $quiz
+     * @param $user
+     * @param $answers
+     *
+     * @return int|testable_assign
+     * @throws moodle_exception
+     */
+    private function submit_quiz_attempt($quiz, $user, $answers) {
+        // Create a quiz attempt for the user.
+        $quizobj = quiz::create($quiz->id, $user->id);
 
-		// Set up and start an attempt.
-		$quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
-		$quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
-		$timenow = time();
-		$attempt = quiz_create_attempt($quizobj, 1, (object)FALSE, $timenow, FALSE, $user->id);
-		quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
-		quiz_attempt_save_started($quizobj, $quba, $attempt);
-		$attemptobj = quiz_attempt::create($attempt->id);
-		$attemptobj->process_submitted_actions($timenow, FALSE, $answers);
+        // Set up and start an attempt.
+        $quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
+        $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+        $timenow = time();
+        $attempt = quiz_create_attempt($quizobj, 1, (object) false, $timenow, false, $user->id);
+        quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $timenow);
+        quiz_attempt_save_started($quizobj, $quba, $attempt);
+        $attemptobj = quiz_attempt::create($attempt->id);
+        $attemptobj->process_submitted_actions($timenow, false, $answers);
 
-		$timefinish = time();
+        $timefinish = time();
 
-		// Finish the attempt.
-		$attemptobj->process_finish($timefinish, FALSE);
+        // Finish the attempt.
+        $attemptobj->process_finish($timefinish, false);
 
-		return $timefinish;
-	}
+        return $timefinish;
+    }
 
-	/**
-	 * Have two users attempt the same quiz and then merge them.
-	 *
-	 * @group        tool_mergeusers
-	 * @group        tool_mergeusers_quiz
-	 * @noinspection PhpUndefinedMethodInspection
-	 * @throws dml_exception
-	 * @throws moodle_exception
-	 * @throws coding_exception
-	 */
-	public function test_mergeconflictingquizattempts()
-	{
-		global $DB;
+    /**
+     * Have two users attempt the same quiz and then merge them.
+     *
+     * @group        tool_mergeusers
+     * @group        tool_mergeusers_quiz
+     * @noinspection PhpUndefinedMethodInspection
+     * @throws       dml_exception
+     * @throws       moodle_exception
+     * @throws       coding_exception
+     */
+    public function test_mergeconflictingquizattempts() {
+        global $DB;
 
-		$this->submit_quiz_attempt($this->quiz1, $this->user_keep, $this->get_fiftypercent_answers());
-		$this->submit_quiz_attempt($this->quiz1, $this->user_remove, $this->get_hundredpercent_answers());
+        $this->submit_quiz_attempt($this->quiz1, $this->user_keep, $this->get_fiftypercent_answers());
+        $this->submit_quiz_attempt($this->quiz1, $this->user_remove, $this->get_hundredpercent_answers());
 
-		// User to keep gets 50%, user to remove gets 100%.
-		$this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
-		$this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_remove, $this->quiz1, $this->course1));
+        // User to keep gets 50%, user to remove gets 100%.
+        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
+        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_remove, $this->quiz1, $this->course1));
 
-		set_config('quizattemptsaction', QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
+        set_config('quizattemptsaction', QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
 
-		$mut = new MergeUserTool();
-		$mut->merge($this->user_keep->id, $this->user_remove->id);
+        $mut = new MergeUserTool();
+        $mut->merge($this->user_keep->id, $this->user_remove->id);
 
-		// User to remove should now have 100%.
-		$this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
+        // User to remove should now have 100%.
+        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
 
-		$user_remove = $DB->get_record('user', ['id' => $this->user_remove->id]);
-		$this->assertEquals(1, $user_remove->suspended);
-	}
+        $user_remove = $DB->get_record('user', ['id' => $this->user_remove->id]);
+        $this->assertEquals(1, $user_remove->suspended);
+    }
 
-	/**
-	 * Have two users attempt different quizzes and then merge them.
-	 *
-	 * @throws coding_exception
-	 * @throws dml_exception
-	 * @throws dml_transaction_exception
-	 * @throws moodle_exception
-	 * @noinspection PhpUndefinedMethodInspection
-	 */
-	public function test_mergenonconflictingquizattempts()
-	{
-		global $DB;
+    /**
+     * Have two users attempt different quizzes and then merge them.
+     *
+     * @throws       coding_exception
+     * @throws       dml_exception
+     * @throws       dml_transaction_exception
+     * @throws       moodle_exception
+     * @noinspection PhpUndefinedMethodInspection
+     */
+    public function test_mergenonconflictingquizattempts() {
+        global $DB;
 
-		$this->submit_quiz_attempt($this->quiz1, $this->user_keep, $this->get_fiftypercent_answers());
-		$this->submit_quiz_attempt($this->quiz2, $this->user_remove, $this->get_hundredpercent_answers());
+        $this->submit_quiz_attempt($this->quiz1, $this->user_keep, $this->get_fiftypercent_answers());
+        $this->submit_quiz_attempt($this->quiz2, $this->user_remove, $this->get_hundredpercent_answers());
 
-		$this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
-		$this->assertEquals('-', $this->get_user_quiz_grade($this->user_keep, $this->quiz2, $this->course2));
-		$this->assertEquals('-', $this->get_user_quiz_grade($this->user_remove, $this->quiz1, $this->course1));
-		$this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_remove, $this->quiz2, $this->course2));
+        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
+        $this->assertEquals('-', $this->get_user_quiz_grade($this->user_keep, $this->quiz2, $this->course2));
+        $this->assertEquals('-', $this->get_user_quiz_grade($this->user_remove, $this->quiz1, $this->course1));
+        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_remove, $this->quiz2, $this->course2));
 
-		set_config('quizattemptsaction', QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
+        set_config('quizattemptsaction', QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
 
-		$mut = new MergeUserTool();
-		$mut->merge($this->user_keep->id, $this->user_remove->id);
+        $mut = new MergeUserTool();
+        $mut->merge($this->user_keep->id, $this->user_remove->id);
 
-		$this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
-		$this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz2, $this->course2));
+        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
+        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz2, $this->course2));
 
-		$user_remove = $DB->get_record('user', ['id' => $this->user_remove->id]);
-		$this->assertEquals(1, $user_remove->suspended);
-	}
+        $user_remove = $DB->get_record('user', ['id' => $this->user_remove->id]);
+        $this->assertEquals(1, $user_remove->suspended);
+    }
 }

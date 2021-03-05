@@ -21,6 +21,7 @@
  * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
 
 /**
  * Wrapper class for the configuration settings of the merge user utility.
@@ -51,59 +52,55 @@
  * If the key 'both' appears, means that both columns are user-related and must be searched for
  * both. See the README.txt for more details on special cases.
  */
-class tool_mergeusers_config
-{
-	/**
-	 * @var tool_mergeusers_config singleton instance.
-	 */
-	private static $instance = NULL;
+class tool_mergeusers_config {
+    /**
+     * @var tool_mergeusers_config singleton instance.
+     */
+    private static $instance = null;
 
-	/**
-	 * @var array settings
-	 */
-	private $config;
+    /**
+     * @var array settings
+     */
+    private $config;
 
-	/**
-	 * Private constructor for the singleton.
-	 */
-	private function __construct()
-	{
-		$config = include dirname(__DIR__) . '/config/config.php';
+    /**
+     * Private constructor for the singleton.
+     */
+    private function __construct() {
+        $config = include(dirname(__DIR__) . '/config/config.php');
 
-		if(file_exists(dirname(__DIR__) . '/config/config.local.php')) {
-			$localconfig = include dirname(__DIR__) . '/config/config.local.php';
-			$config = array_replace_recursive($config, $localconfig);
-		}
-		$this->config = $config;
-	}
+        if (file_exists(dirname(__DIR__) . '/config/config.local.php')) {
+            $localconfig = include(dirname(__DIR__) . '/config/config.local.php');
+            $config = array_replace_recursive($config, $localconfig);
+        }
+        $this->config = $config;
+    }
 
-	/**
-	 * Singleton method.
-	 *
-	 * @return tool_mergeusers_config singleton instance.
-	 */
-	public static function instance(): ?tool_mergeusers_config
-	{
-		if(is_null(self::$instance) || defined('PHPUNIT_TEST') || defined('BEHAT_SITE_RUNNING')) {
-			self::$instance = new tool_mergeusers_config();
-		}
-		return self::$instance;
-	}
+    /**
+     * Singleton method.
+     *
+     * @return tool_mergeusers_config singleton instance.
+     */
+    public static function instance(): ?tool_mergeusers_config {
+        if (is_null(self::$instance) || defined('PHPUNIT_TEST') || defined('BEHAT_SITE_RUNNING')) {
+            self::$instance = new tool_mergeusers_config();
+        }
+        return self::$instance;
+    }
 
-	/**
-	 * Accessor to properties from the current config as attributes of an standard object.
-	 *
-	 * @param string $name name of attribute; by now only:
-	 *                     'gathering', 'exceptions', 'compoundindexes', 'userfieldnames'.
-	 *
-	 * @return mixed null if $name is not a valid property name of the current configuration;
-	 * string or array having the value of the $name property.
-	 */
-	public function __get(string $name)
-	{
-		if(isset($this->config[$name])) {
-			return $this->config[$name];
-		}
-		return NULL;
-	}
+    /**
+     * Accessor to properties from the current config as attributes of an standard object.
+     *
+     * @param string $name name of attribute; by now only:
+     *                     'gathering', 'exceptions', 'compoundindexes', 'userfieldnames'.
+     *
+     * @return mixed null if $name is not a valid property name of the current configuration;
+     * string or array having the value of the $name property.
+     */
+    public function __get(string $name) {
+        if (isset($this->config[$name])) {
+            return $this->config[$name];
+        }
+        return null;
+    }
 }

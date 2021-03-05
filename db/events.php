@@ -21,23 +21,23 @@
  * @copyright  2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-/**
+defined('MOODLE_INTERNAL') || die();
+/*
  * @var array Available handlers for merging events.
  *
  * Available events: merging_success, merging_failed
  */
 $observers = [
-	[
-		'eventname' => 'tool_mergeusers\event\user_merged_success',
-		'callback' => 'tool_mergeusers_old_user_suspend',
-		'includefile' => '/admin/tool/mergeusers/lib/events/olduser.php',
-		'internal' => 1
-	],
-	[
-		'eventname' => 'tool_mergeusers\event\user_merged_success',
-		'callback' => 'tool_mergeusers_make_kept_user_as_not_suspended',
-		'includefile' => '/admin/tool/mergeusers/lib/events/keptuser.php',
-		'internal' => 1
-	],
+        [
+                'eventname' => 'tool_mergeusers\event\user_merged_success',
+                'callback' => 'tool_mergeusers_old_user_suspend',
+                'includefile' => '/admin/tool/mergeusers/lib/events/olduser.php',
+                'internal' => 1
+        ],
+        [
+                'eventname' => 'tool_mergeusers\event\user_merged_success',
+                'callback' => 'tool_mergeusers_make_kept_user_as_not_suspended',
+                'includefile' => '/admin/tool/mergeusers/lib/events/keptuser.php',
+                'internal' => 1
+        ],
 ];
