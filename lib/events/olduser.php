@@ -25,7 +25,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->libdir . '/gdlib.php');
 
 /**

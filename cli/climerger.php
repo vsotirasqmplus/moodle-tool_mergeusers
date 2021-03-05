@@ -22,7 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// I /** @noinspection PhpUnhandledExceptionInspection */.
 define('CLI_SCRIPT', true);
 
 require_once(__DIR__ . '/../../../../config.php');
@@ -32,7 +31,6 @@ ini_set('error_reporting', E_ALL | E_STRICT);
 
 global $CFG;
 
-// I /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/../lib/autoload.php');
 
@@ -61,9 +59,7 @@ Options:
 // Loads current configuration.
 $config = tool_mergeusers_config::instance();
 
-// I /** @noinspection PhpUndefinedFieldInspection */.
 $config->debugdb = !empty($options['debugdb']);
-// I /** @noinspection PhpUndefinedFieldInspection */.
 $config->alwaysRollback = !empty($options['alwaysRollback']);
 
 // Initializes merger tool.
@@ -71,7 +67,6 @@ $mut = new MergeUserTool($config); // May abort execution if database is not sup
 $merger = new Merger($mut);
 
 // Initializes gathering instance.
-// I /** @noinspection PhpUndefinedFieldInspection */.
 $gatheringname = $config->gathering;
 $gathering = new $gatheringname();
 

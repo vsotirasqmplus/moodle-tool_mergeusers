@@ -1,10 +1,4 @@
-<?php /**
- * @noinspection PhpPossiblePolymorphicInvocationInspection
- */
-/**
- * @noinspection PhpIncludeInspection
- */
-
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -35,23 +29,20 @@
  * @author     John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require '../../../config.php';
+require('../../../config.php');
 
-global $CFG;
-global $PAGE;
-global $SESSION;
+global $CFG, $PAGE, $SESSION;
 
-// Report all PHP errors
+// Report all PHP errors.
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
-require_once $CFG->libdir . '/blocklib.php';
-require_once $CFG->libdir . '/adminlib.php';
-require_once $CFG->libdir . '/accesslib.php';
-require_once $CFG->libdir . '/weblib.php';
-
-require_once './index_form.php';
-require_once __DIR__ . '/lib/autoload.php';
+require_once($CFG->libdir . '/blocklib.php');
+require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->libdir . '/accesslib.php');
+require_once($CFG->libdir . '/weblib.php');
+require_once('./index_form.php');
+require_once(__DIR__ . '/lib/autoload.php');
 
 $fromuser = null;
 $touser = null;
@@ -61,7 +52,7 @@ try {
     require_capability('tool/mergeusers:mergeusers', context_system::instance());
 
     admin_externalpage_setup('tool_mergeusers_merge');
-    // Get possible posted params
+    // Get possible posted params.
     $option = optional_param('option', null, PARAM_TEXT);
     if (!$option) {
         if (optional_param('clearselection', false, PARAM_TEXT)) {
@@ -74,15 +65,15 @@ try {
 
     }
 
-    // Define the form
+    // Define the form.
     $mergeuserform = new mergeuserform();
     $renderer = $PAGE->get_renderer('tool_mergeusers');
 
     $data = $mergeuserform->get_data();
 
-    // may abort execution if database not supported, for security
+    // May abort execution if database not supported, for security.
     $mut = new MergeUserTool();
-    // Search tool for searching for users and verifying them
+    // Search tool for searching for users and verifying them.
     $mus = new MergeUserSearch();
 
 } catch (Exception $e) {
@@ -95,14 +86,14 @@ try {
 
 }
 
-// If there was a custom option submitted (by custom form) then use that option
-// instead of main form's data
+// If there was a custom option submitted (by custom form) then use that option.
+// ... instead of main form's data.
 if (!empty($option)) {
     switch ($option) {
-        // one or two users are selected: save them into session.
+        // One or two users are selected: save them into session.
         case 'saveselection':
-            // get and verify the userids from the selection form using the verify_user function (second field is column)
-            // As parameters are optional, there should be conditional execution
+            // Get and verify the userids from the selection form using the verify_user function (second field is column).
+            // As parameters are optional, there should be conditional execution.
             try {
                 $olduser = optional_param('olduser', null, PARAM_INT);
                 $newuser = optional_param('newuser', null, PARAM_INT);
@@ -122,15 +113,11 @@ if (!empty($option)) {
 
             if ($olduser === null && $newuser === null) {
                 try {
-                    /**
-                     * @noinspection PhpPossiblePolymorphicInvocationInspection
-                     */
                     $renderer->mu_error(get_string('no_saveselection', 'tool_mergeusers'));
-
                 } catch (coding_exception $e) {
-
+                    mtrace($e->getMessage());
                 }
-                exit(); // end execution for error
+                exit();
 
             }
 
@@ -139,39 +126,33 @@ if (!empty($option)) {
 
             }
 
-            // Store saved selection in session for display on index page, requires logic to not overwrite existing session
-            // data, unless a "new" old, or "new" new is specified
-            // If session old user already has a user and we have a "new" old user, replace the session's old user
+            // Store saved selection in session for display on index page, requires logic to not overwrite existing session.
+            // Data, unless a "new" old, or "new" new is specified.
+            // If session old user already has a user and we have a "new" old user, replace the session's old user.
             if (empty($SESSION->mut->olduser) || !empty($olduser)) {
                 $SESSION->mut->olduser = $olduser;
 
             }
 
-            // If session new user already has a user and we have a "new" new user, replace the session's new user
+            // If session new user already has a user and we have a "new" new user, replace the session's new user.
             if (empty($SESSION->mut->newuser) || !empty($newuser)) {
                 $SESSION->mut->newuser = $newuser;
 
             }
 
-            /**
-             * @noinspection PhpPossiblePolymorphicInvocationInspection
-             */
             $step = (!empty($SESSION->mut->olduser) && !empty($SESSION->mut->newuser)) ?
                     $renderer::INDEX_PAGE_CONFIRMATION_STEP :
                     $renderer::INDEX_PAGE_SEARCH_STEP;
 
-            /**
-             * @noinspection PhpPossiblePolymorphicInvocationInspection
-             */
             echo $renderer->index_page($mergeuserform, $step);
 
             break;
 
-        // remove any of the selected users to merge, and search for them again.
+        // Remove any of the selected users to merge, and search for them again.
         case 'clearselection':
             $SESSION->mut = null;
 
-            // Redirect back to index/search page for new selections or review selections
+            // Redirect back to index/search page for new selections or review selections.
             $redirecturl = new moodle_url('/admin/tool/mergeusers/index.php');
             try {
                 redirect($redirecturl, null, 0);
@@ -183,9 +164,9 @@ if (!empty($option)) {
 
             break;
 
-        // proceed with the merging and show results.
+        // Proceed with the merging and show results.
         case 'mergeusers':
-            // Verify users once more just to be sure.  Both users should already be verified, but just an extra layer of security
+            // Verify users once more just to be sure.  Both users should already be verified, but just an extra layer of security.
             try {
                 list($fromuser, $oumessage) = $mus->verify_user($SESSION->mut->olduser->id, 'id');
                 list($touser, $numessage) = $mus->verify_user($SESSION->mut->newuser->id, 'id');
@@ -198,106 +179,62 @@ if (!empty($option)) {
 
             }
             if ($fromuser === null || $touser === null) {
-                /**
-                 * @noinspection PhpPossiblePolymorphicInvocationInspection
-                 */
                 $renderer->mu_error($oumessage . '<br />' . $numessage);
-                break; // break execution for error
+                break; // Break execution for error.
 
             }
 
-            // Merge the users
+            // Merge the users.
             $log = [];
             $success = true;
-            /**
-             * @noinspection PhpUnhandledExceptionInspection
-             */
             list($success, $log, $logid) = $mut->merge($touser->id, $fromuser->id);
 
-            // reset mut session
+            // Reset mut session.
             $SESSION->mut = null;
 
-            // render results page
-            /**
-             * @noinspection PhpPossiblePolymorphicInvocationInspection
-             */
+            // Render results page.
             echo $renderer->results_page($touser, $fromuser, $success, $log, $logid);
-
             break;
 
-        // we have both users to merge selected, but we want to change any of them.
+        // We have both users to merge selected, but we want to change any of them.
         case 'searchusers':
-            /**
-             * @noinspection PhpPossiblePolymorphicInvocationInspection
-             */
             echo $renderer->index_page($mergeuserform, $renderer::INDEX_PAGE_SEARCH_STEP);
 
             break;
 
-        // we have both users to merge selected, and in the search step, we
-        // want to proceed with the merging of the currently selected users.
+        // We have both users to merge selected, and in the search step, we ...
+        // ... want to proceed with the merging of the currently selected users.
         case 'continueselection':
-            /**
-             * @noinspection PhpPossiblePolymorphicInvocationInspection
-             */
             echo $renderer->index_page($mergeuserform, $renderer::INDEX_PAGE_CONFIRMATION_STEP);
-
             break;
 
-        // ops!
+        // Oops!
         default:
-            /**
-             * @noinspection PhpUnhandledExceptionInspection
-             */
             $renderer->mu_error(get_string('invalid_option', 'tool_mergeusers'));
-
             break;
-
     }
     // Any submitted data?
 } else if ($data) {
-    // If there is a search argument use this instead of advanced form
+    // If there is a search argument use this instead of advanced form.
     if (!empty($data->searchgroup['searcharg'])) {
 
-        /**
-         * @noinspection PhpUnhandledExceptionInspection
-         */
-        $search_users = $mus->search_users($data->searchgroup['searcharg'], $data->searchgroup['searchfield']);
-        /**
-         * @noinspection PhpParamsInspection
-         */
-        /**
-         * @noinspection PhpUnhandledExceptionInspection
-         */
-        $user_select_table = new UserSelectTable($search_users, $renderer);
+        $searchusers = $mus->search_users($data->searchgroup['searcharg'], $data->searchgroup['searchfield']);
+        $userselecttable = new UserSelectTable($searchusers, $renderer);
+        echo $renderer->index_page($mergeuserform, $renderer::INDEX_PAGE_SEARCH_AND_SELECT_STEP, $userselecttable);
 
-        /**
-         * @noinspection PhpPossiblePolymorphicInvocationInspection
-         */
-        echo $renderer->index_page($mergeuserform, $renderer::INDEX_PAGE_SEARCH_AND_SELECT_STEP, $user_select_table);
-
-        // only run this step if there are both a new and old userids
+        // Only run this step if there are both a new and old userids.
 
     } else if (!empty($data->oldusergroup['olduserid']) && !empty($data->newusergroup['newuserid'])) {
-        // get and verify the userids from the selection form using the verify_user function (second field is column)
-        /**
-         * @noinspection PhpUnhandledExceptionInspection
-         */
+        // Get and verify the userids from the selection form using the verify_user function (second field is column).
         list($olduser, $oumessage) = $mus->verify_user($data->oldusergroup['olduserid'], $data->oldusergroup['olduseridtype']);
-        /**
-         * @noinspection PhpUnhandledExceptionInspection
-         */
         list($newuser, $numessage) = $mus->verify_user($data->newusergroup['newuserid'], $data->newusergroup['newuseridtype']);
 
         if ($olduser === null || $newuser === null) {
-            /**
-             * @noinspection PhpPossiblePolymorphicInvocationInspection
-             */
             $renderer->mu_error($oumessage . '<br />' . $numessage);
-            exit(); // end execution for error
+            exit();
 
         }
-        // Add users to session for review step
+        // Add users to session for review step.
         if (empty($SESSION->mut)) {
             $SESSION->mut = new stdClass();
 
@@ -305,25 +242,16 @@ if (!empty($option)) {
         $SESSION->mut->olduser = $olduser;
         $SESSION->mut->newuser = $newuser;
 
-        /**
-         * @noinspection PhpPossiblePolymorphicInvocationInspection
-         */
         echo $renderer->index_page($mergeuserform, $renderer::INDEX_PAGE_SEARCH_AND_SELECT_STEP);
 
     } else {
-        // simply show search form.
-        /**
-         * @noinspection PhpPossiblePolymorphicInvocationInspection
-         */
+        // Simply show search form.
         echo $renderer->index_page($mergeuserform, $renderer::INDEX_PAGE_SEARCH_STEP);
 
     }
 
 } else {
-    // no form submitted data
-    /**
-     * @noinspection PhpPossiblePolymorphicInvocationInspection
-     */
+    // No form submitted data.
     echo $renderer->index_page($mergeuserform, $renderer::INDEX_PAGE_SEARCH_STEP);
 
 }

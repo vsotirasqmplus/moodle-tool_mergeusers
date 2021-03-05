@@ -30,7 +30,6 @@ spl_autoload_register(
 
             foreach ($dirs as $dir) {
                 if (is_file($dir . '/' . $filename)) {
-                    // 0 /** @noinspection PhpIncludeInspection */.
                     include_once($dir . '/' . $filename);
                     if (class_exists($class)) {
                         return true;

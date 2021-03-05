@@ -30,7 +30,7 @@ class tool_mergeusers_enrolments_testcase extends advanced_testcase {
      */
     public function setUp() {
         global $CFG;
-        include_once "$CFG->dirroot/admin/tool/mergeusers/lib/mergeusertool.php";
+        include_once("$CFG->dirroot/admin/tool/mergeusers/lib/mergeusertool.php");
         $this->resetAfterTest(true);
     }
 
@@ -51,8 +51,8 @@ class tool_mergeusers_enrolments_testcase extends advanced_testcase {
         global $DB;
 
         // Setup two users to merge.
-        $user_remove = $this->getDataGenerator()->create_user();
-        $user_keep = $this->getDataGenerator()->create_user();
+        $userremove = $this->getDataGenerator()->create_user();
+        $userkeep = $this->getDataGenerator()->create_user();
 
         // Create three courses.
         $course1 = $this->getDataGenerator()->create_course();
@@ -83,13 +83,13 @@ class tool_mergeusers_enrolments_testcase extends advanced_testcase {
         $studentrole = $DB->get_record('role', ['shortname' => 'student']);
 
         // Enrol $user_remove on course 1 + 2 and $user_keep on course 2 + 3.
-        $manual->enrol_user($maninstance1, $user_remove->id, $studentrole->id);
-        $manual->enrol_user($maninstance2, $user_remove->id, $studentrole->id);
-        $manual->enrol_user($maninstance2, $user_keep->id, $studentrole->id);
-        $manual->enrol_user($maninstance3, $user_keep->id, $studentrole->id);
+        $manual->enrol_user($maninstance1, $userremove->id, $studentrole->id);
+        $manual->enrol_user($maninstance2, $userremove->id, $studentrole->id);
+        $manual->enrol_user($maninstance2, $userkeep->id, $studentrole->id);
+        $manual->enrol_user($maninstance3, $userkeep->id, $studentrole->id);
 
         // Check initial state of enrolments for $user_remove.
-        $courses = enrol_get_all_users_courses($user_remove->id);
+        $courses = enrol_get_all_users_courses($userremove->id);
         if (!is_array($courses)) {
             $courses = [$courses];
         }
@@ -98,20 +98,20 @@ class tool_mergeusers_enrolments_testcase extends advanced_testcase {
         $this->assertEquals([$course1->id, $course2->id], array_keys($courses));
 
         // Check initial state of enrolments for $user_keep.
-        $courses = enrol_get_all_users_courses($user_keep->id);
+        $courses = enrol_get_all_users_courses($userkeep->id);
         ksort($courses);
         $this->assertCount(2, $courses);
         $this->assertEquals([$course2->id, $course3->id], array_keys($courses));
 
         $mut = new MergeUserTool();
-        $mut->merge($user_keep->id, $user_remove->id);
+        $mut->merge($userkeep->id, $userremove->id);
 
         // Check $user_remove is suspended.
-        $user_remove = $DB->get_record('user', ['id' => $user_remove->id]);
-        $this->assertEquals(1, $user_remove->suspended);
+        $userremove = $DB->get_record('user', ['id' => $userremove->id]);
+        $this->assertEquals(1, $userremove->suspended);
 
         // Check $user_keep is now enrolled on all three courses.
-        $courses = enrol_get_all_users_courses($user_keep->id);
+        $courses = enrol_get_all_users_courses($userkeep->id);
         ksort($courses);
         $this->assertCount(3, $courses);
         $this->assertEquals([$course1->id, $course2->id, $course3->id], array_keys($courses));

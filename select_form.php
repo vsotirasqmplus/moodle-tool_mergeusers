@@ -23,11 +23,9 @@
  * @author     John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
 global $CFG;
-/**
- * @noinspection PhpIncludeInspection
- */
-require_once $CFG->libdir . '/formslib.php'; /// forms library
+require_once($CFG->libdir . '/formslib.php'); // Forms library.
 
 /**
  * Define form snippet for getting the userids of the two users to merge
@@ -40,7 +38,7 @@ class selectuserform extends moodleform {
     protected $ust;
 
     public function __construct(UserSelectTable $ust = null) {
-        // just before parent's construct
+        // Just before parent's construct.
         $this->ust = $ust;
         parent::__construct();
     }
@@ -55,13 +53,13 @@ class selectuserform extends moodleform {
 
         $mform =& $this->_form;
 
-        // header
+        // Header.
         $mform->addElement('header', 'selectusers', get_string('userselecttable_legend', 'tool_mergeusers'));
 
-        // table content
+        // Table content.
         $mform->addElement('static', 'selectuserslist', '', html_writer::table($this->ust));
 
-        // hidden elements
+        // Hidden elements.
         $mform->addElement('hidden', 'option', 'saveselection');
         $mform->setType('option', PARAM_RAW);
         $mform->addElement('hidden', 'selectedolduser', '');
@@ -69,7 +67,7 @@ class selectuserform extends moodleform {
         $mform->addElement('hidden', 'selectednewuser', '');
         $mform->setType('selectednewuser', PARAM_RAW);
 
-        // buttons
+        // Buttons.
         $this->add_action_buttons(false, get_string('saveselection_submit', 'tool_mergeusers'));
     }
 }

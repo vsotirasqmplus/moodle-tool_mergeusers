@@ -34,10 +34,8 @@ require_login();
 global $CFG;
 
 // Require needed library files.
-// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
-// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/outputcomponents.php');
 
 /**

@@ -24,9 +24,9 @@
  */
 class tool_mergeusers_quiz_testcase extends advanced_testcase {
     private $quiz1;
-    private $user_keep;
+    private $userkeep;
     private $quiz2;
-    private $user_remove;
+    private $userremove;
     private $course2;
     private $course1;
 
@@ -46,12 +46,12 @@ class tool_mergeusers_quiz_testcase extends advanced_testcase {
      */
     public function setUp() {
         global $CFG, $DB;
-        include_once "$CFG->dirroot/admin/tool/mergeusers/lib/mergeusertool.php";
+        include_once("$CFG->dirroot/admin/tool/mergeusers/lib/mergeusertool.php");
         $this->resetAfterTest();
 
         // Setup two users to merge.
-        $this->user_remove = $this->getDataGenerator()->create_user();
-        $this->user_keep = $this->getDataGenerator()->create_user();
+        $this->userremove = $this->getDataGenerator()->create_user();
+        $this->userkeep = $this->getDataGenerator()->create_user();
 
         // Create three courses.
         $this->course1 = $this->getDataGenerator()->create_course();
@@ -75,11 +75,11 @@ class tool_mergeusers_quiz_testcase extends advanced_testcase {
         $studentrole = $DB->get_record('role', ['shortname' => 'student']);
 
         // Enrol the users on the courses.
-        $manual->enrol_user($maninstance1, $this->user_remove->id, $studentrole->id);
-        $manual->enrol_user($maninstance1, $this->user_keep->id, $studentrole->id);
+        $manual->enrol_user($maninstance1, $this->userremove->id, $studentrole->id);
+        $manual->enrol_user($maninstance1, $this->userkeep->id, $studentrole->id);
 
-        $manual->enrol_user($maninstance2, $this->user_remove->id, $studentrole->id);
-        $manual->enrol_user($maninstance2, $this->user_keep->id, $studentrole->id);
+        $manual->enrol_user($maninstance2, $this->userremove->id, $studentrole->id);
+        $manual->enrol_user($maninstance2, $this->userkeep->id, $studentrole->id);
     }
 
     /**
@@ -195,23 +195,23 @@ class tool_mergeusers_quiz_testcase extends advanced_testcase {
     public function test_mergeconflictingquizattempts() {
         global $DB;
 
-        $this->submit_quiz_attempt($this->quiz1, $this->user_keep, $this->get_fiftypercent_answers());
-        $this->submit_quiz_attempt($this->quiz1, $this->user_remove, $this->get_hundredpercent_answers());
+        $this->submit_quiz_attempt($this->quiz1, $this->userkeep, $this->get_fiftypercent_answers());
+        $this->submit_quiz_attempt($this->quiz1, $this->userremove, $this->get_hundredpercent_answers());
 
         // User to keep gets 50%, user to remove gets 100%.
-        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
-        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_remove, $this->quiz1, $this->course1));
+        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->userkeep, $this->quiz1, $this->course1));
+        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->userremove, $this->quiz1, $this->course1));
 
         set_config('quizattemptsaction', QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
 
         $mut = new MergeUserTool();
-        $mut->merge($this->user_keep->id, $this->user_remove->id);
+        $mut->merge($this->userkeep->id, $this->userremove->id);
 
         // User to remove should now have 100%.
-        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
+        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->userkeep, $this->quiz1, $this->course1));
 
-        $user_remove = $DB->get_record('user', ['id' => $this->user_remove->id]);
-        $this->assertEquals(1, $user_remove->suspended);
+        $userremove = $DB->get_record('user', ['id' => $this->userremove->id]);
+        $this->assertEquals(1, $userremove->suspended);
     }
 
     /**
@@ -226,23 +226,23 @@ class tool_mergeusers_quiz_testcase extends advanced_testcase {
     public function test_mergenonconflictingquizattempts() {
         global $DB;
 
-        $this->submit_quiz_attempt($this->quiz1, $this->user_keep, $this->get_fiftypercent_answers());
-        $this->submit_quiz_attempt($this->quiz2, $this->user_remove, $this->get_hundredpercent_answers());
+        $this->submit_quiz_attempt($this->quiz1, $this->userkeep, $this->get_fiftypercent_answers());
+        $this->submit_quiz_attempt($this->quiz2, $this->userremove, $this->get_hundredpercent_answers());
 
-        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
-        $this->assertEquals('-', $this->get_user_quiz_grade($this->user_keep, $this->quiz2, $this->course2));
-        $this->assertEquals('-', $this->get_user_quiz_grade($this->user_remove, $this->quiz1, $this->course1));
-        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_remove, $this->quiz2, $this->course2));
+        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->userkeep, $this->quiz1, $this->course1));
+        $this->assertEquals('-', $this->get_user_quiz_grade($this->userkeep, $this->quiz2, $this->course2));
+        $this->assertEquals('-', $this->get_user_quiz_grade($this->userremove, $this->quiz1, $this->course1));
+        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->userremove, $this->quiz2, $this->course2));
 
         set_config('quizattemptsaction', QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
 
         $mut = new MergeUserTool();
-        $mut->merge($this->user_keep->id, $this->user_remove->id);
+        $mut->merge($this->userkeep->id, $this->userremove->id);
 
-        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz1, $this->course1));
-        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->user_keep, $this->quiz2, $this->course2));
+        $this->assertEquals('50.00', $this->get_user_quiz_grade($this->userkeep, $this->quiz1, $this->course1));
+        $this->assertEquals('100.00', $this->get_user_quiz_grade($this->userkeep, $this->quiz2, $this->course2));
 
-        $user_remove = $DB->get_record('user', ['id' => $this->user_remove->id]);
-        $this->assertEquals(1, $user_remove->suspended);
+        $userremove = $DB->get_record('user', ['id' => $this->userremove->id]);
+        $this->assertEquals(1, $userremove->suspended);
     }
 }

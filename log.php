@@ -1,6 +1,4 @@
-<?php /**
- * @noinspection PhpPossiblePolymorphicInvocationInspection
- */
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -27,22 +25,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require '../../../config.php';
+require('../../../config.php');
 
 global $CFG, $DB, $PAGE;
 
-// Report all PHP errors
+// Report all PHP errors.
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
-/**
- * @noinspection PhpIncludeInspection
- */
-require_once "{$CFG->dirroot}/lib/adminlib.php";
-/**
- * @noinspection PhpIncludeInspection
- */
-require_once 'lib/autoload.php';
+require_once("{$CFG->dirroot}/lib/adminlib.php");
+require_once('lib/autoload.php');
 try {
     require_login();
     require_capability('tool/mergeusers:mergeusers', context_system::instance());
@@ -62,14 +54,11 @@ try {
 }
 
 if (empty($log)) {
-    /**
-     * @noinspection PhpUnhandledExceptionInspection
-     */
     print_error(
             'wronglogid', 'tool_mergeusers',
             new moodle_url('/admin/tool/mergeusers/index.php')
     );
-    // aborts execution
+    // Aborts execution.
 
 }
 try {

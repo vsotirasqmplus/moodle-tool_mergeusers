@@ -27,7 +27,6 @@ require_once(__DIR__ . '/../../../../config.php');
 require_login();
 global $CFG;
 
-// I /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/clilib.php');
 
 /**

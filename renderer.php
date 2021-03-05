@@ -21,10 +21,9 @@
  */
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-require_once __DIR__ . '/select_form.php';
-require_once __DIR__ . '/review_form.php';
-// 0 ** @noinspection PhpIncludeInspection */.
-require_once $CFG->dirroot . '/' . $CFG->admin . '/tool/mergeusers/lib.php';
+require_once(__DIR__ . '/select_form.php');
+require_once(__DIR__ . '/review_form.php');
+require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/mergeusers/lib.php');
 
 /**
  * Renderer for the merge user plugin.
@@ -115,7 +114,8 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
      * @param UserSelectTable|null $ust table for users to merge after searching
      *
      * @return       string html to show on index page.
-     * @throws       coding_exception
+     * @throws coding_exception
+     * @throws moodle_exception
      * @noinspection PhpUndefinedMethodInspection
      */
     public function index_page(moodleform $mform, int $step, UserSelectTable $ust = null): string {
@@ -130,7 +130,7 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
                 break;
             case self::INDEX_PAGE_SEARCH_AND_SELECT_STEP:
                 $output .= $this->moodleform($mform);
-                // Render user select table if available
+                // Render user select table if available.
                 if ($ust !== null) {
                     $this->page->requires->js_init_call('M.tool_mergeusers.init_select_table', []);
                     $output .= $this->render_user_select_table($ust);
@@ -317,15 +317,19 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
         if (empty($logs)) {
             $output .= get_string('nologs', 'tool_mergeusers');
         } else {
-            $output .= html_writer::tag('div', get_string('loglist', 'tool_mergeusers'), ['class' => 'title']);
+            $output .= html_writer::tag('div',
+                    get_string('loglist', 'tool_mergeusers'), ['class' => 'title']);
 
             $flags = [];
-            $flags[] = $this->pix_icon('i/invalid', get_string('eventusermergedfailure', 'tool_mergeusers')); // failure icon
-            $flags[] = $this->pix_icon('i/valid', get_string('eventusermergedsuccess', 'tool_mergeusers')); // ok icon
+            $flags[] = $this->pix_icon('i/invalid', get_string('eventusermergedfailure', 'tool_mergeusers'));
+            // Failure icon.
+            $flags[] = $this->pix_icon('i/valid', get_string('eventusermergedsuccess', 'tool_mergeusers'));
+            // Ok icon.
 
             $table = new html_table();
             $table->align = ['center', 'center', 'center', 'center', 'center', 'center'];
-            $table->head = [get_string('olduseridonlog', 'tool_mergeusers'), get_string('newuseridonlog', 'tool_mergeusers'),
+            $table->head = [get_string('olduseridonlog', 'tool_mergeusers'),
+                    get_string('newuseridonlog', 'tool_mergeusers'),
                     get_string('date'), get_string('status'), ''];
 
             $rows = [];

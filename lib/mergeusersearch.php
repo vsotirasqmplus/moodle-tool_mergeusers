@@ -35,7 +35,6 @@ require_once(dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php');
 require_login();
 global $CFG;
 
-// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
 

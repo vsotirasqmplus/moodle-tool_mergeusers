@@ -26,7 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/mod/assign/tests/base_test.php');
 
 /**

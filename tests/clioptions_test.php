@@ -70,7 +70,6 @@ class tool_mergeusers_clioptions_testcase extends advanced_testcase {
         $userremove2 = $this->getDataGenerator()->create_user();
 
         $config = tool_mergeusers_config::instance();
-        // 0 /** @noinspection PhpUndefinedFieldInspection */.
         $config->alwaysRollback = true;
 
         $mut = new MergeUserTool($config);
@@ -112,7 +111,6 @@ class tool_mergeusers_clioptions_testcase extends advanced_testcase {
         $userremove2 = $this->getDataGenerator()->create_user();
 
         $config = tool_mergeusers_config::instance();
-        // 0 /** @noinspection PhpUndefinedFieldInspection */.
         $config->debugdb = true;
 
         $mut = new MergeUserTool($config);

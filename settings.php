@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-// 0 /** @noinspection PhpPossiblePolymorphicInvocationInspection */.
 
 /**
  * Version information
@@ -33,9 +32,6 @@ defined('MOODLE_INTERNAL') || die;
 global $ADMIN, $CFG, $hassiteconfig;
 try {
     if (has_capability('tool/mergeusers:mergeusers', context_system::instance())) {
-        /**
-         * @var part_of_admin_tree $ADMIN
-         */
         if (!$ADMIN->locate('tool_mergeusers')) {
             $ADMIN->add(
                     'accounts',
@@ -61,8 +57,8 @@ try {
     }
 
     if ($hassiteconfig) {
-        include_once __DIR__ . '/lib/autoload.php';
-        include_once __DIR__ . '/lib.php';
+        include_once(__DIR__ . '/lib/autoload.php');
+        include_once(__DIR__ . '/lib.php');
 
         // Add configuration for making user suspension optional.
         $settings = new admin_settingpage(
@@ -79,14 +75,14 @@ try {
                 )
         );
 
-        $supporting_lang = (tool_mergeusers_transactionssupported()) ? 'transactions_supported' : 'transactions_not_supported';
+        $supportinglang = (tool_mergeusers_transactionssupported()) ? 'transactions_supported' : 'transactions_not_supported';
 
         $settings->add(
                 new admin_setting_configcheckbox(
                         'tool_mergeusers/transactions_only',
                         get_string('transactions_setting', 'tool_mergeusers'),
                         get_string('transactions_setting_desc', 'tool_mergeusers') . '<br /><br />' .
-                        get_string($supporting_lang, 'tool_mergeusers'),
+                        get_string($supportinglang, 'tool_mergeusers'),
                         1
                 )
         );
@@ -97,7 +93,7 @@ try {
                         'tool_mergeusers/excluded_exceptions',
                         get_string('excluded_exceptions', 'tool_mergeusers'),
                         get_string('excluded_exceptions_desc', 'tool_mergeusers', $exceptionoptions->defaultvalue),
-                        [$exceptionoptions->defaultkey], // default value: empty => apply all exceptions.
+                        [$exceptionoptions->defaultkey], // Default value: empty => apply all exceptions.
                         $exceptionoptions->options
                 )
         );
@@ -123,7 +119,7 @@ try {
                 )
         );
 
-        // Add settings
+        // Add settings.
         $ADMIN->add('tools', $settings);
     }
 } catch (Exception $exception) {

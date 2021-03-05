@@ -34,11 +34,11 @@ defined('MOODLE_INTERNAL') || die();
  */
 return [
 
-    // Gathering tool.
+        // Gathering tool.
         'gathering' => 'CLIGathering',
 
-    // Database tables to be excluded from normal processing.
-    // You normally will add tables. Be very cautious if you delete any of them.
+        // Database tables to be excluded from normal processing.
+        // You normally will add tables. Be very cautious if you delete any of them.
         'exceptions' => [
                 'user_preferences',
                 'user_private_key',
@@ -47,13 +47,13 @@ return [
                 'plagiarism_turnitin_users'
         ],
 
-    // List of compound indexes.
-    // This list may vary from Moodle instance to another, given that the Moodle version,
-    // local changes and non-core plugins may add new special cases to be processed.
-    // Put in 'userfield' all column names related to a user (i.e., user.id), and all the rest column names
-    // into 'otherfields'.
-    // See README.txt for details on special cases.
-    // Table names must be without $CFG->prefix.
+        // List of compound indexes.
+        // This list may vary from Moodle instance to another, given that the Moodle version,
+        // local changes and non-core plugins may add new special cases to be processed.
+        // Put in 'userfield' all column names related to a user (i.e., user.id), and all the rest column names
+        // into 'otherfields'.
+        // See README.txt for details on special cases.
+        // Table names must be without $CFG->prefix.
         'compoundindexes' => [
                 'grade_grades' => [
                         'userfield' => ['userid'],
@@ -137,10 +137,10 @@ return [
                 ],
         ],
 
-    // List of column names per table, where their content is a user.id.
-    // These are necessary for matching passed by userids in these column names.
-    // In other words, only column names given below will be search for matching user ids.
-    // The key 'default' will be applied for any non matching table name.
+        // List of column names per table, where their content is a user.id.
+        // These are necessary for matching passed by userids in these column names.
+        // In other words, only column names given below will be search for matching user ids.
+        // The key 'default' will be applied for any non matching table name.
         'userfieldnames' => [
                 'logstore_standard_log' => ['userid', 'relateduserid'],
                 'message_contacts' => ['userid', 'contactid'], // Compound index.
@@ -150,8 +150,8 @@ return [
                 'default' => ['authorid', 'reviewerid', 'userid', 'user_id', 'id_user', 'user'], // May appear compound index.
         ],
 
-    // TableMergers to process each database table.
-    // 'default' is applied when no specific TableMerger is specified.
+        // TableMergers to process each database table.
+        // 'default' is applied when no specific TableMerger is specified.
         'tablemergers' => [
                 'default' => 'GenericTableMerger',
                 'quiz_attempts' => 'QuizAttemptsMerger',

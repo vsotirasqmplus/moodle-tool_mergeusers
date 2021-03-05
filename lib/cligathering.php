@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// 0 /**  @noinspection PhpUnused */.
 /**
  * @package    tool
  * @subpackage mergeusers
@@ -27,7 +26,6 @@ defined('CLI_SCRIPT') || die();
 
 global $CFG;
 
-// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/clilib.php');
 
 /**

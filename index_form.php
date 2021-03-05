@@ -27,14 +27,12 @@
  * @author     John Hoopes <hoopes@wisc.edu>, University of Wisconsin - Madison
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
 global $CFG;
-/**
- * @noinspection PhpIncludeInspection
- */
-require_once $CFG->libdir . '/formslib.php'; /// forms library
+require_once($CFG->libdir . '/formslib.php'); // Forms library.
 
 /**
- * Define form snippet for getting the userids of the two users to merge
+ * Define form snippet for getting the userids of the two users to merge.
  */
 class mergeuserform extends moodleform {
 
@@ -66,7 +64,7 @@ class mergeuserform extends moodleform {
 
         $mform->addElement('header', 'mergeusers', get_string('header', 'tool_mergeusers'));
 
-        // Add elements
+        // Add elements.
         $searchuser = [];
         $searchuser[] = $mform->createElement('text', 'searcharg');
         $searchuser[] = $mform->createElement('select', 'searchfield', '', $searchfields, '');

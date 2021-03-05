@@ -35,10 +35,8 @@ require_once(dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php');
 require_login();
 global $CFG;
 
-// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
-// 0 /** @noinspection PhpIncludeInspection */.
 require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/mergeusers/lib.php');
 
 /**
@@ -209,7 +207,6 @@ class MergeUserTool {
         $eventpath = "\\tool_mergeusers\\event\\";
         $eventpath .= ($success) ? 'user_merged_success' : 'user_merged_failure';
 
-        // 0 /** @noinspection PhpUndefinedMethodInspection */.
         // Method Reference /lib/classes/event/base.php::create() .
         $event = $eventpath::create(
                 [
@@ -491,7 +488,6 @@ class MergeUserTool {
      */
     private function updategrades(int $toid, int $fromid) {
         global $DB, $CFG;
-        // 0 /**@noinspection PhpIncludeInspection */.
         include_once($CFG->libdir . '/gradelib.php');
 
         $sql = "SELECT DISTINCT gi.id, gi.iteminstance, gi.itemmodule, gi.courseid
