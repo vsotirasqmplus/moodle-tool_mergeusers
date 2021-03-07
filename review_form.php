@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->libdir . '/formslib.php'); // Forms library.
-
+require_once(__DIR__ . '/locallib.php');
 /**
  * Define the form to confirm users' merge.
  */
@@ -71,7 +71,7 @@ class reviewuserform extends moodleform {
         $mform = &$this->_form;
 
         // Header.
-        $mform->addElement('header', 'reviewusers', get_string('userreviewtable_legend', 'tool_mergeusers'));
+        $mform->addElement('header', 'reviewusers', mergusergetstring('userreviewtable_legend', 'tool_mergeusers'));
 
         // Table content.
         $mform->addElement('static', 'reviewuserslist', '', html_writer::table($this->urt));
@@ -82,21 +82,21 @@ class reviewuserform extends moodleform {
         $buttonarray = [];
         if ($this->reviewstep) {
             $mergeurl->param('option', 'mergeusers');
-            $mergeusersbutton = new single_button($mergeurl, get_string('mergeusers', 'tool_mergeusers'));
-            $mergeusersbutton->add_confirm_action(get_string('mergeusers_confirm', 'tool_mergeusers'));
+            $mergeusersbutton = new single_button($mergeurl, mergusergetstring('mergeusers', 'tool_mergeusers'));
+            $mergeusersbutton->add_confirm_action(mergusergetstring('mergeusers_confirm', 'tool_mergeusers'));
             $buttonarray[0][] = $this->output->render($mergeusersbutton);
         } else if (count($this->urt->data) === 2) {
             $mergeurl->param('option', 'continueselection');
-            $mergeusersbutton = new single_button($mergeurl, get_string('saveselection_submit', 'tool_mergeusers'));
+            $mergeusersbutton = new single_button($mergeurl, mergusergetstring('saveselection_submit', 'tool_mergeusers'));
             $buttonarray[0][] = $this->output->render($mergeusersbutton);
         }
         $mergeurl->param('option', 'clearselection');
-        $mergeusersbutton = new single_button($mergeurl, get_string('clear_selection', 'tool_mergeusers'));
+        $mergeusersbutton = new single_button($mergeurl, mergusergetstring('clear_selection', 'tool_mergeusers'));
         $buttonarray[0][] = $this->output->render($mergeusersbutton);
 
         if ($this->reviewstep) {
             $mergeurl->param('option', 'searchusers');
-            $mergeusersbutton = new single_button($mergeurl, get_string('cancel'));
+            $mergeusersbutton = new single_button($mergeurl, mergusergetstring('cancel'));
             $buttonarray[0][] = $this->output->render($mergeusersbutton);
         }
         $htmltable = new html_table();

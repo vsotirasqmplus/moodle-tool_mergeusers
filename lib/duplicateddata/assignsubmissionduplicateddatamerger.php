@@ -35,7 +35,7 @@ class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger {
     ];
     const ASSIGN_SUBMISSION_NEW = 'new';
 
-    private $findassignsubmissionbyid;
+    private $findassignsubsbyid;
 
     /**
      * AssignSubmissionDuplicatedDataMerger constructor.
@@ -43,7 +43,7 @@ class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger {
      * @param assign_submission_query|null $findbyquery
      */
     public function __construct(assign_submission_query $findbyquery = null) {
-        $this->findassignsubmissionbyid = $findbyquery ?? new db_assign_submission();
+        $this->findassignsubsbyid = $findbyquery ?? new db_assign_submission();
     }
 
     /**
@@ -57,13 +57,13 @@ class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger {
         if ($this->old_submission_has_content_and_new_has_no_content($olddata, $newdata)) {
             return DuplicatedData::from_remove_and_modify(
                     array_keys(
-                            $this->findassignsubmissionbyid->all_from_assign_and_user(
+                            $this->findassignsubsbyid->all_from_assign_and_user(
                                     $newdata->assignment,
                                     $newdata->userid
                             )
                     ),
                     array_keys(
-                            $this->findassignsubmissionbyid->all_from_assign_and_user(
+                            $this->findassignsubsbyid->all_from_assign_and_user(
                                     $olddata->assignment,
                                     $olddata->userid
                             )
@@ -78,11 +78,11 @@ class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger {
                 $submissiontomodify = $olddata;
                 $submissiontoremove = $newdata;
             }
-            $modifyid = $this->findassignsubmissionbyid->all_from_assign_and_user(
+            $modifyid = $this->findassignsubsbyid->all_from_assign_and_user(
                     $submissiontomodify->assignment,
                     $submissiontomodify->userid
             );
-            $removeid = $this->findassignsubmissionbyid->all_from_assign_and_user(
+            $removeid = $this->findassignsubsbyid->all_from_assign_and_user(
                     $submissiontoremove->assignment,
                     $submissiontoremove->userid
             );
@@ -92,7 +92,7 @@ class AssignSubmissionDuplicatedDataMerger implements DuplicatedDataMerger {
 
         return DuplicatedData::from_remove(
                 array_keys(
-                        $this->findassignsubmissionbyid->all_from_assign_and_user(
+                        $this->findassignsubsbyid->all_from_assign_and_user(
                                 $olddata->assignment,
                                 $olddata->userid
                         )

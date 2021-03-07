@@ -27,7 +27,7 @@ defined('CLI_SCRIPT') || die();
 global $CFG;
 
 require_once($CFG->dirroot . '/lib/clilib.php');
-
+require_once(__DIR__ . '/../locallib.php');
 /**
  * Abstraction layer to use to get the list of merging actions to perform asked from command line.
  */
@@ -60,9 +60,9 @@ class CLIGathering implements Gathering {
      * @throws coding_exception
      */
     public function rewind() {
-        cli_heading(get_string('pluginname', 'tool_mergeusers'));
-        echo get_string('cligathering:description', 'tool_mergeusers') . "\n\n";
-        echo get_string('cligathering:stopping', 'tool_mergeusers') . "\n\n";
+        cli_heading(mergusergetstring('pluginname', 'tool_mergeusers'));
+        echo mergusergetstring('cligathering:description', 'tool_mergeusers') . "\n\n";
+        echo mergusergetstring('cligathering:stopping', 'tool_mergeusers') . "\n\n";
         $this->next();
     }
 
@@ -78,7 +78,7 @@ class CLIGathering implements Gathering {
         // Ask for the source user id.
         $record->fromid = 0;
         while ($record->fromid <= 0 && $record->fromid != -1) {
-            $record->fromid = intval(cli_input(get_string('cligathering:fromid', 'tool_mergeusers')));
+            $record->fromid = intval(cli_input(mergusergetstring('cligathering:fromid', 'tool_mergeusers')));
         }
 
         // If we have to exit, do it just now ;-) !
@@ -90,7 +90,7 @@ class CLIGathering implements Gathering {
         // Otherwise, ask for the target user id.
         $record->toid = 0;
         while ($record->toid <= 0 && $record->toid != -1) {
-            $record->toid = intval(cli_input(get_string('cligathering:toid', 'tool_mergeusers')));
+            $record->toid = intval(cli_input(mergusergetstring('cligathering:toid', 'tool_mergeusers')));
         }
 
         // Updates related iterator fields.

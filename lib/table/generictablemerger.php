@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
-
+require_once(__DIR__ . '/../../locallib.php');
 /**
  * Generic implementation of a TableMerger
  *
@@ -69,7 +69,6 @@ class GenericTableMerger implements TableMerger {
      * @param array $errormessages list of error messages.
      * @param array $actionlog
      *
-     * @throws coding_exception
      * @throws dml_exception
      */
     public function merge(array $data, array &$errormessages, array &$actionlog) {
@@ -123,7 +122,6 @@ class GenericTableMerger implements TableMerger {
      * @param array $errormessages Array where to append any error occurred.
      *
      * @throws dml_exception
-     * @throws coding_exception
      * @global object $CFG
      * @global moodle_database $DB
      */
@@ -148,8 +146,26 @@ class GenericTableMerger implements TableMerger {
             $keyfromotherstr = implode('-', $keyfromother);
             $itemarr[$keyfromotherstr][$resobj->$userfield] = $id;
         }
-        unset($result);
 
+        $this->mergecomopmindex($recordstomodify, $itemarr, $data, $idstoremove);
+
+        // We know that idsToRemove have always to be removed and NOT to be updated.
+        foreach ($idstoremove as $id) {
+            if (isset($recordstomodify[$id])) {
+                unset($recordstomodify[$id]);
+            }
+        }
+
+        $this->cleanrecordsoncompoundindex($data, $idstoremove, $actionlog, $errormessages);
+
+    }
+
+    /**
+     * @param $recordstomodify
+     * @param $itemarr
+     * @param $data
+     */
+    private function mergecomopmindex(&$recordstomodify, & $itemarr, & $data, & $idstoremove){
         foreach ($itemarr as $otherinfo) {
             // If we have only one result and it is from the current user => update record.
             if (count($otherinfo) == 1) {
@@ -163,18 +179,7 @@ class GenericTableMerger implements TableMerger {
                 }
             }
         }
-        unset($itemarr);
-        // We know that idsToRemove have always to be removed and NOT to be updated.
-        foreach ($idstoremove as $id) {
-            if (isset($recordstomodify[$id])) {
-                unset($recordstomodify[$id]);
-            }
-        }
 
-        $this->cleanrecordsoncompoundindex($data, $idstoremove, $actionlog, $errormessages);
-
-        unset($idstoremove);
-        unset($sql);
     }
 
     /**
@@ -188,7 +193,6 @@ class GenericTableMerger implements TableMerger {
      * @param array $actionlog array of actions being performed for merging.
      * @param array $errormessages array with found errors while merging users' data.
      *
-     * @throws coding_exception
      * @throws dml_exception
      * @global object $CFG
      * @global moodle_database $DB
@@ -211,7 +215,6 @@ class GenericTableMerger implements TableMerger {
      * @param $actionlog
      * @param $errormessages
      *
-     * @throws coding_exception
      * @throws dml_exception
      */
     protected function cleanrecords($data, $idstoremove, &$actionlog, &$errormessages) {
@@ -229,7 +232,7 @@ class GenericTableMerger implements TableMerger {
             $actionlog[] = $sql;
         } else {
             // An error occurred during DB query.
-            $errormessages[] = get_string('tableko', 'tool_mergeusers',
+            $errormessages[] = mergusergetstring('tableko', 'tool_mergeusers',
                             $data['tableName']) . ': ' . $DB->get_last_error();
         }
         unset($idsgobyebye);
@@ -245,7 +248,7 @@ class GenericTableMerger implements TableMerger {
      * @param array $actionlog list of performed actions.
      * @param array $errormessages list of error messages.
      *
-     * @throws dml_exception|coding_exception
+     * @throws dml_exception
      */
     protected function updateallrecords(array $data, array $recordstomodify, string $fieldname,
             array &$actionlog, array &$errormessages) {
@@ -267,7 +270,6 @@ class GenericTableMerger implements TableMerger {
      * @param array $actionlog
      * @param array $errormessages
      *
-     * @throws coding_exception
      * @throws dml_exception
      */
     protected function updaterecords(array $data, array $recordstomodify, string $fieldname, array &$actionlog,
@@ -281,7 +283,7 @@ class GenericTableMerger implements TableMerger {
 
         try {
             if (!$DB->execute($updaterecords)) {
-                $errormessages[] = get_string('tableko', 'tool_mergeusers', $data['tableName']) .
+                $errormessages[] = mergusergetstring('tableko', 'tool_mergeusers', $data['tableName']) .
                         ': ' . $DB->get_last_error();
             }
             $actionlog[] = $updaterecords;
@@ -293,7 +295,7 @@ class GenericTableMerger implements TableMerger {
                     ' WHERE ' . $fieldname . " = '" . $useridtoclean . "'";
 
             if (!$DB->execute($deleterecord)) {
-                $errormessages[] = get_string('tableko', 'tool_mergeusers', $data['tableName']) .
+                $errormessages[] = mergusergetstring('tableko', 'tool_mergeusers', $data['tableName']) .
                         ': ' . $DB->get_last_error();
             }
             $actionlog[] = $deleterecord;

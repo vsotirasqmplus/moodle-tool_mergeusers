@@ -30,7 +30,7 @@ use coding_exception;
 use lang_string;
 
 defined('MOODLE_INTERNAL') || die();
-
+require_once(__DIR__ . '/../../locallib.php');
 /**
  * Class user_merged_success called when merging user accounts has gone right.
  *
@@ -43,10 +43,9 @@ class user_merged_success extends user_merged {
 
     /**
      * @return lang_string|string
-     * @throws coding_exception
      */
     public static function get_name() {
-        return get_string('eventusermergedsuccess', 'tool_mergeusers');
+        return mergusergetstring('eventusermergedsuccess', 'tool_mergeusers');
     }
 
     /**

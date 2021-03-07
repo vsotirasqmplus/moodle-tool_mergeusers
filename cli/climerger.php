@@ -33,13 +33,13 @@ global $CFG;
 
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/../lib/autoload.php');
-
+require_once(__DIR__ . '/../locallib.php');
 // Now get cli options.
 list($options, $unrecognized) = cli_get_params(['debugdb' => false, 'alwaysRollback' => false, 'help' => false]);
 
 if ($unrecognized) {
     $unrecognized = implode("\n  ", $unrecognized);
-    cli_error(get_string('cliunknowoption', 'admin', $unrecognized), 2);
+    cli_error(mergusergetstring('cliunknowoption', 'admin', $unrecognized), 2);
 }
 
 if ($options['help']) {

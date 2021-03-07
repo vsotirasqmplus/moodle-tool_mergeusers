@@ -26,7 +26,7 @@
  */
 
 require('../../../config.php');
-
+require_once(__DIR__ . '/locallib.php');
 global $CFG, $DB, $PAGE;
 
 // Report all PHP errors.
@@ -66,7 +66,7 @@ try {
     if (!$from) {
         $from = new stdClass();
         $from->id = $log->fromuserid;
-        $from->username = get_string('deleted');
+        $from->username = mergusergetstring('deleted');
 
     }
 
@@ -74,7 +74,7 @@ try {
     if (!$to) {
         $to = new stdClass();
         $to->id = $log->touserid;
-        $to->username = get_string('deleted');
+        $to->username = mergusergetstring('deleted');
 
     }
 

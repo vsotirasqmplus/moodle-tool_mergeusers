@@ -30,7 +30,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require('../../../config.php');
-
+require_once(__DIR__ . '/locallib.php');
 global $CFG, $PAGE, $SESSION;
 
 // Report all PHP errors.
@@ -113,7 +113,7 @@ if (!empty($option)) {
 
             if ($olduser === null && $newuser === null) {
                 try {
-                    $renderer->mu_error(get_string('no_saveselection', 'tool_mergeusers'));
+                    $renderer->mu_error(mergusergetstring('no_saveselection', 'tool_mergeusers'));
                 } catch (coding_exception $e) {
                     mtrace($e->getMessage());
                 }
@@ -210,7 +210,7 @@ if (!empty($option)) {
 
         // Oops!
         default:
-            $renderer->mu_error(get_string('invalid_option', 'tool_mergeusers'));
+            $renderer->mu_error(mergusergetstring('invalid_option', 'tool_mergeusers'));
             break;
     }
     // Any submitted data?

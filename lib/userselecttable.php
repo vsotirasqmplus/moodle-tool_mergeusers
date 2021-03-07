@@ -37,7 +37,7 @@ global $CFG;
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
 require_once($CFG->dirroot . '/lib/outputcomponents.php');
-
+require_once(__DIR__ . '/../locallib.php');
 /**
  * Extend the html table to provide a build function inside for creating a table
  * for user selecting.
@@ -83,12 +83,12 @@ class UserSelectTable extends html_table implements renderable {
         $this->attributes['class'] = 'generaltable boxaligncenter';
 
         $columns = [
-                'col_select_olduser' => get_string('olduser', 'tool_mergeusers'),
-                'col_master_newuser' => get_string('newuser', 'tool_mergeusers'),
+                'col_select_olduser' => mergusergetstring('olduser', 'tool_mergeusers'),
+                'col_master_newuser' => mergusergetstring('newuser', 'tool_mergeusers'),
                 'col_userid' => 'Id',
-                'col_username' => get_string('user'),
-                'col_email' => get_string('email'),
-                'col_idnumber' => get_string('idnumber'),
+                'col_username' => mergusergetstring('user'),
+                'col_email' => mergusergetstring('email'),
+                'col_idnumber' => mergusergetstring('idnumber'),
         ];
 
         $this->head = array_values($columns);

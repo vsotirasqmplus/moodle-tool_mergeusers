@@ -29,18 +29,19 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
+require_once(__DIR__ . '/locallib.php');
 global $ADMIN, $CFG, $hassiteconfig;
 try {
     if (has_capability('tool/mergeusers:mergeusers', context_system::instance())) {
         if (!$ADMIN->locate('tool_mergeusers')) {
             $ADMIN->add(
                     'accounts',
-                    new admin_category('tool_mergeusers', get_string('pluginname', 'tool_mergeusers'))
+                    new admin_category('tool_mergeusers', mergusergetstring('pluginname', 'tool_mergeusers'))
             );
             $ADMIN->add(
                     'tool_mergeusers',
                     new admin_externalpage(
-                            'tool_mergeusers_merge', get_string('pluginname', 'tool_mergeusers'),
+                            'tool_mergeusers_merge', mergusergetstring('pluginname', 'tool_mergeusers'),
                             $CFG->wwwroot . '/' . $CFG->admin . '/tool/mergeusers/index.php',
                             'tool/mergeusers:mergeusers'
                     )
@@ -48,7 +49,7 @@ try {
             $ADMIN->add(
                     'tool_mergeusers',
                     new admin_externalpage(
-                            'tool_mergeusers_viewlog', get_string('viewlog', 'tool_mergeusers'),
+                            'tool_mergeusers_viewlog', mergusergetstring('viewlog', 'tool_mergeusers'),
                             $CFG->wwwroot . '/' . $CFG->admin . '/tool/mergeusers/view.php',
                             'tool/mergeusers:mergeusers'
                     )
@@ -63,14 +64,14 @@ try {
         // Add configuration for making user suspension optional.
         $settings = new admin_settingpage(
                 'mergeusers_settings',
-                get_string('pluginname', 'tool_mergeusers')
+                mergusergetstring('pluginname', 'tool_mergeusers')
         );
 
         $settings->add(
                 new admin_setting_configcheckbox(
                         'tool_mergeusers/suspenduser',
-                        get_string('suspenduser_setting', 'tool_mergeusers'),
-                        get_string('suspenduser_setting_desc', 'tool_mergeusers'),
+                        mergusergetstring('suspenduser_setting', 'tool_mergeusers'),
+                        mergusergetstring('suspenduser_setting_desc', 'tool_mergeusers'),
                         1
                 )
         );
@@ -80,9 +81,9 @@ try {
         $settings->add(
                 new admin_setting_configcheckbox(
                         'tool_mergeusers/transactions_only',
-                        get_string('transactions_setting', 'tool_mergeusers'),
-                        get_string('transactions_setting_desc', 'tool_mergeusers') . '<br /><br />' .
-                        get_string($supportinglang, 'tool_mergeusers'),
+                        mergusergetstring('transactions_setting', 'tool_mergeusers'),
+                        mergusergetstring('transactions_setting_desc', 'tool_mergeusers') . '<br /><br />' .
+                        mergusergetstring($supportinglang, 'tool_mergeusers'),
                         1
                 )
         );
@@ -91,8 +92,8 @@ try {
         $settings->add(
                 new admin_setting_configmultiselect(
                         'tool_mergeusers/excluded_exceptions',
-                        get_string('excluded_exceptions', 'tool_mergeusers'),
-                        get_string('excluded_exceptions_desc', 'tool_mergeusers', $exceptionoptions->defaultvalue),
+                        mergusergetstring('excluded_exceptions', 'tool_mergeusers'),
+                        mergusergetstring('excluded_exceptions_desc', 'tool_mergeusers', $exceptionoptions->defaultvalue),
                         [$exceptionoptions->defaultkey], // Default value: empty => apply all exceptions.
                         $exceptionoptions->options
                 )
@@ -103,8 +104,8 @@ try {
         $settings->add(
                 new admin_setting_configselect(
                         'tool_mergeusers/quizattemptsaction',
-                        get_string('quizattemptsaction', 'tool_mergeusers'),
-                        get_string('quizattemptsaction_desc', 'tool_mergeusers', $quizoptions->allstrings),
+                        mergusergetstring('quizattemptsaction', 'tool_mergeusers'),
+                        mergusergetstring('quizattemptsaction_desc', 'tool_mergeusers', $quizoptions->allstrings),
                         $quizoptions->defaultkey,
                         $quizoptions->options
                 )
@@ -113,8 +114,8 @@ try {
         $settings->add(
                 new admin_setting_configcheckbox(
                         'tool_mergeusers/uniquekeynewidtomaintain',
-                        get_string('uniquekeynewidtomaintain', 'tool_mergeusers'),
-                        get_string('uniquekeynewidtomaintain_desc', 'tool_mergeusers'),
+                        mergusergetstring('uniquekeynewidtomaintain', 'tool_mergeusers'),
+                        mergusergetstring('uniquekeynewidtomaintain_desc', 'tool_mergeusers'),
                         1
                 )
         );

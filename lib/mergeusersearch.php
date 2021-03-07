@@ -37,7 +37,7 @@ global $CFG;
 
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
-
+require_once(__DIR__ . '/../locallib.php');
 /**
  * A class to perform user search and lookup (verification)
  *
@@ -140,7 +140,7 @@ class MergeUserSearch {
         try {
             $user = $DB->get_record('user', [$column => $userinfo], '*', MUST_EXIST);
         } catch (Exception $e) {
-            $message = get_string('invaliduser', 'tool_mergeusers') . '(' . $column . '=>' . $userinfo . '): ' . $e->getMessage();
+            $message = mergusergetstring('invaliduser', 'tool_mergeusers') . '(' . $column . '=>' . $userinfo . '): ' . $e->getMessage();
             $user = null;
         }
 

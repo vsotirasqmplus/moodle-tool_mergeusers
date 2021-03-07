@@ -23,6 +23,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once(__DIR__ . '/select_form.php');
 require_once(__DIR__ . '/review_form.php');
+require_once(__DIR__ . '/locallib.php');
 require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/mergeusers/lib.php');
 
 /**
@@ -82,13 +83,12 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
      * @param int $step current step
      *
      * @return string HTML for the progress bar.
-     * @throws coding_exception
      */
     public function build_progress_bar(int $step): string {
         $steps = [
-                ['text' => '1. ' . get_string('choose_users', 'tool_mergeusers')],
-                ['text' => '2. ' . get_string('review_users', 'tool_mergeusers')],
-                ['text' => '3. ' . get_string('results', 'tool_mergeusers')],
+                ['text' => '1. ' . mergusergetstring('choose_users', 'tool_mergeusers')],
+                ['text' => '2. ' . mergusergetstring('review_users', 'tool_mergeusers')],
+                ['text' => '3. ' . mergusergetstring('results', 'tool_mergeusers')],
         ];
 
         switch ($step) {
@@ -114,13 +114,12 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
      * @param UserSelectTable|null $ust table for users to merge after searching
      *
      * @return       string html to show on index page.
-     * @throws coding_exception
      * @throws moodle_exception
      * @noinspection PhpUndefinedMethodInspection
      */
     public function index_page(moodleform $mform, int $step, UserSelectTable $ust = null): string {
         $output = $this->header();
-        $output .= $this->heading_with_help(get_string('mergeusers', 'tool_mergeusers'), 'header', 'tool_mergeusers');
+        $output .= $this->heading_with_help(mergusergetstring('mergeusers', 'tool_mergeusers'), 'header', 'tool_mergeusers');
 
         $output .= $this->build_progress_bar($step);
 
@@ -162,7 +161,7 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
      * @param $step
      *
      * @return string $reviewtable HTML of the review table section
-     * @throws coding_exception|moodle_exception
+     * @throws moodle_exception
      */
     public function render_user_review_table($step): string {
         return $this->moodleform(
@@ -178,24 +177,19 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
      * Displays merge users tool error message
      *
      * @param string $message The error message
-     * @param bool $showreturn Shows a return button to the index page
-     *
-     * @throws       coding_exception
+     * @throws coding_exception
      * @noinspection PhpUndefinedMethodInspection
      */
-    public function mu_error(string $message, $showreturn = true) {
-        $errorhtml = '';
+    public function mu_error(string $message) {
 
         echo $this->header();
-
+        $errorhtml = '';
         $errorhtml .= $this->output->box($message, 'generalbox align-center');
-        if ($showreturn) {
-            $returnurl = new moodle_url('/admin/tool/mergeusers/index.php');
-            $returnbutton = new single_button($returnurl, get_string('error_return', 'tool_mergeusers'));
-
-            $errorhtml .= $this->output->render($returnbutton);
-        }
-
+        $returnurl = new moodle_url('/admin/tool/mergeusers/index.php');
+        $returnbutton = html_writer::link($returnurl,mergusergetstring('error_return', 'tool_mergeusers'));
+        $errorhtml .= $returnbutton;
+/*        $returnbutton = new single_button($returnurl, mergusergetstring('error_return', 'tool_mergeusers'));
+        $errorhtml .= $this->output->render($returnbutton);*/
         echo $errorhtml;
         echo $this->footer();
     }
@@ -211,7 +205,6 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
      *
      * @return       string html with the results.
      * @throws       ReflectionException
-     * @throws       coding_exception
      * @noinspection PhpUndefinedMethodInspection
      */
     public function results_page(object $to, object $from, bool $success, array $data, $logid): string {
@@ -230,21 +223,21 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
         }
 
         $output = $this->header();
-        $output .= $this->heading(get_string('mergeusers', 'tool_mergeusers'));
+        $output .= $this->heading(mergusergetstring('mergeusers', 'tool_mergeusers'));
         $output .= $this->build_progress_bar(self::INDEX_PAGE_RESULTS_STEP);
         $output .= html_writer::empty_tag('br');
         $output .= html_writer::start_tag('div', ['class' => 'result']);
         $output .= html_writer::start_tag('div', ['class' => 'title']);
-        $output .= get_string('merging', 'tool_mergeusers');
+        $output .= mergusergetstring('merging', 'tool_mergeusers');
         if (!is_null($to) && !is_null($from)) {
-            $output .= ' ' . get_string('usermergingheader', 'tool_mergeusers', $from) . ' ' .
-                    get_string('into', 'tool_mergeusers') . ' ' .
-                    get_string('usermergingheader', 'tool_mergeusers', $to);
+            $output .= ' ' . mergusergetstring('usermergingheader', 'tool_mergeusers', $from) . ' ' .
+                    mergusergetstring('into', 'tool_mergeusers') . ' ' .
+                    mergusergetstring('usermergingheader', 'tool_mergeusers', $to);
         }
         $output .= html_writer::empty_tag('br') . html_writer::empty_tag('br');
-        $output .= get_string('logid', 'tool_mergeusers', $logid);
+        $output .= mergusergetstring('logid', 'tool_mergeusers', $logid);
         $output .= html_writer::empty_tag('br');
-        $output .= get_string('log' . $resulttype, 'tool_mergeusers');
+        $output .= mergusergetstring('log' . $resulttype, 'tool_mergeusers');
         $output .= html_writer::end_tag('div');
         $output .= html_writer::empty_tag('br');
 
@@ -255,9 +248,9 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
         $output .= html_writer::end_tag('div');
         $output .= html_writer::end_tag('div');
         $output .= html_writer::tag('div', html_writer::empty_tag('br'));
-        $output .= $this->notification(html_writer::tag('center', get_string($dbmessage, 'tool_mergeusers')), $notifytype);
+        $output .= $this->notification(html_writer::tag('center', mergusergetstring($dbmessage, 'tool_mergeusers')), $notifytype);
         $output .= html_writer::tag('center',
-                $this->single_button(new moodle_url('/admin/tool/mergeusers/index.php'), get_string('continue'), 'get'));
+                $this->single_button(new moodle_url('/admin/tool/mergeusers/index.php'), mergusergetstring('continue'), 'get'));
         $output .= $this->footer();
 
         return $output;
@@ -302,54 +295,53 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
      *
      * @param array $logs array of logs.
      *
-     * @return       string the corresponding HTML.
-     * @throws       coding_exception
-     * @throws       moodle_exception
+     * @return string the corresponding HTML.
+     * @throws moodle_exception
      * @noinspection PhpUndefinedMethodInspection
-     * @global       object $CFG
+     * @global object $CFG
      */
     public function logs_page(array $logs): string {
         global $CFG;
 
         $output = $this->header();
-        $output .= $this->heading(get_string('viewlog', 'tool_mergeusers'));
+        $output .= $this->heading(mergusergetstring('viewlog', 'tool_mergeusers'));
         $output .= html_writer::start_tag('div', ['class' => 'result']);
         if (empty($logs)) {
-            $output .= get_string('nologs', 'tool_mergeusers');
+            $output .= mergusergetstring('nologs', 'tool_mergeusers');
         } else {
             $output .= html_writer::tag('div',
-                    get_string('loglist', 'tool_mergeusers'), ['class' => 'title']);
+                    mergusergetstring('loglist', 'tool_mergeusers'), ['class' => 'title']);
 
             $flags = [];
-            $flags[] = $this->pix_icon('i/invalid', get_string('eventusermergedfailure', 'tool_mergeusers'));
+            $flags[] = $this->pix_icon('i/invalid', mergusergetstring('eventusermergedfailure', 'tool_mergeusers'));
             // Failure icon.
-            $flags[] = $this->pix_icon('i/valid', get_string('eventusermergedsuccess', 'tool_mergeusers'));
+            $flags[] = $this->pix_icon('i/valid', mergusergetstring('eventusermergedsuccess', 'tool_mergeusers'));
             // Ok icon.
 
             $table = new html_table();
             $table->align = ['center', 'center', 'center', 'center', 'center', 'center'];
-            $table->head = [get_string('olduseridonlog', 'tool_mergeusers'),
-                    get_string('newuseridonlog', 'tool_mergeusers'),
-                    get_string('date'), get_string('status'), ''];
+            $table->head = [mergusergetstring('olduseridonlog', 'tool_mergeusers'),
+                    mergusergetstring('newuseridonlog', 'tool_mergeusers'),
+                    mergusergetstring('date'), mergusergetstring('status'), ''];
 
             $rows = [];
-            foreach ($logs as $i => $log) {
+            foreach ($logs as $log) {
                 $row = new html_table_row();
                 $row->cells = [
                         ($log->from)
                                 ? $this->show_user($log->fromuserid, $log->from)
-                                : get_string('deleted', 'tool_mergeusers', $log->fromuserid),
+                                : mergusergetstring('deleted', 'tool_mergeusers', $log->fromuserid),
                         ($log->to)
                                 ? $this->show_user($log->touserid, $log->to)
-                                : get_string('deleted', 'tool_mergeusers', $log->touserid),
-                        userdate($log->timemodified, get_string('strftimedaydatetime', 'langconfig')),
+                                : mergusergetstring('deleted', 'tool_mergeusers', $log->touserid),
+                        userdate($log->timemodified, mergusergetstring('strftimedaydatetime', 'langconfig')),
                         $flags[$log->success],
                         html_writer::link(
                                 new moodle_url(
                                         '/' . $CFG->admin . '/tool/mergeusers/log.php',
                                         ['id' => $log->id, 'sesskey' => sesskey()]
                                 ),
-                                get_string('more'),
+                                mergusergetstring('more'),
                                 ['target' => '_blank']
                         ),
                 ];

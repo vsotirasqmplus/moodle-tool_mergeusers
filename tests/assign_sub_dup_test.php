@@ -24,7 +24,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../lib/db/inmemoryfindbyquery.php');
 require_once(__DIR__ . '/../lib/duplicateddata/assignsubmissionduplicateddatamerger.php');
 
-class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_testcase {
+class tool_mergeusers_assign_sub_dup_testcase extends advanced_testcase {
 
     /**
      * Should do nothing with new submission and remove old submission when old user has no content submission
@@ -57,9 +57,9 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
         ];
 
         $inmemoryfindbyquery = new in_memory_assign_submission_query($data);
-        $assignsubmissionduplicateddatamerger = new AssignSubmissionDuplicatedDataMerger($inmemoryfindbyquery);
+        $assgsubdupdatamerge = new AssignSubmissionDuplicatedDataMerger($inmemoryfindbyquery);
 
-        $duplicateddata = $assignsubmissionduplicateddatamerger->merge($oldusersubmission, $newusersubmission);
+        $duplicateddata = $assgsubdupdatamerge->merge($oldusersubmission, $newusersubmission);
 
         $this->assertEquals($duplicateddata->to_modify(), $expectedtomodify);
         $this->assertEquals($duplicateddata->to_remove(), $expectedtoremove);
@@ -120,9 +120,9 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
                 ]
         ];
         $inmemoryfindbyquery = new in_memory_assign_submission_query($data);
-        $assignsubmissionduplicateddatamerger = new AssignSubmissionDuplicatedDataMerger($inmemoryfindbyquery);
+        $assdupmanager = new AssignSubmissionDuplicatedDataMerger($inmemoryfindbyquery);
 
-        $duplicateddata = $assignsubmissionduplicateddatamerger->merge($oldusersubmission, $newusersubmission);
+        $duplicateddata = $assdupmanager->merge($oldusersubmission, $newusersubmission);
 
         $this->assertEquals($duplicateddata->to_modify(), $expectedtomodify);
         $this->assertEquals($duplicateddata->to_remove(), $expectedtoremove);
@@ -178,9 +178,9 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
                 ]
         ];
         $inmemoryfindbyquery = new in_memory_assign_submission_query($data);
-        $assignsubmissionduplicateddatamerger = new AssignSubmissionDuplicatedDataMerger($inmemoryfindbyquery);
+        $assignsubdupdatamerg = new AssignSubmissionDuplicatedDataMerger($inmemoryfindbyquery);
 
-        $duplicateddata = $assignsubmissionduplicateddatamerger->merge($oldusersubmission, $newusersubmission);
+        $duplicateddata = $assignsubdupdatamerg->merge($oldusersubmission, $newusersubmission);
 
         $this->assertEquals($duplicateddata->to_modify(), $expectedtomodify);
         $this->assertEquals($duplicateddata->to_remove(), $expectedtoremove);
@@ -211,28 +211,28 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
     }
 
     private function get_assign_submission_submitted($id, $assignid): stdClass {
-        $anoldsubmittedassignsubmision = $this->get_assign_submission($id);
-        $anoldsubmittedassignsubmision->status = 'submitted';
-        $anoldsubmittedassignsubmision->assignment = $assignid;
+        $anoldsubassignsub = $this->get_assign_submission($id);
+        $anoldsubassignsub->status = 'submitted';
+        $anoldsubassignsub->assignment = $assignid;
 
-        return $anoldsubmittedassignsubmision;
+        return $anoldsubassignsub;
     }
 
     private function get_assign_submission_submitted_by_date($id, $assignid, $date): stdClass {
-        $anewsubmittedassignsubmission = $this->get_assign_submission($id);
-        $anewsubmittedassignsubmission->status = 'submitted';
-        $anewsubmittedassignsubmission->assignment = $assignid;
-        $anewsubmittedassignsubmission->timemodified = $date;
+        $anewsubmitted = $this->get_assign_submission($id);
+        $anewsubmitted->status = 'submitted';
+        $anewsubmitted->assignment = $assignid;
+        $anewsubmitted->timemodified = $date;
 
-        return $anewsubmittedassignsubmission;
+        return $anewsubmitted;
     }
 
     private function get_assign_submission_new($id, $assignid): stdClass {
-        $anoldsubmittedassignsubmision = $this->get_assign_submission($id);
-        $anoldsubmittedassignsubmision->status = 'new';
-        $anoldsubmittedassignsubmision->assignment = $assignid;
+        $oldsubasssub = $this->get_assign_submission($id);
+        $oldsubasssub->status = 'new';
+        $oldsubasssub->assignment = $assignid;
 
-        return $anoldsubmittedassignsubmision;
+        return $oldsubasssub;
     }
 
     private function get_assign_submission_draft_by_date($id, $assignid, $date): stdClass {
@@ -243,19 +243,19 @@ class tool_mergeusers_assign_submission_duplicated_testcase extends advanced_tes
     }
 
     private function get_assign_submission_draft($id, $assignid): stdClass {
-        $anassignsubmissiondraft = $this->get_assign_submission($id);
-        $anassignsubmissiondraft->status = 'draft';
-        $anassignsubmissiondraft->assignment = $assignid;
+        $draft = $this->get_assign_submission($id);
+        $draft->status = 'draft';
+        $draft->assignment = $assignid;
 
-        return $anassignsubmissiondraft;
+        return $draft;
     }
 
     private function get_assign_submission_reopened($id, $assignid): stdClass {
-        $anassignsubmissionreopened = $this->get_assign_submission($id);
-        $anassignsubmissionreopened->status = 'reopened';
-        $anassignsubmissionreopened->assignment = $assignid;
+        $reopened = $this->get_assign_submission($id);
+        $reopened->status = 'reopened';
+        $reopened->assignment = $assignid;
 
-        return $anassignsubmissionreopened;
+        return $reopened;
     }
 
     private function get_assign_submission($id): stdClass {

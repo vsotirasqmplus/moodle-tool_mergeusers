@@ -37,7 +37,7 @@ global $CFG;
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
 require_once($CFG->dirroot . '/lib/outputcomponents.php');
-
+require_once(__DIR__ . '/../locallib.php');
 /**
  * Extend the html table to provide a build function inside for creating a table
  * for reviewing the users to merge.
@@ -66,7 +66,6 @@ class UserReviewTable extends html_table implements renderable {
      *
      * @param tool_mergeusers_renderer $renderer
      *
-     * @throws coding_exception
      * @throws moodle_exception
      */
     public function __construct(tool_mergeusers_renderer $renderer) {
@@ -91,7 +90,6 @@ class UserReviewTable extends html_table implements renderable {
     /**
      * Build the user select table using the extension of html_table
      *
-     * @throws coding_exception
      * @throws moodle_exception
      */
     protected function buildtable() {
@@ -112,9 +110,9 @@ class UserReviewTable extends html_table implements renderable {
             $columns = [
                     'col_label' => '',
                     'col_userid' => 'Id',
-                    'col_username' => get_string('user'),
-                    'col_email' => get_string('email'),
-                    'col_extra' => get_string($extrafield)
+                    'col_username' => mergusergetstring('user'),
+                    'col_email' => mergusergetstring('email'),
+                    'col_extra' => mergusergetstring($extrafield)
             ];
             $this->head = array_values($columns);
             $this->colclasses = array_keys($columns);
@@ -122,7 +120,7 @@ class UserReviewTable extends html_table implements renderable {
             // Always display both rows so that the end user can see what is selected/not selected.
             // Add old user row.
             $olduserrow = [];
-            $olduserrow[] = get_string('olduser', 'tool_mergeusers');
+            $olduserrow[] = mergusergetstring('olduser', 'tool_mergeusers');
             if (!empty($this->olduser)) { // If there is an old user display it.
                 $olduserrow[] = $this->olduser->id;
                 $olduserrow[] = $this->renderer->show_user($this->olduser->id, $this->olduser);
@@ -138,7 +136,7 @@ class UserReviewTable extends html_table implements renderable {
 
             // Add new user row.
             $newuserrow = [];
-            $newuserrow[] = get_string('newuser', 'tool_mergeusers');
+            $newuserrow[] = mergusergetstring('newuser', 'tool_mergeusers');
             if (!empty($this->newuser)) { // If there is an new user display it.
                 $newuserrow[] = $this->newuser->id;
                 $newuserrow[] = $this->renderer->show_user($this->newuser->id, $this->newuser);

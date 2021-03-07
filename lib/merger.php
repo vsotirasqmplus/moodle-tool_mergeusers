@@ -23,7 +23,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/autoload.php');
-
+require_once(__DIR__ . '/../locallib.php');
 class Merger {
     /**
      * @var MergeUserTool instance of the tool.
@@ -54,15 +54,15 @@ class Merger {
      *
      * @param int $signo only SIGINT.
      *
-     * @throws       coding_exception
+     * @throws coding_exception
+     * @throws Exception
      * @noinspection PhpMissingParamTypeInspection
-     * @noinspection PhpUnusedParameterInspection
      */
     public function aborting($signo) {
         if (defined('CLI_SCRIPT')) {
-            echo "\n\n" . get_string('ok') . ", exit!\n\n";
+            echo "\n\n$signo\n" . mergusergetstring('ok') . ", exit!\n\n";
         }
-        exit(0); // Quiting normally after all ;-) !
+        throw new Exception('Aborting'); // Quiting normally after all ;-) !
     }
 
     /**
@@ -74,7 +74,6 @@ class Merger {
      * @throws       coding_exception
      * @throws       dml_exception
      * @throws       dml_exception|moodle_exception
-     * @noinspection PhpUnusedLocalVariableInspection
      */
     public function merge(Gathering $gathering) {
         foreach ($gathering as $action) {
@@ -82,11 +81,11 @@ class Merger {
 
             // Only shows results on cli script.
             if (defined('CLI_SCRIPT')) {
-                echo (($success) ? get_string('success') : get_string('error')) . '. Log id: ' . $id . "\n\n";
+                echo (($success) ? mergusergetstring('success') : mergusergetstring('error')) . '. Log id: ' . $id . "\n$log\n\n";
             }
         }
         if (defined('CLI_SCRIPT')) {
-            echo get_string('ok') . ", exit!\n\n";
+            echo mergusergetstring('ok') . ", exit!\n\n";
         }
     }
 }

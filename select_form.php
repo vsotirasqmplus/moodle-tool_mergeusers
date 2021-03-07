@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->libdir . '/formslib.php'); // Forms library.
-
+require_once(__DIR__ . '/locallib.php');
 /**
  * Define form snippet for getting the userids of the two users to merge
  */
@@ -54,7 +54,7 @@ class selectuserform extends moodleform {
         $mform =& $this->_form;
 
         // Header.
-        $mform->addElement('header', 'selectusers', get_string('userselecttable_legend', 'tool_mergeusers'));
+        $mform->addElement('header', 'selectusers', mergusergetstring('userselecttable_legend', 'tool_mergeusers'));
 
         // Table content.
         $mform->addElement('static', 'selectuserslist', '', html_writer::table($this->ust));
@@ -68,6 +68,6 @@ class selectuserform extends moodleform {
         $mform->setType('selectednewuser', PARAM_RAW);
 
         // Buttons.
-        $this->add_action_buttons(false, get_string('saveselection_submit', 'tool_mergeusers'));
+        $this->add_action_buttons(false, mergusergetstring('saveselection_submit', 'tool_mergeusers'));
     }
 }

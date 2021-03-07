@@ -26,7 +26,7 @@ require_once(__DIR__ . '/../db/dbassignsubmission.php');
 
 class AssignSubmissionTableMerger extends GenericTableMerger {
 
-    private $findassignsubmissions;
+    private $findassignsubs;
     private $duplicateddatamerger;
 
     /**
@@ -36,7 +36,7 @@ class AssignSubmissionTableMerger extends GenericTableMerger {
      */
     public function __construct() {
         parent::__construct();
-        $this->findassignsubmissions = new db_assign_submission();
+        $this->findassignsubs = new db_assign_submission();
         $this->duplicateddatamerger = new AssignSubmissionDuplicatedDataMerger();
     }
 
@@ -59,32 +59,32 @@ class AssignSubmissionTableMerger extends GenericTableMerger {
         $touserid = $data['toid'];
         $assignstocheck = $recordstomodify;
         $recordstomodify = [];
-        $assignsubmissionstoremove = [];
-
+        $assignsubstoremove = [];
+        mtrace($userfield . ' ' . implode(', ', $otherfields));
         foreach ($assignstocheck as $assignid) {
-            $olduserlatestsubmission = $this->findassignsubmissions->latest_from_assign_and_user($assignid, $fromuserid);
-            $newuserlatestsubmission = $this->findassignsubmissions->latest_from_assign_and_user($assignid, $touserid);
+            $olduserlatestsub = $this->findassignsubs->latest_from_assign_and_user($assignid, $fromuserid);
+            $newuserlatestsub = $this->findassignsubs->latest_from_assign_and_user($assignid, $touserid);
 
-            if (!empty($newuserlatestsubmission)) {
-                $duplicateddata = $this->duplicateddatamerger->merge($olduserlatestsubmission, $newuserlatestsubmission);
+            if (!empty($newuserlatestsub)) {
+                $duplicateddata = $this->duplicateddatamerger->merge($olduserlatestsub, $newuserlatestsub);
                 $recordstomodify += $duplicateddata->to_modify();
-                $assignsubmissionstoremove += $duplicateddata->to_remove();
+                $assignsubstoremove += $duplicateddata->to_remove();
                 continue;
             }
 
-            if ($oldusersubmissions = $this->findassignsubmissions->all_from_assign_and_user($assignid, $fromuserid)) {
-                $assignsubmissionstomodify = array_keys($oldusersubmissions);
-                $recordstomodify += array_combine($assignsubmissionstomodify, $assignsubmissionstomodify);
+            if ($oldusersubmissions = $this->findassignsubs->all_from_assign_and_user($assignid, $fromuserid)) {
+                $assignsubstomod = array_keys($oldusersubmissions);
+                $recordstomodify += array_combine($assignsubstomod, $assignsubstomod);
             }
         }
 
-        foreach ($assignsubmissionstoremove as $assignsubmissionid) {
+        foreach ($assignsubstoremove as $assignsubmissionid) {
             if (isset($recordstomodify[$assignsubmissionid])) {
                 unset($recordstomodify[$assignsubmissionid]);
             }
         }
 
-        $this->cleanrecordsoncompoundindex($data, $assignsubmissionstoremove, $actionlog, $errormessages);
+        $this->cleanrecordsoncompoundindex($data, $assignsubstoremove, $actionlog, $errormessages);
     }
 
     /**

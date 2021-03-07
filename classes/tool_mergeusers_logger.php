@@ -90,7 +90,7 @@ class tool_mergeusers_logger {
         if (!$logs) {
             return $logs;
         }
-        foreach ($logs as $id => $log) {
+        foreach ($logs as $log) {
             $log->to = $DB->get_record('user', ['id' => $log->touserid]);
             $log->from = $DB->get_record('user', ['id' => $log->fromuserid]);
         }

@@ -32,12 +32,17 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(dirname(dirname(dirname(__DIR__)))) . '/config.php');
-require_login();
+try {
+    require_login();
+} catch (coding_exception | require_login_exception | moodle_exception $e) {
+    die($e->getMessage());
+}
 global $CFG;
 
 require_once($CFG->dirroot . '/lib/clilib.php');
 require_once(__DIR__ . '/autoload.php');
 require_once($CFG->dirroot . '/' . $CFG->admin . '/tool/mergeusers/lib.php');
+require_once(__DIR__ . '/../locallib.php');
 
 /**
  * Lifecycle:
@@ -72,7 +77,7 @@ class MergeUserTool {
      * @var array associative array with special cases for tables with compound indexes,
      * without the $CFG->prefix on each.
      */
-    protected $tableswithcompoundindex;
+    protected $tableswithcompindex;
 
     /**
      * @var array array with table names (without $CFG->prefix) and the list of field names
@@ -94,7 +99,7 @@ class MergeUserTool {
     /**
      * @var array list of table names processed by TableMerger's.
      */
-    protected $tablesprocessedbytablemergers;
+    protected $tablesprocbytblmerge;
 
     /**
      * @var bool if true then never commit the transaction, used for testing.
@@ -117,10 +122,9 @@ class MergeUserTool {
      * @param tool_mergeusers_config|null $config local configuration.
      * @param tool_mergeusers_logger|null $logger logger facility to save results of mergings.
      *
-     * @throws       coding_exception
-     * @throws       dml_exception
-     * @throws       moodle_exception
-     * @throws       ReflectionException
+     * @throws ReflectionException
+     * @throws dml_exception
+     * @throws moodle_exception
      * @noinspection PhpUndefinedFieldInspection
      * @global       object $CFG
      */
@@ -138,18 +142,19 @@ class MergeUserTool {
         if (!isset($excluded['none'])) {
             foreach ($excluded as $exclude => $nonused) {
                 unset($this->tablestoskip[$exclude]);
+                unset($nonused);
             }
         }
 
         // These are special cases, corresponding to tables with compound indexes that need a special treatment.
-        $this->tableswithcompoundindex = $config->compoundindexes;
+        $this->tableswithcompindex = $config->compoundindexes;
 
         // Initializes user-related field names.
         $this->userfieldnames = $config->userfieldnames;
 
         // Load available TableMerger tools.
         $tablemergers = [];
-        $tablesprocessedbytablemergers = [];
+        $tablesprocbytblmerge = [];
         foreach ($config->tablemergers as $tablename => $class) {
             $tm = new $class();
             // Ensure any provided class is a class of TableMerger.
@@ -157,7 +162,7 @@ class MergeUserTool {
                 // Aborts execution by showing an error.
                 if (CLI_SCRIPT) {
                     cli_error(
-                            'Error: ' . __METHOD__ . ':: ' . get_string(
+                            'Error: ' . __METHOD__ . ':: ' . mergusergetstring(
                                     'notablemergerclass', 'tool_mergeusers',
                                     $class
                             )
@@ -170,11 +175,11 @@ class MergeUserTool {
                 }
             }
             // Append any additional table to skip.
-            $tablesprocessedbytablemergers = array_merge($tablesprocessedbytablemergers, $tm->gettablestoskip());
+            $tablesprocbytblmerge = array_merge($tablesprocbytblmerge, $tm->gettablestoskip());
             $tablemergers[$tablename] = $tm;
         }
         $this->tablemergers = $tablemergers;
-        $this->tablesprocessedbytablemergers = array_flip($tablesprocessedbytablemergers);
+        $this->tablesprocbytblmerge = array_flip($tablesprocbytblmerge);
 
         $this->alwaysrollback = !empty($config->alwaysRollback);
         $this->debugdb = !empty($config->debugdb);
@@ -194,12 +199,12 @@ class MergeUserTool {
      * users' merging was successful and log contains all actions done; if array(false, errors, id)
      * means users' merging was aborted and errors contain the list of errors.
      * The last id is the log id of the merging action for later visual revision.
-     * @throws coding_exception
      * @throws dml_exception
      * @throws dml_transaction_exception
      * @throws moodle_exception
      * @global object $CFG
      * @global moodle_database $DB
+     * @noinspection PhpUndefinedMethodInspection
      */
     public function merge(int $toid, int $fromid): array {
         list($success, $log) = $this->_merge($toid, $fromid);
@@ -208,16 +213,10 @@ class MergeUserTool {
         $eventpath .= ($success) ? 'user_merged_success' : 'user_merged_failure';
 
         // Method Reference /lib/classes/event/base.php::create() .
-        $event = $eventpath::create(
-                [
-                        'context' => context_system::instance(),
-                        'other' => [
-                                'usersinvolved' => [
-                                        'toid' => $toid,
-                                        'fromid' => $fromid,
-                                ],
-                                'log' => $log,
-                        ],
+        $event = $eventpath::create([
+                        'context' => context_system::instance()
+                    , 'other' => ['usersinvolved' => ['toid' => $toid, 'fromid' => $fromid]
+                            , 'log' => $log]
                 ]
         );
         $event->trigger();
@@ -225,56 +224,16 @@ class MergeUserTool {
         return [$success, $log, $logid];
     }
 
-    /**
-     * Real method that performs the merging action.
-     *
-     * @param int $toid The user inheriting the data
-     * @param int $fromid The user being replaced
-     *
-     * @return array An array(bool, array) having the following cases: if array(true, log)
-     * users' merging was successful and log contains all actions done; if array(false, errors)
-     * means users' merging was aborted and errors contain the list of errors.
-     * @throws coding_exception
-     * @throws dml_transaction_exception
-     * @global object $CFG
-     * @global moodle_database $DB
-     */
-    private function _merge(int $toid, int $fromid): array {
+    private function _mergetry($fromid, $toid, &$actionlog, &$errormessages) {
         global $DB;
-
-        // Initial checks.
-        // Are they the same?
-        if ($fromid == $toid) {
-            // Yes. do nothing.
-            return [false, [get_string('errorsameuser', 'tool_mergeusers')]];
-        }
-
-        // Ok, now we have to work;-) !
-        // First of all... initialization!
-        $errormessages = [];
-        $actionlog = [];
-
-        if ($this->debugdb) {
-            $DB->set_debug(true);
-        }
-
-        $starttime = time();
-        $starttimestring = get_string('starttime', 'tool_mergeusers', userdate($starttime));
-        $actionlog[] = $starttimestring;
-
-        $transaction = $DB->start_delegated_transaction();
-
         try {
             // Processing each table name.
-            $data = [
-                    'toid' => $toid,
-                    'fromid' => $fromid,
-            ];
+            $data = ['toid' => $toid, 'fromid' => $fromid,];
             foreach ($this->userfieldspertable as $tablename => $userfields) {
                 $data['tableName'] = $tablename;
                 $data['userFields'] = $userfields;
-                if (isset($this->tableswithcompoundindex[$tablename])) {
-                    $data['compoundIndex'] = $this->tableswithcompoundindex[$tablename];
+                if (isset($this->tableswithcompindex[$tablename])) {
+                    $data['compoundIndex'] = $this->tableswithcompindex[$tablename];
                 } else {
                     unset($data['compoundIndex']);
                 }
@@ -296,10 +255,43 @@ class MergeUserTool {
                     $e->getTraceAsString() . html_writer::empty_tag('br')
             );
         }
+    }
 
-        if ($this->debugdb) {
-            $DB->set_debug(false);
+    /**
+     * Real method that performs the merging action.
+     *
+     * @param int $toid The user inheriting the data
+     * @param int $fromid The user being replaced
+     *
+     * @return array An array(bool, array) having the following cases: if array(true, log)
+     * users' merging was successful and log contains all actions done; if array(false, errors)
+     * means users' merging was aborted and errors contain the list of errors.
+     * @throws dml_transaction_exception
+     * @global object $CFG
+     * @global moodle_database $DB
+     */
+    private function _merge(int $toid, int $fromid): array {
+        global $DB;
+
+        // Initial checks.
+        // Are they the same?
+        if ($fromid == $toid) {
+            // Yes. do nothing.
+            return [false, [mergusergetstring('errorsameuser', 'tool_mergeusers')]];
         }
+
+        // Ok, now we have to work;-) !
+        // First of all... initialization!
+        $errormessages = [];
+        $actionlog = [];
+
+        $starttime = time();
+        $starttimestring = mergusergetstring('starttime', 'tool_mergeusers', userdate($starttime));
+        $actionlog[] = $starttimestring;
+
+        $transaction = $DB->start_delegated_transaction();
+
+        $this->_mergetry($fromid, $toid, $actionlog, $errormessages);
 
         if ($this->alwaysrollback) {
             $transaction->rollback(new Exception('alwaysRollback option is set so rolling back transaction'));
@@ -312,12 +304,12 @@ class MergeUserTool {
             // Add skipped tables as first action in log.
             $skippedtables = [];
             if (!empty($this->tablesskipped)) {
-                $skippedtables[] = get_string('tableskipped', 'tool_mergeusers', implode(', ', $this->tablesskipped));
+                $skippedtables[] = mergusergetstring('tableskipped', 'tool_mergeusers', implode(', ', $this->tablesskipped));
             }
 
             $finishtime = time();
-            $actionlog[] = get_string('finishtime', 'tool_mergeusers', userdate($finishtime));
-            $actionlog[] = get_string('timetaken', 'tool_mergeusers', $finishtime - $starttime);
+            $actionlog[] = mergusergetstring('finishtime', 'tool_mergeusers', userdate($finishtime));
+            $actionlog[] = mergusergetstring('timetaken', 'tool_mergeusers', $finishtime - $starttime);
 
             return [true, array_merge($skippedtables, $actionlog)];
         } else {
@@ -331,7 +323,7 @@ class MergeUserTool {
 
         $finishtime = time();
         $errormessages[] = $starttimestring;
-        $errormessages[] = get_string('timetaken', 'tool_mergeusers', $finishtime - $starttime);
+        $errormessages[] = mergusergetstring('timetaken', 'tool_mergeusers', $finishtime - $starttime);
 
         // Concludes with an array of error messages otherwise.
         return [false, $errormessages];
@@ -339,20 +331,7 @@ class MergeUserTool {
 
     // 0 ****************** INTERNAL UTILITY METHODS ***********************************************.
 
-    /**
-     * Initializes the list of database table names and user-related fields for each table.
-     *
-     * @global object $CFG
-     * @global moodle_database $DB
-     */
-    private function init() {
-        global $DB;
-
-        $userfieldspertable = [];
-
-        // Name of tables comes without db prefix.
-        $tablenames = $DB->get_tables(false);
-
+    private function inittables($tablenames, &$userfieldspertable) {
         foreach ($tablenames as $tablename) {
 
             if (!trim($tablename)) {
@@ -366,7 +345,7 @@ class MergeUserTool {
                     continue;
                 }
                 // Table specified to be processed additionally by a TableMerger.
-                if (isset($this->tablesprocessedbytablemergers[$tablename])) {
+                if (isset($this->tablesprocbytblmerge[$tablename])) {
                     continue;
                 }
             }
@@ -384,10 +363,28 @@ class MergeUserTool {
             }
         }
 
+    }
+
+    /**
+     * Initializes the list of database table names and user-related fields for each table.
+     *
+     * @global object $CFG
+     * @global moodle_database $DB
+     */
+    private function init() {
+        global $DB;
+
+        $userfieldspertable = [];
+
+        // Name of tables comes without db prefix.
+        $tablenames = $DB->get_tables(false);
+
+        $this->inittables($tablenames, $userfieldspertable);
+
         $this->userfieldspertable = $userfieldspertable;
 
-        $existingcompoundindexes = $this->tableswithcompoundindex;
-        foreach ($this->tableswithcompoundindex as $tablename => $columns) {
+        $existingcompind = $this->tableswithcompindex;
+        foreach ($this->tableswithcompindex as $tablename => $columns) {
             $chosencolumns = array_merge($columns['userfield'], $columns['otherfields']);
 
             $columnnames = [];
@@ -408,12 +405,12 @@ class MergeUserTool {
             // and this index does not apply.
             $found = array_sum($columnnames);
             if (count($columnnames) !== $found) {
-                unset($existingcompoundindexes[$tablename]);
+                unset($existingcompind[$tablename]);
             }
         }
 
         // Update the attribute with the current existing compound indexes per table.
-        $this->tableswithcompoundindex = $existingcompoundindexes;
+        $this->tableswithcompindex = $existingcompind;
     }
 
     /**
@@ -424,7 +421,6 @@ class MergeUserTool {
      * respectively.
      *
      * @return bool true if database transactions are supported. false otherwise.
-     * @throws coding_exception
      * @throws dml_exception
      * @throws moodle_exception
      * @throws ReflectionException
@@ -432,14 +428,14 @@ class MergeUserTool {
     public function checktransactionsupport(): bool {
         global $CFG;
 
-        $transactionssupported = tool_mergeusers_transactionssupported();
-        $forceonlytransactions = get_config('tool_mergeusers', 'transactions_only');
+        $transsupported = tool_mergeusers_transactionssupported();
+        $forceonlytrans = get_config('tool_mergeusers', 'transactions_only');
 
-        if (!$transactionssupported && $forceonlytransactions) {
+        if (!$transsupported && $forceonlytrans) {
             if (CLI_SCRIPT) {
                 cli_error(
                         'Error: ' . __METHOD__ . ':: ' .
-                        get_string(
+                        mergusergetstring(
                                 'errortransactionsonly', 'tool_mergeusers',
                                 $CFG->dbtype
                         )
@@ -452,7 +448,7 @@ class MergeUserTool {
             }
         }
 
-        return $transactionssupported;
+        return $transsupported;
     }
 
     /**

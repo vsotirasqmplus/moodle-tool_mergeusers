@@ -22,7 +22,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-
+require_once(__DIR__ . '/locallib.php');
 /**
  * Gets whether database transactions are allowed.
  *
@@ -42,13 +42,13 @@ function tool_mergeusers_transactionssupported(): bool {
 
 /**
  * @return stdClass
- * @throws coding_exception
+ * @noinspection PhpUndefinedFieldInspection
  */
 function tool_mergeusers_build_exceptions_options(): stdClass {
     include_once(__DIR__ . '/classes/tool_mergeusers_config.php');
 
     $config = tool_mergeusers_config::instance();
-    $none = get_string('none');
+    $none = mergusergetstring('none');
     $options = ['none' => $none];
     foreach ($config->exceptions as $exception) {
         $options[$exception] = $exception;
@@ -65,7 +65,6 @@ function tool_mergeusers_build_exceptions_options(): stdClass {
 
 /**
  * @return stdClass
- * @throws coding_exception
  */
 function tool_mergeusers_build_quiz_options(): stdClass {
     include_once(__DIR__ . '/lib/table/quizattemptsmerger.php');
@@ -73,13 +72,13 @@ function tool_mergeusers_build_quiz_options(): stdClass {
     // Quiz attempts.
     $quizstrings = new stdClass();
     $quizstrings->{QuizAttemptsMerger::ACTION_RENUMBER} =
-            get_string('qa_action_' . QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
+            mergusergetstring('qa_action_' . QuizAttemptsMerger::ACTION_RENUMBER, 'tool_mergeusers');
     $quizstrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE} =
-            get_string('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE, 'tool_mergeusers');
+            mergusergetstring('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_SOURCE, 'tool_mergeusers');
     $quizstrings->{QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET} =
-            get_string('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET, 'tool_mergeusers');
+            mergusergetstring('qa_action_' . QuizAttemptsMerger::ACTION_DELETE_FROM_TARGET, 'tool_mergeusers');
     $quizstrings->{QuizAttemptsMerger::ACTION_REMAIN} =
-            get_string('qa_action_' . QuizAttemptsMerger::ACTION_REMAIN, 'tool_mergeusers');
+            mergusergetstring('qa_action_' . QuizAttemptsMerger::ACTION_REMAIN, 'tool_mergeusers');
 
     $quizoptions = [
             QuizAttemptsMerger::ACTION_RENUMBER => $quizstrings->{QuizAttemptsMerger::ACTION_RENUMBER},
