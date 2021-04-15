@@ -35,7 +35,7 @@ jobs:
       addons:
         postgresql: "9.4"
     - php: 7.4
-      env: DB=pgsql  MOODLE_BRANCH=MOODLE_38_STABLE
+      env: DB=mysqli  MOODLE_BRANCH=MOODLE_38_STABLE
       services:
         mysql
     - php: 7.4
