@@ -13,18 +13,18 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-defined("MOODLE_INTERNAL") || die();
+defined('MOODLE_INTERNAL') || die();
 
-/**
- * @package tool
- * @subpackage mergeusers
- * @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
- * @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+//
+// @package tool
+// @subpackage mergeusers
+// @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
+// @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
+// @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+//
 
 
-/**
+/*
  * This is the default settings for the correct behaviour of the plugin, given the knowledge base
  * of our experience.
  *
@@ -32,6 +32,7 @@ defined("MOODLE_INTERNAL") || die();
  * Instead, create or edit in the same directory than this "config.php" a file named
  * "config.local.php" to add/replace elements of the default configuration.
  */
+
 return array(
 
     // Gathering tool.
@@ -118,7 +119,7 @@ return array(
                         'otherfields' => array('badgeid'),
                 ),
                 'assign_submission' => array(
-                        //  1 unique key mdl_assisubm_assusegroatt_uix.
+                        // 1 unique key mdl_assisubm_assusegroatt_uix.
                         'userfield' => array('userid'),
                         'otherfields' => array('assignment', 'groupid', 'attemptnumber'),
                 ),
@@ -154,7 +155,8 @@ return array(
     // The key 'default' will be applied for any non matching table name.
         'userfieldnames' => array(
                 'logstore_standard_log' => array('userid', 'relateduserid'),
-                'message_contacts' => array('userid', 'contactid'), //compound index
+                'message_contacts' => array('userid', 'contactid'),
+                // 1 compound index.
                 'message' => array('useridfrom', 'useridto'),
                 'message_read' => array('useridfrom', 'useridto'),
                 'question' => array('createdby', 'modifiedby'),
