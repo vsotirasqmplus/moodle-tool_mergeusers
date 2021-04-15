@@ -16,12 +16,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 
-// @package tool
-// @subpackage mergeusers
-// @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat>
-// @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat)
-// @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-// @author  Vasileios Sotiras altered for Moodle coding standards v.sotiras@qmul.ac.uk
+// 1 @package tool.
+// 2 @subpackage mergeusers.
+// 3 @author Jordi Pujol-Ahulló <jordi.pujol@urv.cat> .
+// 4 @copyright 2013 Servei de Recursos Educatius (http://www.sre.urv.cat) .
+// 5 @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later .
+// 6 @author  Vasileios Sotiras altered for Moodle coding standards v.sotiras@qmul.ac.uk .
 
 
 /*
