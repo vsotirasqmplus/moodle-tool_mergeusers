@@ -24,6 +24,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 require_once(__DIR__ . '/../../locallib.php');
+
 /**
  * Generic implementation of a TableMerger
  *
@@ -165,7 +166,7 @@ class GenericTableMerger implements TableMerger {
      * @param $itemarr
      * @param $data
      */
-    private function mergecomopmindex(&$recordstomodify, & $itemarr, & $data, & $idstoremove){
+    private function mergecomopmindex(&$recordstomodify, &$itemarr, &$data, &$idstoremove) {
         foreach ($itemarr as $otherinfo) {
             // If we have only one result and it is from the current user => update record.
             if (count($otherinfo) == 1) {

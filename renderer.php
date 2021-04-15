@@ -186,10 +186,8 @@ class tool_mergeusers_renderer extends plugin_renderer_base {
         $errorhtml = '';
         $errorhtml .= $this->output->box($message, 'generalbox align-center');
         $returnurl = new moodle_url('/admin/tool/mergeusers/index.php');
-        $returnbutton = html_writer::link($returnurl,mergusergetstring('error_return', 'tool_mergeusers'));
+        $returnbutton = html_writer::link($returnurl, mergusergetstring('error_return', 'tool_mergeusers'));
         $errorhtml .= $returnbutton;
-/*        $returnbutton = new single_button($returnurl, mergusergetstring('error_return', 'tool_mergeusers'));
-        $errorhtml .= $this->output->render($returnbutton);*/
         echo $errorhtml;
         echo $this->footer();
     }

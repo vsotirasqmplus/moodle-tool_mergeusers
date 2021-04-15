@@ -228,7 +228,7 @@ class MergeUserTool {
         global $DB;
         try {
             // Processing each table name.
-            $data = ['toid' => $toid, 'fromid' => $fromid,];
+            $data = ['toid' => $toid, 'fromid' => $fromid];
             foreach ($this->userfieldspertable as $tablename => $userfields) {
                 $data['tableName'] = $tablename;
                 $data['userFields'] = $userfields;
