@@ -23,4 +23,4 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
-
+return [];
