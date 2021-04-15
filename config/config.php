@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+defined("MOODLE_INTERNAL") || die();
 
 /**
  * @package tool
@@ -22,7 +23,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined("MOODLE_INTERNAL") || die();
 
 /**
  * This is the default settings for the correct behaviour of the plugin, given the knowledge base
@@ -34,7 +34,7 @@ defined("MOODLE_INTERNAL") || die();
  */
 return array(
 
-    // gathering tool
+    // Gathering tool.
         'gathering' => 'CLIGathering',
 
     // Database tables to be excluded from normal processing.
@@ -70,55 +70,65 @@ return array(
                         'userfield' => array('userid'),
                         'otherfields' => array('course'),
                 ),
-                'message_contacts' => array(//both fields are user.id values
+                'message_contacts' => array( // Both fields are user.id values.
                         'userfield' => array('userid', 'contactid'),
                         'otherfields' => array(),
                 ),
                 'role_assignments' => array(
                         'userfield' => array('userid'),
-                        'otherfields' => array('contextid', 'roleid'), // mdl_roleassi_useconrol_ix (not unique)
+                        'otherfields' => array('contextid', 'roleid'),
+                        // 1 mdl_roleassi_useconrol_ix (not unique).
                 ),
                 'user_lastaccess' => array(
                         'userfield' => array('userid'),
-                        'otherfields' => array('courseid'), // mdl_userlast_usecou_ui (unique)
+                        'otherfields' => array('courseid'),
+                        // 1 mdl_userlast_usecou_ui (unique).
                 ),
                 'quiz_attempts' => array(
                         'userfield' => array('userid'),
-                        'otherfields' => array('quiz', 'attempt'), // mdl_quizatte_quiuseatt_uix (unique)
+                        'otherfields' => array('quiz', 'attempt'),
+                    // 1 mdl_quizatte_quiuseatt_uix (unique).
                 ),
                 'cohort_members' => array(
                         'userfield' => array('userid'),
                         'otherfields' => array('cohortid'),
                 ),
-                'certif_completion' => array(  // mdl_certcomp_ceruse_uix (unique)
+                'certif_completion' => array(
+                        // 1 mdl_certcomp_ceruse_uix (unique).
                         'userfield' => array('userid'),
                         'otherfields' => array('certifid'),
                 ),
-                'course_modules_completion' => array( // mdl_courmoducomp_usecou_uix (unique)
+                'course_modules_completion' => array(
+                        // 1 mdl_courmoducomp_usecou_uix (unique).
                         'userfield' => array('userid'),
                         'otherfields' => array('coursemoduleid'),
                 ),
-                'scorm_scoes_track' => array( //mdl_scorscoetrac_usescosco_uix (unique)
+                'scorm_scoes_track' => array(
+                        // 1 mdl_scorscoetrac_usescosco_uix (unique).
                         'userfield' => array('userid'),
                         'otherfields' => array('scormid', 'scoid', 'attempt', 'element'),
                 ),
-                'assign_grades' => array( //UNIQUE KEY mdl_assigrad_assuseatt_uix
+                'assign_grades' => array(
+                        // UNIQUE KEY mdl_assigrad_assuseatt_uix.
                         'userfield' => array('userid'),
                         'otherfields' => array('assignment', 'attemptnumber'),
                 ),
-                'badge_issued' => array( // unique key mdl_badgissu_baduse_uix
+                'badge_issued' => array( // 1 unique key mdl_badgissu_baduse_uix.
                         'userfield' => array('userid'),
                         'otherfields' => array('badgeid'),
                 ),
-                'assign_submission' => array( // unique key mdl_assisubm_assusegroatt_uix
+                'assign_submission' => array(
+                        //  1 unique key mdl_assisubm_assusegroatt_uix.
                         'userfield' => array('userid'),
                         'otherfields' => array('assignment', 'groupid', 'attemptnumber'),
                 ),
-                'wiki_pages' => array( //unique key mdl_wikipage_subtituse_uix
+                'wiki_pages' => array(
+                        // 1 unique key mdl_wikipage_subtituse_uix.
                         'userfield' => array('userid'),
                         'otherfields' => array('subwikiid', 'title'),
                 ),
-                'wiki_subwikis' => array( //unique key mdl_wikisubw_wikgrouse_uix
+                'wiki_subwikis' => array(
+                        // 1 unique key mdl_wikisubw_wikgrouse_uix.
                         'userfield' => array('userid'),
                         'otherfields' => array('wikiid', 'groupid'),
                 ),
@@ -126,11 +136,13 @@ return array(
                         'userfield' => array('userid'),
                         'otherfields' => array('enrolid'),
                 ),
-                'assign_user_flags' => array( // They are actually a unique key, but not in DDL.
+                'assign_user_flags' => array(
+                        // They are actually a unique key, but not in DDL.
                         'userfield' => array('userid'),
                         'otherfields' => array('assignment'),
                 ),
-                'assign_user_mapping' => array( // They are actually a unique key, but not in DDL.
+                'assign_user_mapping' => array(
+                        // They are actually a unique key, but not in DDL.
                         'userfield' => array('userid'),
                         'otherfields' => array('assignment'),
                 ),
@@ -146,11 +158,12 @@ return array(
                 'message' => array('useridfrom', 'useridto'),
                 'message_read' => array('useridfrom', 'useridto'),
                 'question' => array('createdby', 'modifiedby'),
-                'default' => array('authorid', 'reviewerid', 'userid', 'user_id', 'id_user', 'user'), //may appear compound index
+                'default' => array('authorid', 'reviewerid', 'userid', 'user_id', 'id_user', 'user'),
+                // 1 may appear compound index.
         ),
 
     // TableMergers to process each database table.
-    // 'default' is applied when no specific TableMerger is specified.
+    // ... 'default' is applied when no specific TableMerger is specified.
         'tablemergers' => array(
                 'default' => 'GenericTableMerger',
                 'quiz_attempts' => 'QuizAttemptsMerger',
